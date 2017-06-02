@@ -5,9 +5,42 @@ THIS_DIR=`dirname $(readlink -f $0)`
 main () 
 {
 	apt_update
-	apt_dependances
+	apt_prepare_tools
+	setup_php7fpm
 	build_nginx
 	nginx_service
+}
+
+setup_php7fpm()
+{
+	if command_exists php ; then
+		log 'php has been installed'
+		return
+	fi
+
+	apt install -y redis-server 
+	apt install -y php7.0 php7.0-dev php7.0-curl php7.0-fpm 
+
+	cd $THIS_DIR
+	mkdir -p temp && cd temp
+
+	if [ ! -d "phpredis" ]; then
+		git clone https://github.com/phpredis/phpredis.git
+	fi
+
+	cd phpredis
+	git checkout php7
+
+	phpize
+	./configure
+	make 
+	make install
+
+	echo "extension=redis.so" > /etc/php/7.0/mods-available/redis.ini
+	ln -sf /etc/php/7.0/mods-available/redis.ini /etc/php/7.0/fpm/conf.d/20-redis.ini
+	ln -sf /etc/php/7.0/mods-available/redis.ini /etc/php/7.0/cli/conf.d/20-redis.ini
+
+	service php7.0-fpm restart
 }
 
 nginx_service ()
@@ -35,9 +68,10 @@ EOL
 
 apt_update ()
 {
-	local input=$1
-	if [ -z "$input" ]; then
-		$input=864000
+	if [ -z "$1" ]; then
+		input=864000
+	else 
+		input=$1
 	fi
 
 	local last_update=`stat -c %Y  /var/cache/apt/pkgcache.bin`
@@ -49,15 +83,22 @@ apt_update ()
 }
 
 
-apt_dependances () 
+apt_prepare_tools () 
 {
 	apt install -y build-essential git
-	apt install -y libpcre3-dev libssl-dev
-	apt install -y libavcodec-dev libavformat-dev libavfilter-dev
 }
 
 build_nginx ()
 {
+	if command_exists /usr/local/nginx/sbin/nginx ; then
+		log 'nginx has been installed'
+		return
+	fi
+
+	apt install -y libpcre3-dev libssl-dev
+	apt install -y libavcodec-dev libavformat-dev libavfilter-dev
+
+
 	cd $THIS_DIR
 	mkdir -p temp && cd temp
 
@@ -90,5 +131,8 @@ log()
 	#logger -p user.notice -t install-scripts "$@"
 }
 
-main "$@"
-exit $?
+command_exists() {
+    type "$1" > /dev/null 2>&1
+}
+
+main "$@"; exit $?
