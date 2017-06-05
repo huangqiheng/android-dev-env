@@ -40,11 +40,33 @@ setup_php7fpm()
 	ln -sf /etc/php/7.0/mods-available/redis.ini /etc/php/7.0/fpm/conf.d/20-redis.ini
 	ln -sf /etc/php/7.0/mods-available/redis.ini /etc/php/7.0/cli/conf.d/20-redis.ini
 
+	php_ini opcache.enable 1
+	php_ini opcache.enable_cli 1
+	php_ini opcache.fast_shutdown 1
+	#php_ini opcache.revalidate_freq 60
+	php_ini opcache.revalidate_freq 0
+	php_ini opcache.max_accelerated_files 4096
+	php_ini opcache.interned_strings_buffer 8
+	php_ini opcache.optimization_level 1
+	php_ini opcache.memory_consumption 1024
+	php_ini opcache.force_restart_timeout 3600
+
 	service php7.0-fpm restart
+}
+
+
+php_ini()
+{
+	sed -ri "s/^[;]?${1}[ ]*=.*/${1}=${2}/" /etc/php/7.0/cli/phpb.ini 
 }
 
 nginx_service ()
 {
+	if [ -f "/lib/systemd/system/nginx.service" ]; then
+		log 'nginx.service is exists.'
+		return
+	fi
+
 	cat >/lib/systemd/system/nginx.service <<EOL
 [Unit]
 Description=The NGINX HTTP and reverse proxy server
@@ -92,11 +114,12 @@ build_nginx ()
 {
 	if command_exists /usr/local/nginx/sbin/nginx ; then
 		log 'nginx has been installed'
-		return
+		#return
 	fi
 
 	apt install -y libpcre3-dev libssl-dev
 	apt install -y libavcodec-dev libavformat-dev libavfilter-dev
+	apt install -y libexpat1-dev
 
 
 	cd $THIS_DIR
@@ -104,6 +127,14 @@ build_nginx ()
 
 	if [ ! -d "nginx-vod-module" ]; then
 		git clone https://github.com/kaltura/nginx-vod-module.git
+	fi
+
+	if [ ! -d "nginx-dav-ext-module" ]; then
+		git clone https://github.com/arut/nginx-dav-ext-module.git
+	fi
+
+	if [ ! -d "nginx-http-auth-digest" ]; then
+		git clone https://github.com/samizdatco/nginx-http-auth-digest.git
 	fi
 
 	if [ ! -d "nginx-1.12.0" ]; then
@@ -115,10 +146,16 @@ build_nginx ()
 
 	make clean
 	./configure \
+		--with-http_dav_module \
+		--with-http_secure_link_module \
 		--with-http_ssl_module \
+		--with-http_stub_status_module \
 		--with-file-aio \
 		--with-threads \
 		--with-cc-opt="-O3" \
+		--with-debug \
+		--add-module=../nginx-http-auth-digest \
+		--add-module=../nginx-dav-ext-module \
 		--add-module=../nginx-vod-module
 
 	make
@@ -131,7 +168,8 @@ log()
 	#logger -p user.notice -t install-scripts "$@"
 }
 
-command_exists() {
+command_exists() 
+{
     type "$1" > /dev/null 2>&1
 }
 
