@@ -4,13 +4,13 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$if_eno1=exec("/sbin/ifconfig eno1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'");
-$if_wlp2s0=exec("/sbin/ifconfig wlp2s0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'");
+$ip_eno1=exec("/sbin/ifconfig eno1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'");
+$ip_wlp2s0=exec("/sbin/ifconfig wlp2s0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'");
 
 $streams = object_read_url('http://localhost:1985/api/v1/streams/');
 $streams['push'] = array(
-	'rtmp://'.$if_eno1.'/[app]/[stream]',
-	'rtmp://'.$if_wlp2s0.'/[app]/[stream]',
+	'rtmp://'.$ip_eno1.'/[channel]/[stream]',
+	'rtmp://'.$ip_wlp2s0.'/[channel]/[stream]',
 );
 
 jsonp_nocache_exit($streams);
