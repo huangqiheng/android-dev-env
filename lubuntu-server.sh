@@ -6,12 +6,44 @@ main ()
 {
 	check_update
 	lubuntu_desktop
+	setup_shadowsocks
 	astrill_vpn
+	setup_chrome
+}
+
+setup_shadowsocks()
+{
+	if cmd_exists /usr/bin/ss-qt5; then
+		echo "shadowsocks-qt5 has been installed."
+		return
+	fi
+
+	the_ppa=hzwhuang/ss-qt5
+
+	if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+		add-apt-repository -y ppa:$the_ppa
+		apt update -y
+	fi
+
+	apt install -y shadowsocks-qt5
+}
+
+setup_chrome()
+{
+	if cmd_exists /opt/google/chrome/chrome; then
+		echo "chrome has been installed."
+		return
+	fi
+
+	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+	sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+	apt update -y
+	apt install -y google-chrome-stable
 }
 
 astrill_vpn()
 {
-	if command_exists /usr/local/Astrill/astrill; then
+	if cmd_exists /usr/local/Astrill/astrill; then
 		echo "astrill has been installed."
 		return
 	fi
@@ -109,7 +141,7 @@ log()
 	#logger -p user.notice -t install-scripts "$@"
 }
 
-command_exists() 
+cmd_exists() 
 {
     type "$1" > /dev/null 2>&1
 }

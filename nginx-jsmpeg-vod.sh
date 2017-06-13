@@ -49,15 +49,10 @@ build_nginx ()
 {
 	if command_exists /usr/local/nginx/sbin/nginx ; then
 		log 'nginx has been installed'
-		return
+		#return
 	fi
 
-	apt_ensure libpcre3-dev
-	apt_ensure libssl-dev
-	apt_ensure libavcodec-dev
-	apt_ensure libavformat-dev
-	apt_ensure libavfilter-dev
-	apt_ensure libexpat1-dev
+	check_apt libpcre3-dev libssl-dev libavcodec-dev libavformat-dev libavfilter-dev libexpat1-dev
 
 	cd $THIS_DIR
 	mkdir -p temp && cd temp
@@ -139,11 +134,8 @@ build_php7fpm()
 		return
 	fi
 
-	apt_ensure redis-server 
-	apt_ensure php7.0
-	apt_ensure php7.0-dev
-	apt_ensure php7.0-curl
-	apt_ensure php7.0-fpm
+	check_apt redis-server 
+	check_apt php7.0 php7.0-dev php7.0-curl php7.0-fpm
 
 	cd $THIS_DIR
 	mkdir -p temp && cd temp
@@ -209,24 +201,18 @@ check_update()
 
 setup_tools() 
 {
-	apt_ensure build-essential
-	apt_ensure git
+	check_apt build-essential git
 }
 
-apt_ensure()
+check_apt()
 {
-	if apt_need "$1"; then
-		apt install -y "$1"
-	fi
-}
-
-apt_need()
-{
-	if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
-		return 0
-	else
-		return 1
-	fi
+	for package in "$@"; do
+		if [ $(dpkg-query -W -f='${Status}' ${package} 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+			apt install -y "$package"
+		else
+			echo "${package} has been installed"
+		fi
+	done
 }
 
 log() 
