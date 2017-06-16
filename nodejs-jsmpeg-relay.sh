@@ -43,7 +43,7 @@ runs()
 
 setup_jsmpeg()
 {
-	if command_exists /usr/bin/node; then
+	if command_exists /usr/bin/http-server; then
 		log "http-server has been installed"
 	else
 		npm -g install http-server
