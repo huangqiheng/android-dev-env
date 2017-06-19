@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [ $(whoami) != 'root' ]; then
+	echo "Must be executed as root"
+	exit 1
+fi
+
+cd /
+
+if [ "$1" = 'restore' ]; then
+	tar -xvpzf backup.tar.gz -C / --numeric-owner
+
+	if [ "$?" -ne 0 ]; then
+		echo 'restore error'
+		exit 1
+	fi
+	
+	for item in /proc /sys /mnt /media; do 
+		if [ ! -d $item ]; then
+			mkdir $item
+		fi
+	done
+
+else 
+	tar -cvpzf __backup.tar.gz --exclude=/backup.tar.gz --one-file-system / 
+
+	if [ "$?" -eq 0 ]; then
+		mv __backup.tar.gz backup.tar.gz
+	else
+		unlink __backup.tar.gz
+		echo 'backup error'
+		exit 1
+	fi
+fi
+

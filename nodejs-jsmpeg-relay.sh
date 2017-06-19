@@ -2,7 +2,8 @@
 
 THIS_DIR=`dirname $(readlink -f $0)`
 #IN_VIDEO=$THIS_DIR/codes/001.mp4
-IN_VIDEO=/var/www/vodsrv/mp4/333.mp4
+#IN_VIDEO=/var/www/vodsrv/mp4/333.mp4
+IN_VIDEO=/dev/video0
 
 main () 
 {
@@ -32,9 +33,9 @@ runs()
 	pid_wsock=$!
 
 	v4l2-ctl --device=/dev/video0 --set-fmt-video=width=1280,height=720
-	ffmpeg_cmd="ffmpeg -re -r 24  -f v4l2 -i /dev/video0 -f mpegts -s 1280x720 -c:v mpeg1video -q:v 10 -c:a mp2 http://localhost:8081/supersecret"
+	ffmpeg_cmd="ffmpeg -re -r 30 -f v4l2 -input_format mjpeg -i ${IN_VIDEO} -bf 0 -f mpegts -c:v mpeg1video -q:v 10 -c:a mp2 http://localhost:8081/supersecret"
 	#ffmpeg_cmd="ffmpeg -re -f v4l2 -i /dev/video0 -f mpegts -r 30 -s 600x480 -c:v mpeg1video -q:v 6 -c:a mp2 http://localhost:8081/supersecret -f flv rtmp://localhost/live/stream"
-	#ffmpeg_cmd="ffmpeg -re -i ${IN_VIDEO} -f mpegts -r 30 -s 960x540 -c:v mpeg1video -q:v 6 -c:a mp2 http://localhost:8081/supersecret"
+	#ffmpeg_cmd="ffmpeg -re -i  -f mpegts -r 30 -s 960x540 -c:v mpeg1video -q:v 6 -c:a mp2 http://localhost:8081/supersecret"
 	pid_ffmpeg=$!
 
 	daemon --name=ffmpegpush --respawn --chdir=$www_root --command="${ffmpeg_cmd}"
