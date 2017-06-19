@@ -15,7 +15,7 @@ push=$(git config --global --get push.default)
 push_url=$(git remote get-url --push origin)
 
 if ! echo $push_url | grep -q "$PUSH_USER"; then
-	new_url=$(echo $push_url | sed -e "s/\/\//\/\/${PUSH_USER}@/g")
+	new_url=$(echo $push_url | sed -e "s/\/\//\/\/${PUSH_USER}:@/g")
 	git remote set-url origin $new_url
 	echo "update remote url: $new_url"
 fi
