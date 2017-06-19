@@ -1,43 +1,62 @@
 #!/bin/bash
 
 THIS_DIR=`dirname $(readlink -f $0)`
+[ -z "$BASH_VERSION" ] && echo "Change shell: bash $0" && setsid bash $0 && exit
 
 main () 
 {
-	check_update ppa:mkusb/ppa
-	check_apt mkusb-nox gdisk
+	if need_ffmpeg 3.1.0; then
+		log 'need to update ffmpeg'
+		apt purge -y ffmpeg 
+		check_update ppa:jonathonf/ffmpeg-3
+	fi
 
-	echo "
-       Make a USB install device from ISO or image file
-           sudo mkusb-nox file.iso
-           sudo -H mkusb file.iso p    # install a persistent live system
-           sudo mkusb-nox \"quote file name (1) with special characters.iso\"
-           sudo mkusb-nox path/file.iso
-           sudo mkusb-nox file.img
-           sudo mkusb-nox file.img.gz
-           sudo mkusb-nox file.img.xz
-           sudo mkusb-nox file.tar    # if an mkusb tarfile for Windows
+	check_apt ffmpeg libav-tools x264 x265
 
-       Install from 'file.img.xz', show all mass storage devices
-           sudo mkusb-nox file.img.xz all
+	log "Now ffmpeg version is: $(ffmpeg_version)"
+}
 
-       Clone a device (typically a CD/DVD drive or USB drive)
-           sudo mkusb-nox /dev/sr0    # example of CD drive
+need_ffmpeg()
+{
+	local current_version=$(ffmpeg_version)
+	[ ! $? ] && return 0
+	version_compare $current_version $1
+	[ ! $? -eq 1 ] && return 0
+	return 1
+}
 
-       Wipe the USB device (may take long time)
-           sudo mkusb-nox wipe-whole-device
 
-       Wipe the first megabyte (MibiByte), show only USB devices
-           sudo mkusb-nox wipe-1
+version_compare () 
+{
+	if [[ $1 == $2 ]]; then
+		return 0
+	fi
 
-       Restore to a storage device
-           sudo mkusb-nox restore  # FAT32 file system
-           sudo -H mkusb wipe    # wipe menu (select suitable file systems)
+	local IFS=.
+	local i ver1=($1) ver2=($2)
+	for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+		ver1[i]=0
+	done
 
-       Wipe the first megabyte, show all mass storage devices
-           sudo mkusb-nox wipe-1 all
-"
+	for ((i=0; i<${#ver1[@]}; i++)); do
+		if [[ -z ${ver2[i]} ]]; then
+			ver2[i]=0
+		fi
+		if ((10#${ver1[i]} > 10#${ver2[i]})); then
+			return 1
+		fi
+		if ((10#${ver1[i]} < 10#${ver2[i]})); then
+			return 2
+		fi
+	done
+	return 0
+}
 
+ffmpeg_version()
+{
+	! cmd_exists ffmpeg && return 1
+	IFS=' -'; set -- $(ffmpeg -version | grep "ffmpeg version"); echo $3
+	[ ! -z $3 ]
 }
 
 #-------------------------------------------------------
@@ -60,7 +79,7 @@ check_update()
 
 	if [ $# -gt 0 ]; then
 		for the_param in "$@"; do
-			the_ppa=$(echo $the_param | sed 's/ppa:\(.*\)\/ppa/\1/')
+			the_ppa=$(echo $the_param | sed 's/ppa:\(.*\)/\1/')
 
 			if [ ! -z $the_ppa ]; then 
 				if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
