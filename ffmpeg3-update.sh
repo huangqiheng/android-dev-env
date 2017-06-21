@@ -1,11 +1,11 @@
 #!/bin/bash
 
+[ -z "$BASH_VERSION" ] && echo "Change to: bash $0" && setsid bash $0 && exit
 THIS_DIR=`dirname $(readlink -f $0)`
-[ -z "$BASH_VERSION" ] && echo "Change shell: bash $0" && setsid bash $0 && exit
 
 main () 
 {
-	if need_ffmpeg 3.1.0; then
+	if need_ffmpeg 3.3.0; then
 		log 'need to update ffmpeg'
 		apt purge -y ffmpeg 
 		check_update ppa:jonathonf/ffmpeg-3
