@@ -1,6 +1,9 @@
 #!/bin/dash
 
+. config.sh
+
 THIS_DIR=`dirname $(readlink -f $0)`
+mjpg_src=$MJPG_SRC
 
 main() 
 {
@@ -28,7 +31,7 @@ runs()
 		fi
 
 		if [ "$2" = "mpegts" ] || [ -z "$2" ]; then
-			local mjpg_url=${2:-"http://localhost:8083/?action=stream"}
+			local mjpg_url=${2:-"$mjpg_src"}
 			local mpegts_url=http://localhost:8081/supersecret
 			local root_dir=${THIS_DIR}/temp/jsmpeg
 			local ffmpeg_cmd="ffmpeg -re -r 30 -i $mjpg_url -f mpegts -c:v mpeg1video -q:v 10 -bf 0 $mpegts_url"
