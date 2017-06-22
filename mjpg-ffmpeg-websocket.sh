@@ -1,6 +1,6 @@
 #!/bin/dash
 
-. config.sh
+. ./config.sh
 
 THIS_DIR=`dirname $(readlink -f $0)`
 mjpg_src=$MJPG_SRC
@@ -31,16 +31,16 @@ runs()
 		fi
 
 		if [ "$2" = "mpegts" ] || [ -z "$2" ]; then
-			local mjpg_url=${2:-"$mjpg_src"}
+			local mjpg_url=${3:-"$mjpg_src"}
 			local mpegts_url=http://localhost:8081/supersecret
 			local root_dir=${THIS_DIR}/temp/jsmpeg
-			local ffmpeg_cmd="ffmpeg -re -r 30 -i $mjpg_url -f mpegts -c:v mpeg1video -q:v 10 -bf 0 $mpegts_url"
 
-			daemon -r -n httpserver -D $root_dir -- http-server -P 8080
-			daemon -r -n wsockrelay -D $root_dir -- node $root_dir/websocket-relay.js supersecret 8081 8082
-			daemon -r -n ffmpegpush -D $root_dir -- "${ffmpeg_cmd}"
+			daemon -r -n httpserver -D "$root_dir" -- http-server -P 8080
+			daemon -r -n wsockrelay -D "$root_dir" -- node $root_dir/websocket-relay.js supersecret 8081 8082
+			daemon -r -n ffmpegpush -D "$root_dir" -- ffmpeg -re -r 30 -i "$mjpg_url" -f mpegts -c:v mpeg1video -q:v 10 -bf 0 "$mpegts_url"
+			[ ! -z "$2" ] && return 0
 		fi
-		exit
+		return 0
 	fi
 
 	if [ "$1" = "stop" ]; then
@@ -54,8 +54,15 @@ runs()
 			daemon -n httpserver --stop 2>/dev/null
 			daemon -n wsockrelay --stop 2>/dev/null
 			daemon -n ffmpegpush --stop 2>/dev/null
+			[ ! -z "$2" ] && return 0
 		fi
-		exit
+
+		if [ "$2" = "ffmpegpush" ]; then
+			daemon -n ffmpegpush --stop 2>/dev/null
+			[ ! -z "$2" ] && return 0
+		fi
+
+		return 0
 	fi
 }
 
