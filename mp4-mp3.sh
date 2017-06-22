@@ -4,14 +4,40 @@ THIS_DIR=`dirname $(readlink -f $0)`
 
 main() 
 {
-	ffmpeg -i "$1" -b:a 320K -vn "$2"
+	check_update ppa:jonathonf/ffmpeg-3
+	update_ffmpeg 3.3.0
 
+	[ -z $1 ] && return 0
 
+	cd $THIS_DIR/temp
+
+	ffmpeg -i "$1" -ss 3 -i "$2" -c:v copy -map 0:v:0 -map 1:a:0 -shortest /home/and/Videos/out.mp4
 }
 
 #-------------------------------------------------------
 #		basic functions
 #-------------------------------------------------------
+
+update_ffmpeg()
+{
+	if cmd_exists ffmpeg; then 
+		local need_ver=$1
+
+		IFS=' -'; set -- $(ffmpeg -version | grep "ffmpeg version");  
+		local current_version=$3
+		
+		cmp_version $current_version $need_ver
+
+		if [ ! $? -eq 2 ]; then
+			log "ffmpeg $current_version >= $need_ver"
+			return
+		fi
+
+		apt purge -y ffmpeg 
+	fi
+
+	check_apt ffmpeg libav-tools x264 x265
+}
 
 check_update()
 {
