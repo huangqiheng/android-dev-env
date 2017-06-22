@@ -16,30 +16,42 @@ runs()
 {
 	if [ "$1" = "start" ]; then
 		if [ "$2" = "camera" ] || [ -z "$2" ]; then
-			local MJPG_WWW=/usr/local/share/mjpg-streamer/www
-			export LD_LIBRARY_PATH=/usr/local/lib/mjpg-streamer
-			mjpg_streamer -i "input_uvc.so -n -r 1280x720" -o "output_http.so -p 8083 -w ${MJPG_WWW}" &
-			log 'mjpg_streamer was started' 
-			[ ! -z $2 ] && return 0
+			if pidof mjpg_streamer >/dev/null; then
+				log 'mjpg_streamer is running' 
+			else
+				local MJPG_WWW=/usr/local/share/mjpg-streamer/www
+				export LD_LIBRARY_PATH=/usr/local/lib/mjpg-streamer
+				mjpg_streamer -i "input_uvc.so -n -r 1280x720" -o "output_http.so -p 8083 -w ${MJPG_WWW}" &
+				log 'mjpg_streamer was started' 
+			fi
+			[ ! -z "$2" ] && return 0
 		fi
 
-		local mjpg_url=${2:-"http://localhost:8083/?action=stream"}
-		local root_dir=${THIS_DIR}/temp/jsmpeg
-		local ffmpeg_cmd="ffmpeg -re -r 30 -f v4l2 -input_format mjpeg -i $mjpg_url -f mpegts -c:v mpeg1video -q:v 10 -bf 0 http://localhost:8081/supersecret"
+		if [ "$2" = "mpegts" ] || [ -z "$2" ]; then
+			local mjpg_url=${2:-"http://localhost:8083/?action=stream"}
+			local mpegts_url=http://localhost:8081/supersecret
+			local root_dir=${THIS_DIR}/temp/jsmpeg
+			local ffmpeg_cmd="ffmpeg -re -r 30 -i $mjpg_url -f mpegts -c:v mpeg1video -q:v 10 -bf 0 $mpegts_url"
 
-		daemon -r -n httpserver -D $root_dir -X "http-server -P 8080"
-		daemon -r -n wsockrelay -D $root_dir -X "node $root_dir/websocket-relay.js supersecret 8081 8082"
-		daemon -r -n ffmpegpush -D $root_dir -X "${ffmpeg_cmd}"
+			daemon -r -n httpserver -D $root_dir -- http-server -P 8080
+			daemon -r -n wsockrelay -D $root_dir -- node $root_dir/websocket-relay.js supersecret 8081 8082
+			daemon -r -n ffmpegpush -D $root_dir -- "${ffmpeg_cmd}"
+		fi
 		exit
 	fi
 
 	if [ "$1" = "stop" ]; then
-		kill -9 $(pidof mjpg_streamer) 2>/dev/null
-		log 'mjpg_streamer was killed' 
+		if [ "$2" = "camera" ] || [ -z "$2" ]; then
+			kill -9 $(pidof mjpg_streamer) 2>/dev/null
+			log 'mjpg_streamer was killed' 
+			[ ! -z "$2" ] && return 0
+		fi
 
-		daemon -n httpserver --stop 2>/dev/null
-		daemon -n wsockrelay --stop 2>/dev/null
-		daemon -n ffmpegpush --stop 2>/dev/null
+		if [ "$2" = "mpegts" ] || [ -z "$2" ]; then
+			daemon -n httpserver --stop 2>/dev/null
+			daemon -n wsockrelay --stop 2>/dev/null
+			daemon -n ffmpegpush --stop 2>/dev/null
+		fi
 		exit
 	fi
 }
