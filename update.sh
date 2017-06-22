@@ -4,13 +4,13 @@ THIS_DIR=`dirname $(readlink -f $0)`
 . $THIS_DIR/config.sh
 
 user=$(git config --global --get user.name)
-[ -z $user ] && git config --global --set user.name $GIT_USER_NAME
+[ -z $user ] && git config --global --add user.name $GIT_USER_NAME
 
 email=$(git config --global --get user.email)
-[ -z $email ] && git config --global --set user.email $GIT_USER_EMAIL
+[ -z $email ] && git config --global --add user.email $GIT_USER_EMAIL
 
 push=$(git config --global --get push.default)
-[ -z $push ] && git config --global --set push.default $GIT_PUSH_DEFAULT
+[ -z $push ] && git config --global --add push.default $GIT_PUSH_DEFAULT
 
 push_url=$(git remote get-url --push origin)
 
