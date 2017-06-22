@@ -15,8 +15,10 @@ main()
 	runs "$@"
 }
 
-runs()
-{
+runs() {
+	local root_dir=${THIS_DIR}/temp/jsmpeg
+	local mpegts_url=http://localhost:8081/supersecret
+
 	if [ "$1" = "start" ]; then
 		if [ "$2" = "camera" ] || [ -z "$2" ]; then
 			if pidof mjpg_streamer >/dev/null; then
@@ -32,11 +34,18 @@ runs()
 
 		if [ "$2" = "mpegts" ] || [ -z "$2" ]; then
 			local mjpg_url=${3:-"$mjpg_src"}
-			local mpegts_url=http://localhost:8081/supersecret
-			local root_dir=${THIS_DIR}/temp/jsmpeg
-
 			daemon -r -n httpserver -D "$root_dir" -- http-server -P 8080
 			daemon -r -n wsockrelay -D "$root_dir" -- node $root_dir/websocket-relay.js supersecret 8081 8082
+			daemon -r -n ffmpegpush -D "$root_dir" -- ffmpeg -re -r 30 -i "$mjpg_url" -f mpegts -c:v mpeg1video -q:v 10 -bf 0 "$mpegts_url"
+			[ ! -z "$2" ] && return 0
+		fi
+		return 0
+	fi
+
+	if [ "$1" = "restart" ]; then
+		if [ "$2" = "ffmpeg" ] || [ -z "$2" ]; then
+			local mjpg_url=${3:-"$mjpg_src"}
+			daemon -n ffmpegpush --stop 2>/dev/null
 			daemon -r -n ffmpegpush -D "$root_dir" -- ffmpeg -re -r 30 -i "$mjpg_url" -f mpegts -c:v mpeg1video -q:v 10 -bf 0 "$mpegts_url"
 			[ ! -z "$2" ] && return 0
 		fi

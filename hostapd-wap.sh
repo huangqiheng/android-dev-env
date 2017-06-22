@@ -1,10 +1,12 @@
 #!/bin/bash
 
-GATEWAY_IFACE='eno1'
-WIRELESS_IFACE='wlp2s0'
-DRIVER_NAME='nl80211'
-WAP_ESSID='and_dell9020_hotspot'
-WAP_PASSD='password'
+. ./config.sh
+
+GATEWAY_IFACE=${GATEWAY_IFACE:-'eno1'}
+WIRELESS_IFACE=${WIRELESS_IFACE:-'wlp2s0'}
+DRIVER_NAME=${DRIVER_NAME:-'nl80211'}
+WAP_ESSID=${WAP_ESSID:-'and_gigabyte_hotspot'}
+WAP_PASSD=${WAP_PASSD:-'password'}
 
 THIS_DIR=`dirname $(readlink -f $0)`
 
