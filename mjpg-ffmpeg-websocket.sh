@@ -5,7 +5,7 @@
 THIS_DIR=`dirname $(readlink -f $0)`
 mjpg_src=$MJPG_SRC
 qscale_val=20
-src_size='1280x720'
+src_size='1024x768'
 dit_size='640x480'
 
 main() 
