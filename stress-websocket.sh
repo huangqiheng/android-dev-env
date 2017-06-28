@@ -17,7 +17,7 @@ main()
 			     --header "Origin: http://example.com:80" \
 			     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
 			     --header "Sec-WebSocket-Version: 13" \
-			     http://localhost:8082/ >/dev/null 2>&1 &
+			     http://192.168.2.202:8082/ >/dev/null 2>&1 &
 			echo "new pid $!"
 		done
 	else

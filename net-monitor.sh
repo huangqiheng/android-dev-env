@@ -1,40 +1,86 @@
-#!/bin/bash
-
+#!/bin/bash 
 THIS_DIR=`dirname $(readlink -f $0)`
 
 main() 
 {
-	check_update ppa:jonathonf/ffmpeg-3
-	update_ffmpeg 3.3.0
+	check_update
 
-	[ -z $1 ] && return 0
-
-	cd $THIS_DIR/temp
-
-	ffmpeg -i "$1" -ss 3 -i "$2" -c:v copy -map 0:v:0 -map 1:a:0 -shortest /home/and/Videos/out.mp4
+	case "$1" in
+	'nload')
+		check_apt nload 
+		nload
+		;;
+	'iftop')
+		check_apt iftop
+		iftop -n
+		;;
+	'iptraf')
+		check_apt iptraf iptraf-ng
+		iptraf
+		;;
+	'nethogs')
+		check_apt nethogs
+		nethogs
+		;;
+	'bmon')
+		check_apt bmon
+		bmon
+		;;
+	'slurm')
+		check_apt slurm
+		slurm -s -i $2 #eth0
+		;;
+	'tcptrack')
+		check_apt tcptrack
+		tcptrack
+		;;
+	'vnstat')
+		check_apt vnstat
+		service vnstat status
+		vnstat -l -i $2 #eth0
+		;;
+	'bwm-ng')
+		check_apt bwm-ng
+		bwm-ng -o curses2
+		;;
+	'cbm')
+		check_apt cbm
+		cbm
+		;;
+	'speedometer')
+		check_apt speedometer
+		speedometer -r $2 -t $2 #eth0
+		;;
+	'pktstat')
+		check_apt pktstat
+		pktstat -i $2 -nt #eth0
+		;;
+	'netwatch')
+		check_apt netwatch
+		netwatch -e $2 -nt #eth0
+		;;
+	'trafshow')
+		check_apt trafshow
+		trafshow -i $2 tcp #eth0 
+		;;
+	'netload')
+		check_apt netload
+		netload $2 #eth0
+		;;
+	'ifstat')
+		check_apt ifstat
+		ifstat -t -i $2 0.5 #eth0 
+		;;
+	'dstat')
+		check_apt dstat
+		dstat -nt
+		;;
+	'collectl')
+		check_apt collectl
+		collectl -sn -oT -i0.5
+		;;
+	esac
 }
-
-update_ffmpeg()
-{
-	if cmd_exists ffmpeg; then 
-		local need_ver=$1
-
-		IFS=' -'; set -- $(ffmpeg -version | grep "ffmpeg version");  
-		local current_version=$3
-		
-		cmp_version $current_version $need_ver
-
-		if [ ! $? -eq 2 ]; then
-			log "ffmpeg $current_version >= $need_ver"
-			return
-		fi
-
-		apt purge -y ffmpeg 
-	fi
-
-	check_apt ffmpeg libav-tools x264 x265
-}
-
 
 #-------------------------------------------------------
 #		basic functions
