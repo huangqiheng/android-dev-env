@@ -4,6 +4,20 @@ THIS_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
+	check_update
+	check_apt build-essential linux-headers-`uname -r`
+
+	cd $THIS_DIR && mkdir -p temp && cd temp
+
+	wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1504/x86_64/cuda-repo-ubuntu1504_7.5-18_amd64.deb
+	dpkg -i cuda-repo-ubuntu1504_7.5-18_amd64.deb
+
+	apt update -y
+	check_apt cuda
+
+
+	exit
+	# whthi lightdm ui
 	check_update ppa:graphics-drivers/ppa
 	check_apt nvidia-381 nvidia-cuda-toolkit
 
