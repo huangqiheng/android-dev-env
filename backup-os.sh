@@ -23,8 +23,11 @@ if [ "$1" = 'restore' ]; then
 
 else 
 	tar -cvpzf __backup.tar.gz --exclude=/backup.tar.gz --one-file-system / 
+	ret=$?
 
-	if [ "$?" -eq 0 ]; then
+	echo "tar return: ${ret}"
+
+	if [ "$ret" -ne 2 ]; then
 		mv __backup.tar.gz backup.tar.gz
 	else
 		unlink __backup.tar.gz
