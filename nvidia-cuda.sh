@@ -2,29 +2,36 @@
 
 THIS_DIR=`dirname $(readlink -f $0)`
 
+url_driver_runfile=http://us.download.nvidia.com/XFree86/Linux-x86_64/384.59/NVIDIA-Linux-x86_64-384.59.run
+url_cuda_runfile=https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run
+url_cuda_patch_runfile=https://developer.nvidia.com/compute/cuda/8.0/Prod2/patches/2/cuda_8.0.61.2_linux-run
+
 main () 
 {
 	check_update
-	check_apt build-essential linux-headers-`uname -r`
+	check_apt build-essential freeglut3-dev mpich2
+	check_apt linux-headers-$(uname -r)
+
+	check_apt nvidia-current nvidia-modprobe
 
 	cd $THIS_DIR && mkdir -p temp && cd temp
 
-	wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1504/x86_64/cuda-repo-ubuntu1504_7.5-18_amd64.deb
-	dpkg -i cuda-repo-ubuntu1504_7.5-18_amd64.deb
 
-	apt update -y
-	check_apt cuda
+	for url in $url_driver_runfile $url_cuda_runfile $url_cuda_patch_runfile; do
+		if [ ! -f $(basename $url) ]; then
+			wget $url
+		fi
+	done
 
+	if ! cmd_exists nvidia-smi; then
+		bash $(basename $url_driver_runfile)
+	fi
 
-	exit
-	# whthi lightdm ui
-	check_update ppa:graphics-drivers/ppa
-	check_apt nvidia-381 nvidia-cuda-toolkit
-
-	nvidia-smi
-	nvcc --version
+	if ! cmd_exists nvcc; then
+		bash $(basename $url_cuda_runfile)
+		bash $(basename $url_cuda_patch_runfile)
+	fi
 }
-
 
 #-------------------------------------------------------
 #		basic functions
