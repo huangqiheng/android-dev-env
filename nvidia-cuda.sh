@@ -9,7 +9,11 @@ url_cuda_patch_runfile=https://developer.nvidia.com/compute/cuda/8.0/Prod2/patch
 main () 
 {
 	check_update
-	check_apt build-essential freeglut3-dev mpich2
+	check_apt build-essential
+	check_apt freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev libglfw3-dev libgles2-mesa-dev
+
+	export GLPATH=/usr/lib
+
 	check_apt linux-headers-$(uname -r)
 
 	check_apt nvidia-current nvidia-modprobe
