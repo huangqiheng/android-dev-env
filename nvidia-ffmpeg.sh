@@ -55,24 +55,6 @@ main ()
 
 
 	#----------------------------------------#
-	# install cuda utility
-	#----------------------------------------#
-
-	cd $THIS_DIR/temp
-
-	utils_zip=$(basename "$cuda_utils")
-
-	if [ ! -f $utils_zip ]; then
-		wget $cuda_utils
-	fi
-
-	unzip $utils_zip
-
-	nvenc_dir="${utils_zip%.*}"
-	cd $nvenc_dir
-	make
-
-	#----------------------------------------#
 	# build nasm-2.13 for x264
 	#----------------------------------------#
 
@@ -103,6 +85,25 @@ main ()
 	make -j 4
 	make install
 	ldconfig
+
+	#----------------------------------------#
+	# install cuda utility
+	#----------------------------------------#
+
+	cd $THIS_DIR/temp
+
+	utils_zip=$(basename "$cuda_utils")
+
+	if [ ! -f $utils_zip ]; then
+		wget $cuda_utils
+	fi
+
+	unzip $utils_zip
+
+	nvenc_dir="${utils_zip%.*}"
+	cd $nvenc_dir
+	make
+
 
 	#----------------------------------------#
 	# build ffmpeg with cuda
