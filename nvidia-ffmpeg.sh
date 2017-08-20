@@ -14,7 +14,7 @@ main ()
 	check_update ppa:graphics-drivers/ppa
 
 	check_apt build-essential git yasm unzip wget sysstat
-	check_apt freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev libglfw3-dev libgles2-mesa-dev
+	check_apt glew-utils libglew-dbg libglew-dev libglew1.13 libglewmx-dbg libglewmx-dev freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev libglfw3-dev libgles2-mesa-dev
 	check_apt linux-headers-$(uname -r)
 
 	#----------------------------------------#
@@ -111,7 +111,7 @@ main ()
 
 	apt -y remove ffmpeg
 
-	check_apt libchromaprint-dev frei0r-plugins-dev ladspa-sdk libass-dev libiec61883-dev libraw1394-dev libavc1394-dev libass-dev libbluray-dev  libbs2b-dev libcaca-dev libcdio-dev  libfontconfig1-dev libfribidi-dev libgme-dev libgsm1-dev libmodplug-dev libmp3lame-dev libopenjpeg-dev libopus-dev libpulse-dev librubberband-dev libshine-dev libsnappy-dev flite1-dev libopencv-dev libsoxr-dev libssh-dev libspeex-dev libtheora-dev libtwolame-dev libvorbis-dev libvpx-dev libwavpack-dev libwebp-dev libx265-dev libzmq-dev libzmq3-dev libzvbi-dev libxvidcore-dev libopenal-dev libsdl-dev libcdio-paranoia-dev libgnutls-dev libssl-dev
+	check_apt libchromaprint-dev frei0r-plugins-dev ladspa-sdk libass-dev libiec61883-dev libraw1394-dev libavc1394-dev libass-dev libbluray-dev  libbs2b-dev libcaca-dev libcdio-dev  libfontconfig1-dev libfribidi-dev libgme-dev libgsm1-dev libmodplug-dev libmp3lame-dev libopenjpeg-dev libopus-dev libpulse-dev librubberband-dev libshine-dev libsnappy-dev flite1-dev libopencv-dev libsoxr-dev libssh-dev libspeex-dev libtheora-dev libtwolame-dev libvorbis-dev libvpx-dev libwavpack-dev libwebp-dev libx265-dev libzmq-dev libzmq3-dev libzvbi-dev libxvidcore-dev libopenal-dev libsdl-dev libcdio-paranoia-dev libgnutls-dev libssl-dev libfdk-aac-dev
 
 	apt-get install --reinstall libc6 
 
