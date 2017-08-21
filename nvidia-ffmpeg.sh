@@ -14,7 +14,7 @@ main ()
 	check_update ppa:graphics-drivers/ppa
 
 	check_apt build-essential git yasm unzip wget sysstat
-	check_apt freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev libglfw3-dev libgles2-mesa-dev
+	check_apt glew-utils libglew-dbg libglew-dev libglew1.13 libglewmx-dbg libglewmx-dev freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev libglfw3-dev libgles2-mesa-dev
 	check_apt linux-headers-$(uname -r)
 
 	#----------------------------------------#
@@ -103,7 +103,7 @@ main ()
 
 	nvenc_dir="${utils_zip%.*}"
 	cd $nvenc_dir
-	make
+	make CFLAGS=-fPIC
 
 
 	#----------------------------------------#
@@ -111,6 +111,10 @@ main ()
 	#----------------------------------------#
 
 	apt -y remove ffmpeg
+
+	check_apt libchromaprint-dev frei0r-plugins-dev ladspa-sdk libass-dev libiec61883-dev libraw1394-dev libavc1394-dev libass-dev libbluray-dev  libbs2b-dev libcaca-dev libcdio-dev  libfontconfig1-dev libfribidi-dev libgme-dev libgsm1-dev libmodplug-dev libmp3lame-dev libopenjpeg-dev libopus-dev libpulse-dev librubberband-dev libshine-dev libsnappy-dev flite1-dev libopencv-dev libsoxr-dev libssh-dev libspeex-dev libtheora-dev libtwolame-dev libvorbis-dev libvpx-dev libwavpack-dev libwebp-dev libx265-dev libzmq-dev libzmq3-dev libzvbi-dev libxvidcore-dev libopenal-dev libsdl-dev libcdio-paranoia-dev libgnutls-dev libssl-dev libfdk-aac-dev
+
+	apt-get install --reinstall libc6 
 
 	cd $THIS_DIR/temp
 	if [ ! -d ffmpeg ]; then
@@ -129,14 +133,8 @@ main ()
 	cd $THIS_DIR/temp
 	mkdir ffmpeg_build
 	cd ffmpeg_build
-	../ffmpeg/configure
-		--enable-nonfree \
-		--enable-nvenc \
-		--enable-nvresize \
-		--extra-cflags=-I../cudautils \
-		--extra-ldflags=-L../cudautils \
-		--enable-gpl \
-		--enable-libx264
+	../ffmpeg/configure --prefix=/usr --toolchain=hardened --cc=cc --cxx=g++ --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --enable-gpl --disable-stripping --enable-avresample --enable-avisynth --enable-gnutls --enable-openssl --enable-ladspa --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libmodplug --enable-libmp3lame --enable-libopenjpeg --enable-libopus --enable-libpulse --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libssh --enable-libtheora --enable-libtwolame --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx265 --enable-libxvid --enable-libzmq --enable-libzvbi --enable-openal --enable-opengl --enable-sdl --enable-libdc1394 --enable-libiec61883 --enable-libopencv --enable-frei0r --enable-libx264 --enable-chromaprint --enable-shared --enable-nonfree --enable-nvenc --enable-nvresize --extra-cflags=-I../cudautils --extra-ldflags=-L../cudautils
+
 	make -j 4
 
 	./ffmpeg -encoders 2>/dev/null | grep nvenc_h264
