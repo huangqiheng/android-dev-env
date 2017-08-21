@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# config.sh
+# GIT_USER_NAME=youname
+# GIT_USER_EMAIL=you@email.com
+# GIT_PUSH_DEFAULT=simple
+# GIT_PUSH_USER=yougithubaccount
+
 THIS_DIR=`dirname $(readlink -f $0)`
 . $THIS_DIR/config.sh
 
