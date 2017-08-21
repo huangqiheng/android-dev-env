@@ -21,6 +21,7 @@ main ()
 	# install display driver
 	#----------------------------------------#
 
+:q
 	systemctl stop lightdm
 	rmmod nvidia_drm
 	rmmod nvidia_uvm
