@@ -125,15 +125,14 @@ main ()
 	make -j 4
 	make install
 
-	ffmpeg -encoders 2>/dev/null | grep cuvid
-	res_encoder=$?
+	err_count=0
+	for i in encoders decoders filters; do
+		echo ${i}:
+		ffmpeg -hide_banner -${i} | egrep -i "npp|cuvid|nvenc|cuda"
+		err_count=$[ $err_count + $? ]
+	done
 
-	ffmpeg -filters 2>/dev/null | grep scale_npp
-	res_filter=$?
-
-	res=$[ $res_encoder + $res_filter ]
-
-	if [ $res -gt 0 ]; then
+	if [ $err_count -gt 0 ]; then
 		echo 'build ffmpeg error'
 	fi
 }
