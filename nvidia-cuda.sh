@@ -31,7 +31,7 @@ main ()
 		bash $(basename $url_driver_runfile)
 	fi
 
-	if ! cmd_exists nvcc; then
+	if ! cmd_exists /usr/local/cuda/bin/nvcc; then
 		bash $(basename $url_cuda_runfile)
 		bash $(basename $url_cuda_patch_runfile)
 	fi
