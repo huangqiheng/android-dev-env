@@ -88,6 +88,7 @@ main ()
 			echo 'ffmpeg cuda has error'
 			exit 1
 		fi
+		unlink ./test.mkv
 	fi
 
 	echo 'ffmpeg cuda is ready'
