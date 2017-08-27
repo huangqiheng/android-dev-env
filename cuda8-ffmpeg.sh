@@ -79,7 +79,19 @@ main ()
 
 	if [ $err_count -gt 0 ]; then
 		echo 'build ffmpeg error'
+		exit 1
 	fi
+
+	if [ -f /dev/video0 ]; then
+		cd $THIS_DIR/temp
+		if ! ffmpeg -y -f v4l2 -i /dev/video0 -fs 100 -c:v h264_nvenc test.mkv; then 
+			echo 'ffmpeg cuda has error'
+			exit 1
+		fi
+	fi
+
+	echo 'ffmpeg cuda is ready'
+	exit 0
 }
 
 check_dependance()
