@@ -1,5 +1,12 @@
+#!/bin/bash
 
+. $(dirname $(readlink -f $0))/basic_functions.sh
 
-apt install exfat-utils exfat-fuse
+main () 
+{
+	check_apt exfat-utils exfat-fuse
+	mount -t exfat $1 $2
+}
 
+main "$@"; exit $?
 
