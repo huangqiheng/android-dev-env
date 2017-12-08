@@ -52,7 +52,7 @@ set_conf()
 
 check_bash()
 {
-	[ -z "$BASH_VERSION" ] && echo "Change to: bash $0" && setsid bash $0 && exit
+	[ -z "$BASH_VERSION" ] && echo "Change to: bash $0" && setsid bash $0 $@ && exit
 }
 
 check_sudo()
