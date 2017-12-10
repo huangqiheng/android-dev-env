@@ -1,0 +1,26 @@
+BLUETOOTHCTL(1)                                    General Commands Manual                                   BLUETOOTHCTL(1)
+
+NNAAMMEE
+       bluetoothctl - bluetooth control tool
+
+SSYYNNOOPPSSIISS
+       bblluueettooootthhccttll
+
+DDEESSCCRRIIPPTTIIOONN
+       bblluueettooootthhccttll is bluetooth control tool
+
+UUSSAAGGEE
+       bluetoothctl [options]
+
+       Help Options:
+         --hh, ----hheellpp Show help options
+
+       Application Options:
+         --vv, ----vveerrssiioonn Show version information and exit
+         --aa, ----aaggeenntt==CCAAPPAABBIILLIITTYY Register agent handler
+
+AAUUTTHHOORR
+       This  manual page was written by Nobuhiro Iwamatsu <iwamatsu@debian.org>, for the Debian GNU/Linux system (but may be
+       used by others).
+
+                                                          May 2013                                           BLUETOOTHCTL(1)
