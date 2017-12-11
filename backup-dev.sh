@@ -14,8 +14,8 @@ main ()
 	local infile=$1
 	local outfile=$2
 
-	if is_device "$infile"; then
-		if is_device "$outfile"; then
+	if is_devblk "$infile"; then
+		if is_devblk "$outfile"; then
 			echo "The output file must be normal file as *.img.gz"
 			exit 1
 		fi
@@ -36,10 +36,10 @@ main ()
 		echo Input device: $infile
 		echo Backup gzip file: $outfile
 
-		dd if=$infile | gzip -c > $outfile bs=1024K conv=noerror,sync status=progress
+		dd if=$infile bs=1024K conv=noerror,sync status=progress | gzip -c > $outfile
 
 	else
-		if ! is_device "$outfile"; then
+		if ! is_devblk "$outfile"; then
 			echo "The output must be device like /dev/sda1"
 			exit 1
 		fi
@@ -69,11 +69,6 @@ echo "
     ./backup_dd.sh /dev/sda2 sda2.img.gz	# backup sda2 as $PWD/sda2.img.gz
     ./backup_dd.sh sda2.img.gz /dev/sda1	# restore $PWD/dump.backup to mounted /dev/sda1
 "
-}
-
-is_device()
-{
-	[ $(lsblk -np --output KNAME | grep -c "$1") -gt 0 ]
 }
 
 main "$@"; exit $?

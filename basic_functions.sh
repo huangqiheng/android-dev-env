@@ -104,6 +104,12 @@ check_update()
 	fi 
 }
 
+is_devblk()
+{
+	[ $(lsblk -np --output KNAME | grep -c "$1") -gt 0 ]
+}
+
+
 apt_exists()
 {
 	[ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -gt 0 ]
