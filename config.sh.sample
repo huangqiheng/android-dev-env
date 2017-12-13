@@ -4,8 +4,6 @@ GIT_USER_EMAIL=yourname@email.com
 GIT_PUSH_DEFAULT=simple
 GIT_PUSH_USER=your_github_username
 
-MJPG_SRC=http://localhost:8083/?action=stream
-
 GATEWAY_IFACE='enp2s0'
 WIRELESS_IFACE='wlp4s0'
 DRIVER_NAME='nl80211'
