@@ -14,6 +14,8 @@ main ()
 install_firefox()
 {
 	check_apt firefox
+	check_apt ubuntu-restricted-extras
+
 	ratpoisonrc "bind C-f exec firefox"
 }
 
