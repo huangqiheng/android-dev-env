@@ -24,7 +24,7 @@ set_comt()
 	fi
 
 	if [ "$1" = "on" ]; then
-		sed -ri "s|^${2}*(\s*${3}.*)|\1|" $__comment_file
+		sed -ri "s|\s*${2}*(\s*${3}.*)|\1|" $__comment_file
 	else
 		sed -ri "s|(^\s*${3}.*)|${2}\1|" $__comment_file
 	fi
@@ -46,7 +46,11 @@ set_conf()
 		exit
 	fi
 
-	sed -ri "s|^[;# ]*${1}[ ]*=.*|${1}=${2}|" $__ini_file
+	if [ $num_param -eq 2 ]; then
+		sed -ri "s|^[;# ]*${1}[ ]*=.*|${1}=${2}|" $__ini_file
+	else
+		sed -ri "s|^[;# ]*${1}[ ]*${3}.*|${1}${3}${2}|" $__ini_file
+	fi
 }
 
 check_bash()

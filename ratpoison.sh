@@ -4,6 +4,7 @@
 
 main () 
 {
+	check_update
 	install_ratpoison
 	install_xterm
 	install_firefox

@@ -5,6 +5,7 @@
 main () 
 {
 	check_apt wicd-curses
+	wicd-curses
 }
 
 main "$@"; exit $?
