@@ -37,7 +37,8 @@ ratpoisonrc()
 
 install_ratpoison()
 {
-	check_apt xinit ratpoison 
+	check_apt xinit x11-xserver-utils xclip
+	check_apt ratpoison 
 	
 	ratpoisonrc "exec rpws init 6 -k"
 	ratpoisonrc "bind M-1 exec rpws 1"
