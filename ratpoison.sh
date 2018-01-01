@@ -6,7 +6,7 @@ main ()
 {
 	check_update
 	install_ratpoison
-	install_xterm
+	install_terminal
 	install_firefox
 	install_pinyin
 	install_astrill
@@ -14,16 +14,17 @@ main ()
 
 install_firefox()
 {
-	check_apt firefox
 	check_apt ubuntu-restricted-extras
+	check_apt firefox
 
 	ratpoisonrc "bind C-f exec firefox"
 }
 
-install_xterm()
+install_terminal()
 {
-	check_apt xterm
-	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
+	check_apt xterm lxterminal
+	ratpoisonrc "bind c exec lxterminal"
+	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 }
 
 ratpoisonrc()
@@ -37,7 +38,8 @@ ratpoisonrc()
 
 install_ratpoison()
 {
-	check_apt xinit x11-xserver-utils xclip
+	check_apt xinit x11-xserver-utils
+	check_apt dbus-x11 xclip
 	check_apt ratpoison 
 	
 	ratpoisonrc "exec rpws init 6 -k"
@@ -51,7 +53,6 @@ install_ratpoison()
 
 install_pinyin()
 {
-	check_apt dbus-x11
 	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-imlist fcitx-sunpinyin
 
 	im-config -n fcitx
