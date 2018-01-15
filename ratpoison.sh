@@ -8,6 +8,7 @@ main ()
 	install_ratpoison
 	install_xterm
 	install_firefox
+	install_pulseaudio
 	install_pinyin
 	install_astrill
 }
@@ -58,6 +59,14 @@ install_pinyin()
 
 	ratpoisonrc "exec fcitx"
 }
+
+install_pulseaudio()
+{
+	check_apt alsa-base alsa-utils pulseaudio linux-sound-base libasound2
+
+	ratpoisonrc "exec pulseaudio"
+}
+
 
 install_astrill()
 {
