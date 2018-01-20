@@ -6,7 +6,7 @@ main ()
 {
 	check_update
 	install_ratpoison
-	install_xterm
+	install_terminal
 	install_firefox
 	install_pulseaudio
 	install_pinyin
@@ -21,10 +21,12 @@ install_firefox()
 	ratpoisonrc "bind C-f exec firefox"
 }
 
-install_xterm()
+install_terminal()
 {
-	check_apt xterm
-	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
+	check_apt xterm lxterminal
+	ratpoisonrc "bind c exec lxterminal"
+	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
+	ratpoisonrc "bind M-c exec xterm -fa nonaco -fs 10"
 }
 
 ratpoisonrc()
