@@ -7,18 +7,19 @@ main ()
 	check_update
 	install_ratpoison
 	install_terminal
-	install_firefox
+	install_browser
 	install_pulseaudio
 	install_pinyin
 	install_astrill
 }
 
-install_firefox()
+install_browser()
 {
-	check_apt firefox
+	check_apt firefox chromium-browser
 	check_apt ubuntu-restricted-extras
 
 	ratpoisonrc "bind C-f exec firefox"
+	ratpoisonrc "bind C-o exec chromium-browser"
 }
 
 install_terminal()
