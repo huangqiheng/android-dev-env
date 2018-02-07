@@ -12,6 +12,8 @@ main ()
 	[ "$1" = "stop" ] && dante_stop_exit
 
 	install_dante $1 $2
+
+	echo 'curl -vv -x socks5://user:pass@127.0.0.1:2018 http://www.163.com'
 }
 
 dante_start_exit()
