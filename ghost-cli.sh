@@ -6,11 +6,16 @@ main ()
 {
 	check_update
 	setup_nodejs
-	check_apt sqlite3
 
 	npm install -g ghost-cli
 
-	if [ "$1" = "production" ]; then
+	if [ "$1" = "dev" ]; then
+		check_apt sqlite3
+		npm install -g nodemon@latest
+		npm install -g gscan
+	fi
+
+	if [ "$1" = "idc" ]; then
 		check_apt nginx
 		ufw allow 'Nginx Full'
 		check_apt mysql-server
