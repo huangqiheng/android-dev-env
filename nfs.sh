@@ -22,6 +22,7 @@ add_exports_exit()
 {
 	echo "$1    *(ro,sync,no_root_squash)" >> /etc/exports
 	systemctl restart nfs-kernel-server.service
+	exit 0
 }
 
 maintain "$@"; main "$@"; exit $?

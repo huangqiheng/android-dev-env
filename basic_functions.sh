@@ -8,6 +8,15 @@ fi
 #		basic functions
 #-------------------------------------------------------
 
+get_latest_release()  # $1="creationix/nvm"
+{
+	curl --silent "https://api.github.com/repos/$1/releases/latest" |
+	grep '"tag_name":' |
+	sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+
+
 __comment_file=''
 
 set_comt()

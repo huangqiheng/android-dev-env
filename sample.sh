@@ -4,8 +4,19 @@
 
 main () 
 {
-
 }
 
-main "$@"; exit $?
+maintain()
+{
+	check_update
+	[ "$1" = 'help' ] && show_help_exit $2
+}
 
+show_help_exit()
+{
+	cat <<< EOL
+
+EOL
+	exit 0
+}
+maintain "$@"; main "$@"; exit $?

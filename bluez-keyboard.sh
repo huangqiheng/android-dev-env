@@ -19,8 +19,6 @@ bluetoothctl executes:
   connect xx:xx:xx:xx:xx:xx
   quit
 EOL
-	echo $help
-
 	bluetoothctl
 }
 
