@@ -12,7 +12,7 @@ main ()
 	check_update
 	setup_nodejs
 
-	check_npm_g ghost ghost-cli
+	check_npm_g ghost ghost-cli@latest
 
 	if [ "$1" = "dev" ]; then
 		if [ -n "$2" ]; then
@@ -45,7 +45,7 @@ main ()
 	fi
 
 	if ! user_exists $GHOST_USER; then
-		adduser $GHOST_USER
+		useradd_system $GHOST_USER
 	fi
 
 	mkdir -p $GHOST_PATH

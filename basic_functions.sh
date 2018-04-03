@@ -133,6 +133,11 @@ user_exists()
 	$(id -u "$1" > /dev/null 2>&1)
 }
 
+useradd_system()
+{
+	adduser --system --no-create-home --shell /bin/false --group --disabled-login "$1"
+}
+
 ufw_actived()
 {
 	[ $(ufw status | grep inactive) -eq 0 ]
