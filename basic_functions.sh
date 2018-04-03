@@ -128,6 +128,25 @@ apt_exists()
 	[ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -gt 0 ]
 }
 
+user_exists()
+{
+	$(id -u "$1" > /dev/null 2>&1)
+}
+
+ufw_actived()
+{
+	[ $(ufw status | grep inactive) -eq 0 ]
+}
+
+check_npm_g()
+{
+	if cmd_exists "$1"; then
+		log "$1 has been installed"
+	else 
+		npm install -g "$2"
+	fi
+}
+
 check_apt()
 {
 	for package in "$@"; do
