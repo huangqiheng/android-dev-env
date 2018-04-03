@@ -4,6 +4,8 @@
 
 GHOST_PATH=/var/www/ghost
 GHOST_USER=ghostblog
+GHOST_PASS=ghostblogpass
+MYSQL_ROOT=ghostroot
 DEV_MODE=1
 GHOST_INSTALL='ghost install --local'
 
@@ -36,6 +38,10 @@ main ()
 		check_npm_g gscan gscan
 	else
 		GHOST_INSTALL='ghost install'
+		check_apt debconf-utils
+
+		debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT"
+		debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT"
 		check_apt nginx mysql-server
 
 		if ufw_actived; then
@@ -45,7 +51,9 @@ main ()
 	fi
 
 	if ! user_exists $GHOST_USER; then
-		useradd_system $GHOST_USER
+		adduser --home "/home/$GHOST_USER" --gecos "" --disabled-password $GHOST_USER
+		echo "$GHOST_USER:$GHOST_PASS" | chpasswd
+		usermod -aG sudo $GHOST_USER
 	fi
 
 	mkdir -p $GHOST_PATH
