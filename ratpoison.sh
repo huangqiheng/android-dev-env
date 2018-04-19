@@ -4,7 +4,7 @@
 
 main () 
 {
-	check_update
+	check_update f
 	install_ratpoison
 	install_terminal
 	install_browser
@@ -58,7 +58,10 @@ install_pinyin()
 	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-imlist fcitx-sunpinyin
 
 	im-config -n fcitx
-	fcitx-imlist -s "fcitx-keyboard-us"
+
+	if cmd_exists fcitx-imlist; then
+		fcitx-imlist -s "fcitx-keyboard-us"
+	fi
 
 	ratpoisonrc "exec fcitx"
 }
@@ -78,15 +81,18 @@ install_astrill()
 		return
 	fi
 
-	local THIS_DIR=/tmp/install-scripts
-	mkdir -p $THIS_DIR 
-	cd $THIS_DIR
+	cd $CACHE_DIR
 
 	if [ ! -f "astrill-setup-linux64.sh" ]; then
 		wget https://astrill4u.com/downloads/astrill-setup-linux64.sh
 	fi
 
-	set_comt $THIS_DIR/astrill-setup-linux64.sh
+	if [ ! -f "astrill-setup-linux64.sh" ]; then
+		log 'FIXME: download astrill failure'
+		return
+	fi
+
+	set_comt $CACHE_DIR/astrill-setup-linux64.sh
 	set_comt off '#' 'read x'
 
 	bash astrill-setup-linux64.sh

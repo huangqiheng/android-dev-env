@@ -11,7 +11,7 @@ main ()
 		exit 0
 	fi
 
-	sslpath=$THIS_DIR/temp/ssl
+	sslpath=$CACHE_DIR/ssl
 	mkdir -p $sslpath
 
 	keyFile=$sslpath/$1.key

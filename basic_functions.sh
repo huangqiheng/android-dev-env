@@ -1,4 +1,7 @@
 THIS_DIR=`dirname $(readlink -f $0)`
+CACHE_DIR=$THIS_DIR/cache
+
+mkdir -p $CACHE_DIR
 
 if [ -f $THIS_DIR/config.sh ]; then
 	. $THIS_DIR/config.sh
