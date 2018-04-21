@@ -11,6 +11,15 @@ main ()
 	install_pulseaudio
 	install_pinyin
 	install_astrill
+	install_wallpaper
+}
+
+install_wallpaper()
+{
+	check_apt xcompmgr nitrogen
+
+	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
+	ratpoisonrc "exec nitrogen --restore"
 }
 
 install_browser()
