@@ -55,13 +55,11 @@ install_ratpoison()
 install_pinyin()
 {
 	check_apt dbus-x11
-	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-imlist fcitx-sunpinyin
+	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
 
 	im-config -n fcitx
 
-	if cmd_exists fcitx-imlist; then
-		fcitx-imlist -s "fcitx-keyboard-us"
-	fi
+	fcitx-config-gtk2
 
 	ratpoisonrc "exec fcitx"
 }
@@ -88,7 +86,12 @@ install_astrill()
 	fi
 
 	if [ ! -f "astrill-setup-linux64.sh" ]; then
-		log 'FIXME: download astrill failure'
+		if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
+			dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
+			ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
+		else
+			log 'FIXME: download astrill failure'
+		fi
 		return
 	fi
 

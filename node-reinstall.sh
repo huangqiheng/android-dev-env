@@ -17,7 +17,7 @@ main ()
 	npm install -g n
 	n stable
 
-	ln -sf "/usr/local/n/versions/node/$1/bin/node /usr/bin/nodejs"
+	ln -sf "/usr/local/n/versions/node/$1/bin/node" /usr/bin/nodejs
 	n $1
 }
 

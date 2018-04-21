@@ -2,6 +2,8 @@
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
 
+check_bash
+
 GHOST_PATH=/var/www/ghost
 GHOST_USER=ghostblog
 GHOST_PASS=ghostblogpass
@@ -70,7 +72,7 @@ setup_nodejs()
 		return
 	fi
 
-	curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+	curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 	check_apt nodejs
 }
 

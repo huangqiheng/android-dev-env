@@ -1,5 +1,6 @@
 THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
+DATA_DIR=$THIS_DIR/data
 
 mkdir -p $CACHE_DIR
 
