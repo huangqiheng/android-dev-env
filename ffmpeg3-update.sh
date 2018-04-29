@@ -5,6 +5,11 @@ THIS_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
+	setup_ffmpeg3
+}
+
+setup_ffmpeg3()
+{
 	if need_ffmpeg 3.3.0; then
 		log 'need to update ffmpeg'
 		apt purge -y ffmpeg 
