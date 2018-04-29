@@ -40,16 +40,9 @@ main ()
 		check_npm_g gscan gscan
 	else
 		GHOST_INSTALL='ghost install'
-		check_apt debconf-utils
+		setup_mysql
+		setup_nginx
 
-		debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT"
-		debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT"
-		check_apt nginx mysql-server
-
-		if ufw_actived; then
-			ufw allow 'Nginx Full'
-			ufw reload
-		fi
 	fi
 
 	if ! user_exists $GHOST_USER; then
@@ -63,6 +56,25 @@ main ()
 	chown $GHOST_USER:$GHOST_USER $GHOST_PATH
 
 	runuser -l $GHOST_USER -c "cd $GHOST_PATH; $GHOST_INSTALL"
+}
+
+setup_nginx()
+{
+	check_apt nginx
+
+	if ufw_actived; then
+		ufw allow 'Nginx Full'
+		ufw reload
+	fi
+}
+
+setup_mysql()
+{
+	check_apt debconf-utils
+
+	debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT"
+	debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT"
+	check_apt mysql-server
 }
 
 setup_nodejs()
