@@ -2,6 +2,8 @@ THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
 
+cd $THIS_DIR
+
 mkdir -p $CACHE_DIR
 
 if [ -f $THIS_DIR/config.sh ]; then
@@ -120,6 +122,19 @@ check_update()
 		apt upgrade -y
 	fi 
 }
+
+__is_update_checked=0
+
+check_update_once()
+{
+	if [ $__is_update_checked -eq 1 ]; then
+		return 0
+	fi 
+
+	check_update $1
+	__is_update_checked=1
+}
+
 
 is_devblk()
 {
