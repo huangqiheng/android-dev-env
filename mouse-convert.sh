@@ -1,12 +1,13 @@
 #!/bin/bash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
+check_bash
 
-main () 
+main() 
 {
 	mxid=$(xinput --list --short | awk '/Trackball/{gsub(/.*id=/, "");gsub(/[[:blank:]].*/, "");print}')
 	bmap=$(xinput get-button-map $mxid)
-	nmap=$(awk '{s=$1;$1=$3;$3=s};1' <<<$bmap)
+	nmap=$(awk '{s=$1;$1=$3;$3=s};1' <<< $bmap)
 	xinput set-button-map $mxid $nmap
 }
 
@@ -18,8 +19,8 @@ maintain()
 
 show_help_exit()
 {
-	cat <<< EOL
-
+	cat << EOL
+this is help
 EOL
 	exit 0
 }
