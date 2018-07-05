@@ -27,12 +27,22 @@ main ()
 	source /etc/profile;
 
 	go get -u -d github.com/ipfs/go-ipfs;
-	cd $HOME/go/src/github.com/ipfs/go-ipfs;
+	go get github.com/Kubuxu/go-ipfs-swarm-key-gen/ipfs-swarm-key-gen;
+
+	cd /home/$userName/go/src/github.com/ipfs/go-ipfs;
 	make install;
 
-	go get github.com/Kubuxu/go-ipfs-swarm-key-gen/ipfs-swarm-key-gen;
-	ipfs-swarm-key-gen > ~/.ipfs/swarm.key;
+	ipfs init;
 "
+
+	cat << EOL
+set private ipfs:
+	ipfs-swarm-key-gen > ~/.ipfs/swarm.key;
+	ipfs bootstrap rm --all
+	ipfs add /ip4/10.0.2.7/tcp/4001/ipfs/QmSoLV....
+	export LIBP2P_FORCE_PNET=1
+	ipfs daemon
+EOL
 
 }
 
