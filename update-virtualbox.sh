@@ -4,7 +4,7 @@
 
 main () 
 {
-	apt remove virtualbox --auto-remove
+	apt remove virtualbox virtualbox-dkms --auto-remove
 	wget -q -O - https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo apt-key add - echo deb http://download.virtualbox.org/virtualbox/debian `lsb_release -cs` non-free contrib | sudo tee /etc/apt/sources.list.d/virtualbox.org.list
 	apt update
 	apt install virtualbox-5.2
