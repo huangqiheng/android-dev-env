@@ -23,6 +23,7 @@ main ()
 	install_wine
 	update-binfmt --import /usr/share/binfmts/wine
 
+	check_apt install libgconf2-4
 	sh bin/wxdt install
 
 	log "run cmd: sh $wxdtCmd"
