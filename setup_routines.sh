@@ -1,5 +1,21 @@
 #!/bin/bash
 
+setup_typescript()
+{
+	setup_nodejs
+	check_npm_g typescript
+}
+
+setup_nodejs()
+{
+	if cmd_exists /usr/bin/node; then
+		log "node has been installed"
+		return
+	fi
+
+	curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+	check_apt nodejs
+}
 
 setup_ffmpeg3()
 {

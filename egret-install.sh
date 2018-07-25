@@ -5,6 +5,13 @@
 
 main () 
 {
+	setup_typescript
+
+	cd $CACHE_DIR
+	git clone https://github.com/egret-labs/egret-core.git
+
+	cd egret-core
+	npm install -g
 }
 
 maintain()

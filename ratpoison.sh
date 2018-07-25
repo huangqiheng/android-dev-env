@@ -68,7 +68,7 @@ install_pinyin()
 
 	im-config -n fcitx
 
-	fcitx-config-gtk2
+	fcitx-config-gtk
 
 	ratpoisonrc "exec fcitx"
 }

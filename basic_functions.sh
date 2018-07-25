@@ -2,9 +2,11 @@ THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
 
-cd $THIS_DIR
-
 mkdir -p $CACHE_DIR
+
+. $THIS_DIR/setup_routines.sh
+
+cd $THIS_DIR
 
 if [ -f $THIS_DIR/config.sh ]; then
 	. $THIS_DIR/config.sh

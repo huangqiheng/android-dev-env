@@ -4,21 +4,21 @@
 
 main () 
 {
-	cd $DATA_DIR
+	cd $CACHE_DIR
 
-	wxdtCmd=$DATA_DIR/wechat_web_devtools/bin/wxdt
+	wxdtCmd=$CACHE_DIR/wechat_web_devtools/bin/wxdt
 	if [ ! -f  $wxdtCmd ]; then
 		git clone https://github.com/huangqiheng/wechat_web_devtools.git
 
 		if [ ! -f  $wxdtCmd ]; then
 			log "get debtools error"
-			rm -rf $DATA_DIR/wechat_web_devtools/dist
+			rm -rf $CACHE_DIR/wechat_web_devtools/dist
 			rm -rf /tmp/wxdt_xsp
 			exit 1
 		fi
 	fi
 
-	cd $DATA_DIR/wechat_web_devtools
+	cd $CACHE_DIR/wechat_web_devtools
 
 	install_wine
 	update-binfmt --import /usr/share/binfmts/wine
