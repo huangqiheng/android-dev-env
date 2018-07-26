@@ -1,10 +1,10 @@
 THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
+RUN_DIR=$HOME/runCodes
 
 mkdir -p $CACHE_DIR
-
-. $THIS_DIR/setup_routines.sh
+mkdir -p $RUN_DIR
 
 cd $THIS_DIR
 
@@ -52,7 +52,7 @@ __ini_file=''
 
 set_conf()
 {
-	num_param=$#
+	local num_param=$#
 	if [ $num_param -eq 1 ]; then
 		__ini_file=$1
 		return
@@ -68,6 +68,41 @@ set_conf()
 	else
 		sed -ri "s|^[;# ]*${1}[ ]*${3}.*|${1}${3}${2}|" $__ini_file
 	fi
+}
+
+__insert_file=''
+
+insert_line()
+{
+	local num_param=$#
+	if [ $num_param -eq 1 ]; then
+		__insert_file=$1
+		return
+	fi
+
+	if [ -z $__insert_file ]; then
+		echo 'set_conf(): Please set ini file first.'
+		exit
+	fi
+
+	sed -i "/$1/a $2" $__insert_file
+}
+
+__cat_file=''
+
+append_file()
+{
+	if [ -f "$1" ]; then
+		__cat_file=$1
+		return
+	fi
+
+	if [ -z $__cat_file ]; then
+		echo 'append_file(): Please set file first.'
+		exit
+	fi
+
+	echo "$1" >> $__cat_file
 }
 
 check_bash()
@@ -187,5 +222,5 @@ log()
 
 cmd_exists() 
 {
-    type "$1" > /dev/null 2>&1
+	type $(which "$1") > /dev/null 2>&1
 }

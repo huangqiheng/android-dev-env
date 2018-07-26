@@ -12,6 +12,22 @@ main ()
 
 	cd egret-core
 	npm install -g
+
+	set_comt $CACHE_DIR/egret-core
+	set_comt off 'toolsList = project_1.launcher.getLauncherLibrary().getInstalledTools();' '//'
+
+	mkdir -p $HOME/egret-src
+
+	if [ ! -d $HOME/egret-src/helloWorld ]; then
+		cd $HOME/egret-src
+		egret create helloWorld
+
+		insert_line $HOME/egret-src/helloWorld/src/Main.ts
+		insert_line 'private createGameScene' 'console.log("hello egret world");'
+
+		cd helloWorld
+		egret run
+	fi
 }
 
 maintain()
@@ -27,4 +43,5 @@ show_help_exit()
 EOL
 	exit 0
 }
+
 maintain "$@"; main "$@"; exit $?

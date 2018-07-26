@@ -1,5 +1,27 @@
 #!/bin/bash
 
+setup_golang()
+{
+	if cmd_exists go; then
+		log 'golang is installed'
+		return 0
+	fi
+
+	if [ "$1" = "" ]; then
+		check_update ppa:longsleep/golang-backports
+		check_apt golang-go
+		return 1
+	fi
+
+	cd $CACHE_DIR
+	wget https://dl.google.com/go/go${1}.linux-amd64.tar.gz
+	tar -C /usr/local -xzf go${1}.linux-amd64.tar.gz
+	echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+	echo 'export PATH=$PATH:$HOME/go/bin' >> /etc/profile
+
+	return 2
+}
+
 setup_typescript()
 {
 	setup_nodejs
@@ -39,31 +61,11 @@ need_ffmpeg()
 	return 1
 }
 
-
-version_compare () 
+version_compare() 
 {
-	if [[ $1 == $2 ]]; then
-		return 0
-	fi
-
-	local IFS=.
-	local i ver1=($1) ver2=($2)
-	for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
-		ver1[i]=0
-	done
-
-	for ((i=0; i<${#ver1[@]}; i++)); do
-		if [[ -z ${ver2[i]} ]]; then
-			ver2[i]=0
-		fi
-		if ((10#${ver1[i]} > 10#${ver2[i]})); then
-			return 1
-		fi
-		if ((10#${ver1[i]} < 10#${ver2[i]})); then
-			return 2
-		fi
-	done
-	return 0
+	dpkg --compare-version "$1" eq "$2" && return 0
+	dpkg --compare-version "$1" lt "$2" && return 1
+	return 2
 }
 
 ffmpeg_version()
