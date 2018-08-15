@@ -95,6 +95,7 @@ install_astrill()
 	fi
 
 	if [ ! -f "astrill-setup-linux64.sh" ]; then
+		check_apt gtk2-engines-pixbuf
 		if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
 			dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
 			ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
@@ -107,7 +108,6 @@ install_astrill()
 	set_comt $CACHE_DIR/astrill-setup-linux64.sh
 	set_comt off '#' 'read x'
 
-	check_apt gtk2-engines-pixbuf
 	bash astrill-setup-linux64.sh
 
 	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
