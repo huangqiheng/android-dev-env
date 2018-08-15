@@ -222,5 +222,5 @@ log()
 
 cmd_exists() 
 {
-	type $(which "$1") > /dev/null 2>&1
+	type "$(which "$1")" > /dev/null 2>&1
 }

@@ -107,6 +107,7 @@ install_astrill()
 	set_comt $CACHE_DIR/astrill-setup-linux64.sh
 	set_comt off '#' 'read x'
 
+	check_apt gtk2-engines-pixbuf
 	bash astrill-setup-linux64.sh
 
 	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
