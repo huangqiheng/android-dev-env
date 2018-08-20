@@ -12,6 +12,7 @@ main ()
 	install_pinyin
 	install_astrill
 	install_wallpaper
+	install_xscreensaver
 }
 
 install_wallpaper()
@@ -80,6 +81,12 @@ install_pulseaudio()
 	ratpoisonrc "exec pulseaudio"
 }
 
+install_xscreensaver()
+{
+	check_apt xscreensaver
+	ratpoisonrc "exec xscreensaver -nosplash"
+	ratpoisonrc "bind C-l xscreensaver-command -lock"
+}
 
 install_astrill()
 {

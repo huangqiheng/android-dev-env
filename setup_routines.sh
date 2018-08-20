@@ -35,7 +35,7 @@ setup_nodejs()
 		return
 	fi
 
-	curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+	curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
 	check_apt nodejs
 }
 

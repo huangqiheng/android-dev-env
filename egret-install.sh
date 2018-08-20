@@ -8,12 +8,14 @@ main ()
 	setup_typescript
 
 	cd $CACHE_DIR
-	git clone https://github.com/egret-labs/egret-core.git
+	if [ ! -d egret-core ]; then
+		git clone https://github.com/egret-labs/egret-core.git
+	fi
 
 	cd egret-core
 	npm install -g
 
-	set_comt $CACHE_DIR/egret-core
+	set_comt $CACHE_DIR/egret-core/tools/commands/run.js
 	set_comt off 'toolsList = project_1.launcher.getLauncherLibrary().getInstalledTools();' '//'
 
 	mkdir -p $HOME/egret-src
