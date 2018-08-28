@@ -85,7 +85,7 @@ install_xscreensaver()
 {
 	check_apt xscreensaver
 	ratpoisonrc "exec xscreensaver -nosplash"
-	ratpoisonrc "bind C-l xscreensaver-command -lock"
+	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }
 
 install_astrill()
@@ -102,6 +102,7 @@ install_astrill()
 	fi
 
 	if [ ! -f "astrill-setup-linux64.sh" ]; then
+		# check_apt 
 		check_apt gtk2-engines-pixbuf
 		if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
 			dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
