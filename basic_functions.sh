@@ -199,7 +199,7 @@ check_npm_g()
 	if cmd_exists "$1"; then
 		log "$1 has been installed"
 	else 
-		npm install -g "$2"
+		npm install -g "$1"
 	fi
 }
 
