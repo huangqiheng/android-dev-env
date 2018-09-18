@@ -5,6 +5,7 @@
 
 main () 
 {
+	check_apt ethtool
 	local devName=$1
 	cat /sys/class/net/$devName/speed
 	ethtool $devName | grep Speed
@@ -14,7 +15,6 @@ main ()
 
 maintain()
 {
-	#check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 

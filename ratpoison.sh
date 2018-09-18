@@ -19,8 +19,8 @@ install_wallpaper()
 {
 	check_apt xcompmgr nitrogen
 
-	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
 	ratpoisonrc "exec nitrogen --restore"
+	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
 }
 
 install_browser()
