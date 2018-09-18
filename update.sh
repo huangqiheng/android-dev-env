@@ -7,11 +7,11 @@
 # GIT_PUSH_USER=yougithubaccount
 
 
-if [ $(whoami) != 'root' ]; then
-	echo "This script should be executed as root or with sudo:"
-	echo "	sudo $0"
-	exit 1
-fi
+# if [ $(whoami) != 'root' ]; then
+# 	echo "This script should be executed as root or with sudo:"
+# 	echo "	sudo $0"
+# 	exit 1
+# fi
 
 THIS_DIR=`dirname $(readlink -f $0)`
 . $THIS_DIR/config.sh
