@@ -5,14 +5,22 @@
 main () 
 {
 	check_update f
+
 	install_ratpoison
-	install_terminal
-	install_browser
 	install_pulseaudio
 	install_pinyin
-	install_astrill
 	install_wallpaper
 	install_xscreensaver
+
+	install_terminal
+	install_browser
+	install_astrill
+	install_utils
+}
+
+install_utils()
+{
+	check_apt xclip
 }
 
 install_wallpaper()
