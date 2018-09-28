@@ -2,6 +2,7 @@ THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
 RUN_DIR=$HOME/runCodes
+RUN_USER=$(basename $HOME)
 
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
@@ -16,11 +17,26 @@ fi
 #		basic functions
 #-------------------------------------------------------
 
+chownUser()
+{
+	chown -R $RUN_USER:$RUN_USER $1
+}
+
 get_latest_release()  # $1="creationix/nvm"
 {
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |
 	grep '"tag_name":' |
 	sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+
+ratpoisonrc()
+{
+	echo_file=$HOME/.ratpoisonrc
+	if grep -iq "$1" $echo_file; then
+		return 1
+	fi
+	echo "$1" >> $echo_file
 }
 
 

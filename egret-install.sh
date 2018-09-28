@@ -30,6 +30,8 @@ main ()
 		cd helloWorld
 		egret run
 	fi
+
+	chownUser $HOME/egret-src
 }
 
 maintain()

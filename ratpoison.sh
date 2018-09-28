@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
+. $THIS_DIR/setup_routines.sh
 
 main () 
 {
@@ -14,8 +15,15 @@ main ()
 
 	install_terminal
 	install_browser
-	install_astrill
+	install_virtualbox
+	#install_astrill
 	install_utils
+}
+
+install_virtualbox()
+{
+	check_apt virtualbox
+	ratpoisonrc "bind C-v exec virtualbox"
 }
 
 install_utils()
@@ -46,15 +54,6 @@ install_terminal()
 	ratpoisonrc "bind c exec lxterminal"
 	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 	ratpoisonrc "bind M-c exec xterm -fa nonaco -fs 10"
-}
-
-ratpoisonrc()
-{
-	echo_file=$HOME/.ratpoisonrc
-	if grep -iq "$1" $echo_file; then
-		return 1
-	fi
-	echo "$1" >> $echo_file
 }
 
 install_ratpoison()
@@ -96,38 +95,6 @@ install_xscreensaver()
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }
 
-install_astrill()
-{
-	if cmd_exists /usr/local/Astrill/astrill; then
-		echo "astrill has been installed."
-		return
-	fi
-
-	cd $CACHE_DIR
-
-	if [ ! -f "astrill-setup-linux64.sh" ]; then
-		wget https://astrill4u.com/downloads/astrill-setup-linux64.sh
-	fi
-
-	if [ ! -f "astrill-setup-linux64.sh" ]; then
-		# check_apt 
-		check_apt gtk2-engines-pixbuf
-		if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
-			dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
-			ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
-		else
-			log 'FIXME: download astrill failure'
-		fi
-		return
-	fi
-
-	set_comt $CACHE_DIR/astrill-setup-linux64.sh
-	set_comt off '#' 'read x'
-
-	bash astrill-setup-linux64.sh
-
-	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
-}
 
 main "$@"; exit $?
 
