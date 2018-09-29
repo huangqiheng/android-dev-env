@@ -16,7 +16,7 @@ main ()
 	install_terminal
 	install_browser
 	install_virtualbox
-	install_wps
+	#install_wps
 	#install_astrill
 	install_utils
 }
