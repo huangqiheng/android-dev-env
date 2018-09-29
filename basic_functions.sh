@@ -17,6 +17,11 @@ fi
 #		basic functions
 #-------------------------------------------------------
 
+runUser()
+{
+	runuser -l $RUN_USER -c "$1"
+}
+
 chownUser()
 {
 	chown -R $RUN_USER:$RUN_USER $1

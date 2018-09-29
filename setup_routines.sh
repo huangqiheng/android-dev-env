@@ -1,5 +1,24 @@
 #!/bin/bash
 
+install_wps()
+{
+	if cmd_exists wps; then
+		echo "wps has been installed."
+		return
+	fi
+
+	check_apt unzip
+
+	cd $CACHE_DIR
+	wget http://kdl.cc.ksosoft.com/wps-community/download/6757/wps-office_10.1.0.6757_amd64.deb
+	dpkg -i wps-office_10.1.0.6757_amd64.deb
+
+	cd $DATA_DIR
+	unzip wps_symbol_fonts.zip -d /usr/share/fonts/wps-office
+
+	ratpoisonrc "bind C-p exec /usr/bin/wps"
+}
+
 install_astrill()
 {
 	if cmd_exists /usr/local/Astrill/astrill; then
