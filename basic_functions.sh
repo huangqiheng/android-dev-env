@@ -245,3 +245,12 @@ cmd_exists()
 {
 	type "$(which "$1")" > /dev/null 2>&1
 }
+
+cmd_exists_exit()
+{
+	if cmd_exists "$1"; then
+		echo "$1 is available, exit"
+		echo "$2"
+		exit	
+	fi
+}
