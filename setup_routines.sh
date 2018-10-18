@@ -19,6 +19,26 @@ install_wps()
 	ratpoisonrc "bind C-p exec /usr/bin/wps"
 }
 
+setup_objconv()
+{
+	if cmd_exists objconv; then
+		echo "objconv has been installed"
+		return
+	fi
+
+	cd $CACHE_DIR
+	if [ ! -d objconv ]; then
+		git clone https://github.com/vertis/objconv.git
+	fi
+
+	cd objconv
+
+	g++ -o objconv -O2 src/*.cpp  -Wno-narrowing -Wno-format-overflow
+
+	cp objconv /usr/local/bin
+}
+
+
 install_astrill()
 {
 	if cmd_exists /usr/local/Astrill/astrill; then
@@ -54,6 +74,19 @@ install_astrill()
 	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
 }
 
+setup_gotty()
+{
+	if cmd_exists gotty; then
+		log 'gotty is installed'
+		return 0
+	fi
+
+	setup_golang
+	go get github.com/yudai/gotty
+
+	gopath=$(go env GOPATH)
+	cp $gopath/bin/gotty /usr/local/bin
+}
 
 setup_golang()
 {

@@ -12,7 +12,7 @@ main ()
 	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
 
 	install_astrill
-	check_apt socat shadowsocks
+	check_apt socat shadowsocks proxychains
 
 	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
 	ratpoisonrc "exec socat tcp-listen:3128,reuseaddr,fork tcp:localhost:3213 &"

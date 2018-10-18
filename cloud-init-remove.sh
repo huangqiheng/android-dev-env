@@ -5,13 +5,17 @@
 
 main () 
 {
-	curl ifconfig.co
-	curl ifconfig.me
-	curl icanhazip.com
+	echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+	apt-get purge -y cloud-init
+	rm -rf /etc/cloud/
+	rm -rf /var/lib/cloud/
+
+	log 'Please reboot.'
 }
 
 maintain()
 {
+	check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 

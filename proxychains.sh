@@ -5,13 +5,12 @@
 
 main () 
 {
-	curl ifconfig.co
-	curl ifconfig.me
-	curl icanhazip.com
+	check_apt proxychains
 }
 
 maintain()
 {
+	check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 

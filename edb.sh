@@ -9,7 +9,10 @@ main ()
 	check_apt libqt5xmlpatterns5-dev qtbase5-dev qt5-default libqt5svg5-dev 
 	check_apt libgraphviz-dev
 	check_apt libcapstone-dev pkg-config
-	check_apt yasm
+	check_apt yasm nasm
+	check_apt gdbserver
+
+	setup_objconv
 
 	cd $CACHE_DIR
 	if [ ! -d edb-debugger ]; then
