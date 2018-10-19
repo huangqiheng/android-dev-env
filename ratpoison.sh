@@ -5,7 +5,8 @@
 
 main () 
 {
-	check_update f
+	check_apt_sources
+	[ "$1" = 'check' ] || check_update f
 
 	install_ratpoison
 	install_pulseaudio
@@ -19,6 +20,17 @@ main ()
 	#install_wps
 	#install_astrill
 	install_utils
+}
+
+check_apt_sources()
+{
+	if grep "multiverse" /etc/apt/sources.list 1>/dev/null; then
+		log 'sources.list is ok'
+		return
+	fi
+
+	log 'Please append "restricted universe multiverse" to /etc/apt/sources.list'
+	exit
 }
 
 install_virtualbox()
@@ -76,8 +88,7 @@ install_pinyin()
 	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
 
 	im-config -n fcitx
-
-	fcitx-config-gtk
+	log '--Please run fcitx-config-gtk after installed.'
 
 	ratpoisonrc "exec fcitx"
 }
