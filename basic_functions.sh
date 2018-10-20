@@ -3,6 +3,7 @@ CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
 RUN_DIR=$HOME/runCodes
 RUN_USER=$(basename $HOME)
+WIRELESS_IFACE=${WIRELESS_IFACE:-'wlp2s0'}
 
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
@@ -16,6 +17,12 @@ fi
 #-------------------------------------------------------
 #		basic functions
 #-------------------------------------------------------
+
+
+extra_wifi_interface()
+{
+	WIRELESS_IFACE=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g')
+}
 
 runUser()
 {
