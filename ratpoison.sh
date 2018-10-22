@@ -48,7 +48,7 @@ install_wallpaper()
 {
 	check_apt xcompmgr nitrogen
 
-	ratpoisonrc "exec nitrogen --restore"
+	ratpoisonrc "exec nitrogen --restore $DATA_DIR"
 	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
 }
 
