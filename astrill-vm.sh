@@ -5,10 +5,12 @@
 
 main () 
 {
-	cloudinit_remove
+
+	full_sources
 	check_update f
 	check_apt xinit ratpoison 
 
+	cloudinit_remove
 	auto_login
 
 	install_astrill

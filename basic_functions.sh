@@ -253,6 +253,23 @@ cmd_exists()
 	type "$(which "$1")" > /dev/null 2>&1
 }
 
+auto_login()
+{
+	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
+	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
+}
+
+full_sources()
+{
+	cat >/etc/network/interfaces <<EOL
+deb http://cn.archive.ubuntu.com/ubuntu bionic main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu bionic-security main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu bionic-backports main restricted universe multiverse
+deb http://security.archive.ubuntu.com/ubuntu bionic-security main restricted universe multiverse
+EOL
+}
+
 cmd_exists_exit()
 {
 	if cmd_exists "$1"; then

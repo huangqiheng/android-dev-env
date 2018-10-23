@@ -38,12 +38,6 @@ setup_objconv()
 	cp objconv /usr/local/bin
 }
 
-auto_login()
-{
-	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
-	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
-}
-
 cloudinit_remove()
 {
 	if [ ! -d /etc/cloud/ ]; then
