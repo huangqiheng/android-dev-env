@@ -261,7 +261,7 @@ auto_login()
 
 full_sources()
 {
-	cat >/etc/network/interfaces <<EOL
+	cat >/etc/apt/sources.list <<EOL
 deb http://cn.archive.ubuntu.com/ubuntu bionic main restricted universe multiverse
 deb http://cn.archive.ubuntu.com/ubuntu bionic-security main restricted universe multiverse
 deb http://cn.archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse
