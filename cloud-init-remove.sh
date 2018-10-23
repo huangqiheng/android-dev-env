@@ -3,13 +3,10 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
+
 main () 
 {
-	echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
-	apt-get purge -y cloud-init
-	rm -rf /etc/cloud/
-	rm -rf /var/lib/cloud/
-
+	cloudinit-remove
 	log 'Please reboot.'
 }
 

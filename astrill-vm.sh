@@ -5,11 +5,11 @@
 
 main () 
 {
+	cloudinit_remove
 	check_update f
 	check_apt xinit ratpoison 
 
-	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
-	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
+	auto_login
 
 	install_astrill
 	check_apt socat shadowsocks proxychains

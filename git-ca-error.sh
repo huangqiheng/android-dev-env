@@ -10,6 +10,7 @@ main ()
 
 maintain()
 {
+	check_sudo
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 

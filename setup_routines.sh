@@ -38,6 +38,24 @@ setup_objconv()
 	cp objconv /usr/local/bin
 }
 
+auto_login()
+{
+	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
+	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
+}
+
+cloudinit_remove()
+{
+	if [ ! -d /etc/cloud/ ]; then
+		log 'cloud-init isnt exists'
+		return
+	fi
+
+	echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+	apt-get purge -y cloud-init
+	rm -rf /etc/cloud/
+	rm -rf /var/lib/cloud/
+}
 
 install_astrill()
 {
