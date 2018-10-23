@@ -5,7 +5,6 @@
 
 main () 
 {
-
 	full_sources
 	check_update f
 	check_apt xinit ratpoison 
