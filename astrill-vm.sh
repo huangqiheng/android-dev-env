@@ -5,19 +5,43 @@
 
 main () 
 {
+	if [ ! -f $HOME/sslocal.json ]; then
+		log 'Please prepare the sslocal.json file'
+		exit 1
+	fi
+
 	full_sources
 	check_update f
+
 	check_apt xinit ratpoison 
 
 	cloudinit_remove
 	auto_login
+	auto_startx
+
+	#fix_gpt_auto_error
+
+	check_apt shadowsocks proxychains 
+	ratpoisonrc "exec sslocal $HOME/sslocal.json &"
 
 	install_astrill
-	check_apt socat shadowsocks proxychains
-
-	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
+	check_apt socat 
 	ratpoisonrc "exec socat tcp-listen:3128,reuseaddr,fork tcp:localhost:3213 &"
 	ratpoisonrc "exec /usr/local/Astrill/astrill"
+
+	check_apt tor
+	set_conf /etc/tor/torrc
+	set_conf Socks5Proxy '127.0.0.1:7070' ' '
+	set_conf SOCKSPort '0.0.0.0:9050' ' '
+	set_conf /etc/tor/torsocks.conf
+	set_conf TorAddress '0.0.0.0'
+	systemctl restart tor
+}
+
+fix_gpt_auto_error()
+{
+	set_conf /etc/default/grub
+	set_conf GRUB_CMDLINE_LINUX_DEFAULT '"systemd.gpt_auto=0"'
 }
 
 maintain()

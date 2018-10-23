@@ -41,6 +41,14 @@ get_latest_release()  # $1="creationix/nvm"
 	sed -E 's/.*"([^"]+)".*/\1/'
 }
 
+bashrc()
+{
+	echo_file=$HOME/.bashrc
+	if grep -iq "$1" $echo_file; then
+		return 1
+	fi
+	echo "$2" >> $echo_file
+}
 
 ratpoisonrc()
 {
@@ -256,7 +264,16 @@ cmd_exists()
 auto_login()
 {
 	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
-	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER}--noclear %I \$TERM"
+	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER} --noclear %I \$TERM"
+}
+
+auto_startx()
+{
+	bashrc startx <<EOL
+if [ \$(tty) == "/dev/tty1" ]; then
+        startx
+fi
+EOL
 }
 
 full_sources()
