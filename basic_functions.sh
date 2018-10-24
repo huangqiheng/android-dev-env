@@ -77,7 +77,11 @@ set_comt()
 	fi
 
 	if [ "$1" = "on" ]; then
-		sed -ri "s|\s*${2}*(\s*${3}.*)|\1|" $__comment_file
+		if grep -q "$3" $__comment_file; then
+			sed -ri "s|\s*${2}*(\s*${3}.*)|\1|" $__comment_file
+		else
+			echo "$3" >> $__comment_file
+		fi
 	else
 		sed -ri "s|(^\s*${3}.*)|${2}\1|" $__comment_file
 	fi
