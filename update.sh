@@ -28,12 +28,12 @@ cd $THIS_DIR
 
 pull_result=$(git pull)
 
-if echo $commit_result | grep -q 'use "git push" to publish your local commits'; then
+if echo $pull_result | grep -q 'use "git push" to publish your local commits'; then
 	git push
 	exit
 fi
 
-echo $commit_result
+echo $pull_result
 
 git add .
 commit_result=$(git commit -m "${input_msg}")
