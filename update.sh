@@ -26,7 +26,12 @@ input_msg=${input_msg:="update"}
 
 cd $THIS_DIR
 
-git pull
+pull_result=$(git pull)
+
+if echo $commit_result | grep -q 'use "git push" to publish your local commits'; then
+	git push
+	exit
+fi
 
 git add .
 commit_result=$(git commit -m "${input_msg}")
