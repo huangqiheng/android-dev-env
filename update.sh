@@ -29,6 +29,11 @@ cd $THIS_DIR
 git pull
 
 git add .
-git commit -m "${input_msg}"
+commit_result=`git commit -m "${input_msg}"`
+
+echo $commit_result
+exit
+
+
 git push
 
