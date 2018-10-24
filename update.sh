@@ -39,6 +39,7 @@ fi
 
 echo $pull_result
 
+
 git add .
 commit_result=$(git commit -m "${input_msg}")
 
