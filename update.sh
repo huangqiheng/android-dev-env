@@ -28,6 +28,10 @@ cd $THIS_DIR
 
 pull_result=$(git pull)
 
+if echo $pull_result | grep -q 'insufficient permission for adding an object'; then
+	sudo chown -R $(id -u):$(id -g) "$(git rev-parse --show-toplevel)/.git"
+fi
+
 if echo $pull_result | grep -q 'use "git push" to publish your local commits'; then
 	git push
 	exit
@@ -45,5 +49,6 @@ fi
 
 echo $commit_result
 
+git config --global credential.helper 'cache --timeout 7200'
 git push
 
