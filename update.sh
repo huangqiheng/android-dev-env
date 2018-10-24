@@ -32,7 +32,7 @@ git add .
 commit_result=$(git commit -m "${input_msg}")
 
 echo $commit_result
-if echo $commit_result | grep 'nothing to commit'; then
+if echo $commit_result | grep -q 'nothing to commit'; then
 	exit
 fi
 
