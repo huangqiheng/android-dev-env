@@ -1,13 +1,8 @@
 #!/bin/bash
 
-# config.sh
-# GIT_USER_NAME=youname
-# GIT_USER_EMAIL=you@email.com
-# GIT_PUSH_DEFAULT=simple
-# GIT_PUSH_USER=yougithubaccount
-
 THIS_DIR=`dirname $(readlink -f $0)`
 . $THIS_DIR/config.sh
+GIT_PUSH_DEFAULT=simple
 
 user=$(git config --global --get user.name)
 [ -z $user ] && git config --global --add user.name $GIT_USER_NAME
@@ -30,6 +25,9 @@ input_msg=$1
 input_msg=${input_msg:="update"}
 
 cd $THIS_DIR
+
+git pull
+
 git add .
 git commit -m "${input_msg}"
 git push
