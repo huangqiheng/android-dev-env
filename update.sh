@@ -33,13 +33,17 @@ if echo $commit_result | grep -q 'use "git push" to publish your local commits';
 	exit
 fi
 
+echo $commit_result
+
 git add .
 commit_result=$(git commit -m "${input_msg}")
 
-echo $commit_result
 if echo $commit_result | grep -q 'nothing to commit'; then
+	echo 'nothing to commit'
 	exit
 fi
+
+echo $commit_result
 
 git push
 
