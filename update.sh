@@ -1,6 +1,26 @@
 #!/bin/bash
 
+#---------------------------------------------------------------------
+# pull
+
 THIS_DIR=`dirname $(readlink -f $0)`
+
+cd $THIS_DIR
+pull_result=$(git pull)
+
+if echo $pull_result | grep -q 'insufficient permission for adding an object'; then
+	sudo chown -R $(id -u):$(id -g) "$(git rev-parse --show-toplevel)/.git"
+fi
+
+if echo $pull_result | grep -q 'use "git push" to publish your local commits'; then
+	git push
+	exit
+fi
+echo $pull_result
+
+#---------------------------------------------------------------------
+# config
+
 . $THIS_DIR/config.sh
 GIT_PUSH_DEFAULT=simple
 
@@ -18,28 +38,16 @@ push_url=$(git remote get-url --push origin)
 if ! echo $push_url | grep -q "${GIT_PUSH_USER}@"; then
 	new_url=$(echo $push_url | sed -e "s/\/\//\/\/${GIT_PUSH_USER}@/g")
 	git remote set-url origin $new_url
-	echo "update remote url: $new_url"
+	echo "Update remote url: $new_url"
 fi
+
+#---------------------------------------------------------------------
+# push
 
 input_msg=$1
 input_msg=${input_msg:="update"}
 
 cd $THIS_DIR
-
-pull_result=$(git pull)
-
-if echo $pull_result | grep -q 'insufficient permission for adding an object'; then
-	sudo chown -R $(id -u):$(id -g) "$(git rev-parse --show-toplevel)/.git"
-fi
-
-if echo $pull_result | grep -q 'use "git push" to publish your local commits'; then
-	git push
-	exit
-fi
-
-echo $pull_result
-
-
 git add .
 commit_result=$(git commit -m "${input_msg}")
 
