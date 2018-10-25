@@ -19,8 +19,6 @@ main ()
 	auto_login
 	auto_startx
 
-	#fix_gpt_auto_error
-
 	check_apt shadowsocks proxychains 
 	ratpoisonrc "exec sslocal $HOME/sslocal.json &"
 
@@ -36,6 +34,19 @@ main ()
 	set_conf /etc/tor/torsocks.conf
 	set_conf TorAddress '0.0.0.0'
 	systemctl restart tor
+
+	check_apt xauth
+	set_conf /etc/ssh/sshd_config
+	set_conf X11Forwarding yes ' '
+	set_conf X11DisplayOffset 10 ' '
+	cat /var/run/sshd.pid | xargs kill -1
+
+	cat >$HOME/.ssh/config <<EOL
+Host *
+  ForwardAgent yes
+  ForwardX11 yes
+EOL
+
 }
 
 fix_gpt_auto_error()
