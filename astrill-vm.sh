@@ -11,7 +11,7 @@ main ()
 	fi
 
 	full_sources
-	check_update f
+	check_update_once f
 
 	check_apt xinit ratpoison 
 
@@ -35,18 +35,7 @@ main ()
 	set_conf TorAddress '0.0.0.0'
 	systemctl restart tor
 
-	check_apt xauth
-	set_conf /etc/ssh/sshd_config
-	set_conf X11Forwarding yes ' '
-	set_conf X11DisplayOffset 10 ' '
-	cat /var/run/sshd.pid | xargs kill -1
-
-	cat >$HOME/.ssh/config <<EOL
-Host *
-  ForwardAgent yes
-  ForwardX11 yes
-EOL
-
+	x11_forward_server
 }
 
 fix_gpt_auto_error()

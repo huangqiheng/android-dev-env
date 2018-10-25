@@ -159,6 +159,7 @@ check_sudo()
 	fi
 }
 
+
 check_update()
 {
 	check_sudo

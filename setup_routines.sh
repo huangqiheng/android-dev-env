@@ -1,5 +1,29 @@
 #!/bin/bash
 
+x11_forward_server()
+{
+	log 'setting ssh server'
+	check_update_once
+	check_apt xauth
+
+	set_conf /etc/ssh/sshd_config
+	set_conf X11Forwarding yes ' '
+	set_conf X11DisplayOffset 10 ' '
+	set_conf X11UseLocalhost no ' '
+
+	cat /var/run/sshd.pid | xargs kill -1
+}
+
+x11_forward_client()
+{
+	log 'setting ssh client'
+	cat > $HOME/.ssh/config <<EOL
+Host *
+  ForwardAgent yes
+  ForwardX11 yes
+EOL
+}
+
 install_wps()
 {
 	if cmd_exists wps; then
