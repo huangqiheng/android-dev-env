@@ -12,20 +12,21 @@ main ()
 		wget https://svn.nmap.org/nmap/nmap-os-db
 	fi
 
-	for ip in $(get_local_ips); do
+	for ip in $(get_localnet_ips); do
 		log ""
 		log "------------------- detecting $ip -------------------------"
 		nmap -O -Pn $ip
 	done
 }
 
-get_local_ips()
+fast_nmap_scan_exit()
 {
-	arp-scan --interface=enp2s0 --localnet 2>/dev/null | awk '{print $1}' | tail -n +3 | head -n -2
+	nmap -p 22 --open -sV 192.168.1.0/24
 }
 
 maintain()
 {
+	[ "$1" = 'fast' ] && fast_nmap_scan_exit $2
 	check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }

@@ -18,6 +18,24 @@ fi
 #		basic functions
 #-------------------------------------------------------
 
+get_wifi_ifaces()
+{
+	lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g'
+}
+
+get_ifaces()
+{
+	ifconfig -s | tail -n +2 | awk '{print $1}' | grep -v 'lo'
+}
+
+get_localnet_ips()
+{
+	for iface in $(get_ifaces); do
+		arp-scan --interface=$iface --localnet 2>/dev/null | awk '{print $1}' | tail -n +3 | head -n -2
+	done
+}
+
+
 
 extra_wifi_interface()
 {
