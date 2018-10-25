@@ -5,23 +5,48 @@
 
 main () 
 {
+	check_apt libblockdev-crypto2 libblockdev-mdraid2
+
 	handle_fstab
 	link_mtab
 	set_kernel_behavior
 	disable_bash_history
 	daily_clean_tmp
-	setup_apt_env
+	set_apt_env
+	set_permanent /permanent
+}
+
+set_permanent()
+{
+	mkdir -p "$1"
+	chmod 777 "$1"
+}
+
+add_fstab_tmpfs()
+{
+	target_str="tmpfs $1 tmpfs defaults,noatime 0 0"
+	if ! grep -q "$target_str" /etc/fstab; then
+		echo $target_str >> /etc/fstab  
+	fi
+}
+
+disable_swap()
+{
+	sed -i '/\sswap\s/s/^/#/' /etc/fstab 
 }
 
 handle_fstab()
 {
+	disable_swap
+
+	add_fstab_tmpfs /tmp
+	add_fstab_tmpfs /var/tmp
+	add_fstab_tmpfs /var/log
+	add_fstab_tmpfs /var/mail
+
 	rootLine=$(sed -n "/\s\/\s/p" /etc/fstab)
 	IFS=' '; set -- $rootLine
 	sed -i "/\s\/\s/s/$4 $5 $6/noatime 0 1/" /etc/fstab
-
-	exit
-
-	sed -i '/\sswap\s/s/^/#/' /etc/fstab 
 }
 
 link_mtab()
@@ -30,7 +55,7 @@ link_mtab()
 	ln -s /proc/mounts /etc/mtab
 }
 
-setup_apt_env()
+set_apt_env()
 {
 	cat >/etc/init.d/apt-tmpfs <<EOL
 #!/bin/bash
@@ -50,7 +75,7 @@ setup_apt_env()
 case "${1:-''}" in
   'start')
    # create the /var/log/apt needed by apt
-   mkdir /var/log/apt
+   mkdir -p /var/log/apt
    chmod 777 /var/log/apt
    ;;
   'stop')
