@@ -5,14 +5,23 @@
 
 main () 
 {
-	check_apt nmap
+	check_apt nmap arp-scan
 
 	cd /usr/share/nmap
 	if [ ! -f nmap-os-db ]; then
 		wget https://svn.nmap.org/nmap/nmap-os-db
 	fi
 
-	nmap -sP -PS22,3389 192.168.2.1/24
+	for ip in $(get_local_ips); do
+		log ""
+		log "------------------- detecting $ip -------------------------"
+		nmap -O -Pn $ip
+	done
+}
+
+get_local_ips()
+{
+	arp-scan --interface=enp2s0 --localnet 2>/dev/null | awk '{print $1}' | tail -n +3 | head -n -2
 }
 
 maintain()
