@@ -8,29 +8,30 @@ main ()
 	check_apt_sources
 	[ "$1" = 'check' ] || check_update f
 
-	install_ratpoison
-	install_pulseaudio
-	install_pinyin
-	install_wallpaper
-	install_xscreensaver
+	install_ratpoison 	# system
+	install_pinyin		# input
+	install_sounds		# sound
+	install_graphics	# graphic
+
+	install_wallpaper	# appearance
+	install_xscreensaver 	# lock
 
 	install_terminal
 	install_browser
 	install_virtualbox
-	#install_wps
-	#install_astrill
 	install_utils
 }
 
 check_apt_sources()
 {
-	if grep "multiverse" /etc/apt/sources.list 1>/dev/null; then
+	line_count=$(grep "main restricted universe multiverse" /etc/apt/sources.list | wc -l)
+
+	if [ $line_count -gt 3 ]; then
 		log 'sources.list is ok'
 		return
 	fi
 
-	log 'Please append "restricted universe multiverse" to /etc/apt/sources.list'
-	exit
+	full_sources
 }
 
 install_virtualbox()
@@ -93,7 +94,16 @@ install_pinyin()
 	ratpoisonrc "exec fcitx"
 }
 
-install_pulseaudio()
+install_graphics()
+{
+	if lspci | grep -i "VGA.*intel"; then 
+		check_apt xserver-xorg-video-intel
+	fi
+
+	check_apt mesa-utils 
+}
+
+install_sounds()
 {
 	check_apt alsa-base alsa-utils pulseaudio linux-sound-base libasound2
 
