@@ -6,7 +6,7 @@
 THIS_DIR=`dirname $(readlink -f $0)`
 
 cd $THIS_DIR
-pull_result=$(git pull)
+IFS=; pull_result=$(git pull)
 
 if echo $pull_result | grep -q 'insufficient permission for adding an object'; then
 	sudo chown -R $(id -u):$(id -g) "$(git rev-parse --show-toplevel)/.git"
@@ -49,7 +49,7 @@ input_msg=${input_msg:="update"}
 
 cd $THIS_DIR
 git add .
-commit_result=$(git commit -m "${input_msg}")
+IFS=; commit_result=$(git commit -m "${input_msg}")
 
 if echo $commit_result | grep -q 'nothing to commit'; then
 	echo 'Nothing to commit.'
