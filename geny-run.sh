@@ -16,17 +16,19 @@ main ()
 
 	echo "target is: $target"
 
-	if [ $opt = 'close' ]; then 
-		player --vm-name $target_device -x
+	if [ "$opt" = 'close' ]; then 
+		log "closing $target"
+		player --vm-name "$target" -x
 		exit 0
 	fi
 
-	if VBoxManage showvminfo $target_device | grep "State.*running"; then
+	if VBoxManage showvminfo $target| grep "State.*running"; then
 		log 'Target is running, no need to start'
 		exit 0
 	fi
 
-	player --vm-name $target_device
+	log "starting $target"
+	player --vm-name "$target"
 	exit 0
 }
 
