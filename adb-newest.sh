@@ -14,16 +14,7 @@ main ()
 	fi
 	unzip platform-tools-latest-linux.zip
 
-	bashrc=$HOME/.bash_aliases
-	if [ ! -f $bashrc ]; then
-		touch $bashrc 
-	fi
-	if ! grep -q "$adb_root/platform-tools/adb" $bashrc; then
-		echo "alias adb=\"$adb_root/platform-tools/adb\"" >> $bashrc 
-		echo "alias fastboot=\"$adb_root/platform-tools/fastboot\"" >> $bashrc
-	fi
-
-	source $bashrc
+	bashrc 'platform-tools/adb' "PATH=\$PATH:$adb_root/platform-tools"
 	adb version
 }
 

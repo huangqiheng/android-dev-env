@@ -10,7 +10,7 @@ main ()
 		https://github.com/color0e/Oreo_Arm_trans/raw/master/ARM_Translation_Oreo.zip
 	fi
 
-	adb push ARM_Translation_Oreo.zip /sdcard/Download/
+	adb push --sync ARM_Translation_Oreo.zip /sdcard/Download/
 	adb shell flash-archive.sh /sdcard/Download/ARM_Translation_Oreo.zip
 }
 
