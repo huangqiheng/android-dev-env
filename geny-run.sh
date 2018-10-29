@@ -28,7 +28,23 @@ main ()
 	fi
 
 	log "starting $target"
-	player --vm-name "$target"
+	player --vm-name "$target" &
+
+	while true ; do
+		isDone=$(adb shell getprop dev.bootcomplete)
+		if [ "$isDone" = '1' ]; then
+			log 'boot completed.'
+			break
+		fi
+		sleep 2
+	done
+
+	exit 0
+}
+
+kill_player_exit()
+{
+	kill -9 $(pidof player)
 	exit 0
 }
 
@@ -62,6 +78,7 @@ maintain()
 {
 	#check_update
 	[ "$1" = 'help' ] && show_help_exit $2
+	[ "$1" = 'kill' ] && kill_player_exit $2
 }
 
 show_help_exit()
