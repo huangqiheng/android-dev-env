@@ -5,8 +5,6 @@
 
 main () 
 {
-	#imgSize=$(ffmpeg -f video4linux2 -hide_banner -list_formats all -i /dev/video0 2>&1 | grep mjpeg | awk -F: '{print $4}' | awk '{print $NF}')
-
 	image_path="$1"
 	if [ ! -d $image_path ]; then
 		image_path=$(pwd)
