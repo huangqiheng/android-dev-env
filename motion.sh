@@ -50,7 +50,8 @@ maintain()
 pack_exit()
 {
 	inputFiles="$IMGS_DIR/%*.jpg"
-	outputFile="$IMGS_DIR/pack.mp4"
+	timestamp=$(date -d "today" +"%Y%m%d%H%M")
+	outputFile="$IMGS_DIR/pack-$timestamp.mp4"
 
 	unlink $outputFile
 
