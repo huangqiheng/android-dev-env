@@ -84,30 +84,20 @@ install_astrill()
 
 	cd $CACHE_DIR
 
-	if [ ! -f "astrill-setup-linux64.sh" ]; then
-		wget https://astrill4u.com/downloads/astrill-setup-linux64.sh
+
+	# check_apt 
+	check_apt libgtk2.0-0
+	apt --fix-broken install
+	check_apt gtk2-engines-pixbuf gtk2-engines-murrine
+	
+	if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
+		dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
+		ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
+		return 0
+	else
+		log 'FIXME: download astrill-setup-linux64.deb please'
+		return 1
 	fi
-
-	if [ ! -f "astrill-setup-linux64.sh" ]; then
-		# check_apt 
-		check_apt libgtk2.0-0
-		apt --fix-broken install
-		check_apt gtk2-engines-pixbuf
-		if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
-			dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
-			ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
-		else
-			log 'FIXME: download astrill failure'
-		fi
-		return
-	fi
-
-	set_comt $CACHE_DIR/astrill-setup-linux64.sh
-	set_comt off '#' 'read x'
-
-	bash astrill-setup-linux64.sh
-
-	ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
 }
 
 setup_gotty()
