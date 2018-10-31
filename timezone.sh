@@ -5,6 +5,9 @@
 
 main () 
 {
+	check_apt ntp
+	timedatectl set-ntp on
+
 	check_apt tzdata
 	dpkg-reconfigure tzdata
 }
