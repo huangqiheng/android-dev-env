@@ -88,7 +88,7 @@ install_astrill()
 	# check_apt 
 	check_apt libgtk2.0-0
 	apt --fix-broken install
-	check_apt gtk2-engines-pixbuf gtk2-engines-murrine
+	check_apt gtk2-engines-pixbuf gtk2-engines-murrine gnome-themes-extra
 	
 	if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
 		dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
