@@ -25,7 +25,9 @@ main ()
 	install_astrill
 	check_apt socat 
 	ratpoisonrc "exec socat tcp-listen:3128,reuseaddr,fork tcp:localhost:3213 &"
-	ratpoisonrc "exec /usr/local/Astrill/astrill"
+
+	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24+32 -fbdir /var/tmp &"
+	ratpoisonrc "exec DISPLAY=:1 /usr/local/Astrill/astrill"
 
 	check_apt tor
 	set_conf /etc/tor/torrc
