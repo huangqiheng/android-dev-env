@@ -7,6 +7,8 @@ IMGS_DIR=$HOME/motion-pics
 
 main () 
 {
+	check_sudo
+
 	if cmd_exists "motion"; then
 		motion
 		log 'motion is running'
