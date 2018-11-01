@@ -58,6 +58,6 @@ fi
 
 echo $commit_result
 
-git config --global credential.helper 'cache --timeout 7200'
+git config --global credential.helper 'cache --timeout 21600'
 git push
 
