@@ -11,6 +11,9 @@ main ()
 		cat $HOME/.fwknoprc
 		exit
 	fi
+
+	check_apt rng-tools
+	rngd -r /dev/urandom
 }
 
 maintain()

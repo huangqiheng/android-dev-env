@@ -8,7 +8,7 @@ main ()
 	check_apt polipo
 
 	set_conf '/etc/polipo/config'
-	set_conf socksParentProxy '127.0.0.1:1337'
+	set_conf socksParentProxy '127.0.0.1:3128'
 	set_conf socksProxyType socks5
 	set_conf proxyAddress '::0'
 	set_conf proxyPort 8123
