@@ -122,9 +122,17 @@ set_conf()
 	fi
 
 	if [ $num_param -eq 2 ]; then
-		sed -ri "s|^[;# ]*${1}[ ]*=.*|${1}=${2}|" $__ini_file
+		if grep "${1}\s*=\s*" $__ini_file; then
+			sed -ri "s|^[;# ]*${1}[ ]*=.*|${1}=${2}|" $__ini_file
+		else
+			echo "${1}=${2}" >> $__ini_file
+		fi
 	else
-		sed -ri "s|^[;# ]*${1}[ ]*${3}.*|${1}${3}${2}|" $__ini_file
+		if grep "${1}\s*${3}\s*" $__ini_file; then
+			sed -ri "s|^[;# ]*${1}[ ]*${3}.*|${1}${3}${2}|" $__ini_file
+		else
+			echo "${1}${3}${2}" >> $__ini_file
+		fi
 	fi
 }
 
@@ -139,7 +147,7 @@ insert_line()
 	fi
 
 	if [ -z $__insert_file ]; then
-		echo 'set_conf(): Please set ini file first.'
+		echo 'insert_line(): Please set ini file first.'
 		exit
 	fi
 
