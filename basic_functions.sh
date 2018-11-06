@@ -36,6 +36,10 @@ get_localnet_ips()
 }
 
 
+ip_to_interface()
+{
+	ifconfig | grep -B1 "$1" | grep -o "^\w*"
+}
 
 extra_wifi_interface()
 {
@@ -134,6 +138,33 @@ set_conf()
 			echo "${1}${3}${2}" >> $__ini_file
 		fi
 	fi
+}
+
+__get_ini_file=''
+
+get_conf()
+{
+	local num_param=$#
+
+	if [ -z $__get_ini_file ]; then
+		local input_path="$1"
+
+		if [ ! -f $input_path ]; then
+			echo 'get_conf(): Please set ini file first.'
+			exit
+		fi
+
+		__get_ini_file=$input_path
+		return
+	fi
+
+	local inputKey=$1
+	local sep='='
+	if [ $num_param -eq 2 ]; then
+		sep="$2"
+	fi
+
+	sed -n "s/^[;# ]*${inputKey}\s*${sep}\s*\(\S*\)\s*$/\1/p" $__get_ini_file
 }
 
 __insert_file=''
