@@ -164,7 +164,7 @@ get_conf()
 		sep="$2"
 	fi
 
-	sed -n "s/^[;# ]*${inputKey}\s*${sep}\s*\(\S*\)\s*$/\1/p" $__get_ini_file
+	sed -n "s/^${inputKey}\s*${sep}\s*\([^; ]*\).*$/\1/p" $__get_ini_file
 }
 
 __insert_file=''
