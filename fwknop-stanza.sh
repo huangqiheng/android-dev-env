@@ -65,6 +65,8 @@ EOL
 
 systemctl enable fwknopd
 systemctl start fwknopd
+
+rm -- "\$0"
 EEOL
 
 	check_apt sshpass
@@ -105,10 +107,18 @@ seal_the_ports_exit()
 	exit
 }
 
+fwknopd_list_exit()
+{
+	check_sudo
+	fwknopd --fw-list
+	exit
+}
+
 maintain()
 {
 	[ "$1" = 'seal' ] && seal_the_ports_exit 'on'
-	[ "$1" = 'open' ] && seal_the_ports_exit 'off'
+	[ "$1" = 'unseal' ] && seal_the_ports_exit 'off'
+	[ "$1" = 'list' ] && fwknopd_list_exit
 	[ "$1" = 'clean' ] && clean_fwknoprc_exit $2
 	[ "$1" = 'help' ] && show_help_exit $2
 }

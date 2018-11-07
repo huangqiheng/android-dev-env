@@ -210,9 +210,10 @@ check_bash()
 
 check_sudo()
 {
+	init_colors
 	if [ $(whoami) != 'root' ]; then
 	    echo "This script should be executed as root or with sudo:"
-	    echo "	${Red}sudo $ORIARGS ${Color_Off}"
+	    echo "	${Red}sudo sh $ORIARGS ${Color_Off}"
 	    exit 1
 	fi
 }
@@ -361,6 +362,8 @@ cmd_exists_exit()
 
 init_colors()
 {
+	[ ! -z $Color_Off ] && return
+
 	# Reset
 	Color_Off='\033[0m'       # Text Reset
 
