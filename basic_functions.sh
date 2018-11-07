@@ -1,3 +1,4 @@
+ORIARGS="$0 $*"
 THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
@@ -211,7 +212,7 @@ check_sudo()
 {
 	if [ $(whoami) != 'root' ]; then
 	    echo "This script should be executed as root or with sudo:"
-	    echo "	sudo $0"
+	    echo "	sudo sh $ORIARGS"
 	    exit 1
 	fi
 }
