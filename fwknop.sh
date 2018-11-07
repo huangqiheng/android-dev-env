@@ -89,8 +89,16 @@ clean_fwknoprc_exit()
 	exit
 }
 
+seal_the_ports()
+{
+	exit
+	iptables -A INPUT -i eth0 -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --dport 22 -j DROP
+}
+
 maintain()
 {
+	[ "$1" = 'seal' ] && clean_fwknoprc_exit $2
 	[ "$1" = 'clean' ] && clean_fwknoprc_exit $2
 	[ "$1" = 'help' ] && show_help_exit $2
 }
