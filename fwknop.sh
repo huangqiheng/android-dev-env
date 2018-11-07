@@ -46,7 +46,7 @@ conf="/etc/fwknop/fwknopd.conf"
 if grep -qe "^PCAP_INTF" \$conf; then
 	sed -ri "s|^PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
 else
-	sed -ri "s|^.*PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
+	sed -ri "s|^[#; ]*PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
 fi
 
 cat > /etc/systemd/system/fwknopd.service <<EOL
@@ -74,21 +74,10 @@ EEOL
 
 	sshpass -e scp /tmp/fwknop-remote-shell.sh $sshHost:~
 	sshpass -e ssh -t $sshHost "echo $inputPass | sudo -S sh ~/fwknop-remote-shell.sh"
+}
 
-
-	exit
-
-
-
-	if [ "$1" = 'client' ]; then
-		check_apt fwknop-client fwknop-gui
-		fwknop -A tcp/22 -D localhost --key-gen --use-hmac --save-rc-stanza
-		grep KEY $HOME/.fwknoprc
-		exit
-	fi
-
-
-	exit
+rngd()
+{
 	check_apt rng-tools
 	rngd -r /dev/urandom
 }
