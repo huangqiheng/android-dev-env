@@ -89,16 +89,26 @@ clean_fwknoprc_exit()
 	exit
 }
 
-seal_the_ports()
+seal_the_ports_exit()
 {
+	check_sudo
+	get_conf /etc/fwknop/fwknopd.conf
+	iface=$(get_conf PCAP_INTF ' ')
+
+	if [ "$1" = 'on' ]; then
+		iptables -A INPUT -i $iface -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		iptables -A INPUT -i $iface -p tcp --dport 22 -j DROP
+	else
+		iptables -D INPUT -i $iface -p tcp --dport 22 -j DROP
+		iptables -D INPUT -i $iface -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+	fi
 	exit
-	iptables -A INPUT -i eth0 -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-	iptables -A INPUT -i eth0 -p tcp --dport 22 -j DROP
 }
 
 maintain()
 {
-	[ "$1" = 'seal' ] && clean_fwknoprc_exit $2
+	[ "$1" = 'seal' ] && seal_the_ports_exit 'on'
+	[ "$1" = 'open' ] && seal_the_ports_exit 'off'
 	[ "$1" = 'clean' ] && clean_fwknoprc_exit $2
 	[ "$1" = 'help' ] && show_help_exit $2
 }

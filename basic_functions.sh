@@ -1,3 +1,4 @@
+ORIARGS="$0 $*"
 THIS_DIR=`dirname $(readlink -f $0)`
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
@@ -164,7 +165,7 @@ get_conf()
 		sep="$2"
 	fi
 
-	sed -n "s/^[;# ]*${inputKey}\s*${sep}\s*\(\S*\)\s*$/\1/p" $__get_ini_file
+	sed -n "s/^${inputKey}\s*${sep}\s*\([^; ]*\).*$/\1/p" $__get_ini_file
 }
 
 __insert_file=''
@@ -211,7 +212,7 @@ check_sudo()
 {
 	if [ $(whoami) != 'root' ]; then
 	    echo "This script should be executed as root or with sudo:"
-	    echo "	${Red}sudo $0${Color_Off}"
+	    echo "	${Red}sudo $ORIARGS ${Color_Off}"
 	    exit 1
 	fi
 }
