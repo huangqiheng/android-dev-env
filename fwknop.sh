@@ -65,6 +65,8 @@ EOL
 
 systemctl enable fwknopd
 systemctl start fwknopd
+
+rm -- "\$0"
 EEOL
 
 	check_apt sshpass

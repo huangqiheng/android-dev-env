@@ -42,7 +42,7 @@ install_virtualbox()
 
 install_utils()
 {
-	check_apt xclip
+	check_apt xclip shutter
 }
 
 install_wallpaper()

@@ -19,6 +19,17 @@ fi
 #		basic functions
 #-------------------------------------------------------
 
+sshhost_parse()
+{
+	SSH_sshHost="$1"
+	IFS='@:'; set -- "$SSH_sshHost"
+
+	SSH_username="$1"
+	SSH_hostname="$2"
+	SSH_portnumb="$3"
+	SSH_hostip=$(dig +short $SSH_hostname)
+}
+
 get_wifi_ifaces()
 {
 	lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g'
