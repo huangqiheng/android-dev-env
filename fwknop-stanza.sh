@@ -7,7 +7,7 @@ main ()
 {
 	sshHost="$1"
 	targetHost=$(echo $sshHost | awk -F'@' '{print $2}')
-	targetIp=$(dig +short $targetHost)
+	targetIp=$(ping -q -c 1 -t 1 $targetHost | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
 
 	log "target ip addr: $targetIp"
 

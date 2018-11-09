@@ -1,5 +1,6 @@
 ORIARGS="$0 $*"
-THIS_DIR=`dirname $(readlink -f $0)`
+THIS_SCRIPT=$(readlink -f $0)
+THIS_DIR=$(dirname $THIS_SCRIPT)
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
 RUN_DIR=$HOME/runCodes
@@ -22,12 +23,12 @@ fi
 sshhost_parse()
 {
 	SSH_sshHost="$1"
-	IFS='@:'; set -- "$SSH_sshHost"
+	IFS='@:'; set -- $(echo "$SSH_sshHost")
 
 	SSH_username="$1"
 	SSH_hostname="$2"
 	SSH_portnumb="$3"
-	SSH_hostip=$(dig +short $SSH_hostname)
+	SSH_hostip=$(ping -q -c 1 -t 1 $SSH_hostname | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
 }
 
 get_wifi_ifaces()
@@ -221,7 +222,6 @@ check_bash()
 
 check_sudo()
 {
-	init_colors
 	if [ $(whoami) != 'root' ]; then
 	    echo "This script should be executed as root or with sudo:"
 	    echo "	${Red}sudo sh $ORIARGS ${Color_Off}"
@@ -329,6 +329,11 @@ log()
 {
 	echo "$@"
 	#logger -p user.notice -t install-scripts "$@"
+}
+
+log_red()
+{
+    echo "${Red}$*${Color_Off}"
 }
 
 cmd_exists() 
@@ -447,4 +452,5 @@ init_colors()
 	On_IPurple='\033[0;105m'  # Purple
 	On_ICyan='\033[0;106m'    # Cyan
 	On_IWhite='\033[0;107m'   # White
-}
+}; init_colors
+
