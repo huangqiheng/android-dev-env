@@ -149,7 +149,9 @@ setup_nodejs()
 		return
 	fi
 
-	curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+	version=${1:-'10'}
+
+	curl -sL https://deb.nodesource.com/setup_${version}.x | sudo -E bash -
 	check_apt nodejs
 }
 
