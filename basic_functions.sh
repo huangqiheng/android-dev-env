@@ -318,7 +318,7 @@ check_apt()
 {
 	for package in "$@"; do
 		if apt_exists $package; then
-			log "${package} has been installed"
+			echo "${Green}${package} has been installed.${Color_Off}"
 		else
 			apt install -y "$package"
 		fi
