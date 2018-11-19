@@ -27,7 +27,7 @@ main ()
 	setup_socat 3213 3128
 	setup_polipo 7070 8213
 
-	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24+32 -fbdir /var/tmp &"
+	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24 -fbdir /var/tmp &"
 	ratpoisonrc "exec DISPLAY=:1 /usr/local/Astrill/astrill"
 	x11_forward_server
 
