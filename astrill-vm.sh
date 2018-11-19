@@ -14,12 +14,11 @@ main ()
 	check_update_once f
 
 	check_apt xinit ratpoison 
-	check_apt proxychains 
-
-	cloudinit_remove
 	auto_login
 	auto_startx
+	cloudinit_remove
 
+	check_apt proxychains 
 	install_shadowsocks
 	install_astrill
 
