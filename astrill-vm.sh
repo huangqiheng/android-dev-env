@@ -5,11 +5,6 @@
 
 main () 
 {
-	if [ ! -f $HOME/sslocal.json ]; then
-		log 'Please prepare the sslocal.json file'
-		exit 1
-	fi
-
 	full_sources
 	check_update_once f
 
@@ -17,6 +12,11 @@ main ()
 	auto_login
 	auto_startx
 	cloudinit_remove
+
+	if [ ! -f $HOME/sslocal.json ]; then
+		log 'Please prepare the sslocal.json file'
+		exit 1
+	fi
 
 	check_apt proxychains 
 	install_shadowsocks
