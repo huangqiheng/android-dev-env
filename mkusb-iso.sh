@@ -6,7 +6,7 @@ main ()
 {
 	check_update ppa:mkusb/ppa
 	check_apt mkusb-nox gdisk
-	check_apt grub-pc-bin
+	check_apt grub-pc-bin grub-efi-amd64-bin
 
 	echo "
        Make a USB install device from ISO or image file
