@@ -350,11 +350,12 @@ auto_login()
 {
 	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
 	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER} --noclear %I \$TERM"
+	set_conf Type "simple"
 }
 
 auto_startx()
 {
-	bashrc startx 'if [ $(tty) == "/dev/tty1" ]; then startx fi'
+	bashrc startx 'if [ $(tty) = "/dev/tty1" ]; then startx; fi'
 }
 
 full_sources()

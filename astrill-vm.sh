@@ -5,10 +5,7 @@
 
 main () 
 {
-	#full_sources
-	#check_update_once f
 	check_update universe
-
 	check_apt xinit ratpoison 
 	auto_login
 	auto_startx
