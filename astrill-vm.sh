@@ -5,29 +5,36 @@
 
 main () 
 {
-	check_update universe
-	check_apt xinit ratpoison 
+	cloudinit_remove
 	auto_login
 	auto_startx
-	cloudinit_remove
 
 	if [ ! -f $HOME/sslocal.json ]; then
 		log 'Please prepare the sslocal.json file'
 		exit 1
 	fi
 
-	check_apt proxychains 
-	install_shadowsocks
+	check_update universe
+	check_apt xinit ratpoison 
+
+	# install astrill
 	install_astrill
-
-	setup_tor '127.0.0.1:7070'
-	setup_socat 3213 3128
-	setup_polipo 7070 8213
-
+	check_apt Xvfb
 	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24 -fbdir /var/tmp &"
 	ratpoisonrc "exec DISPLAY=:1 /usr/local/Astrill/astrill"
-	x11_forward_server
+	setup_socat 3213 3128
 
+	# install sslocal
+	check_apt shadowsocks 
+	ratpoisonrc "exec sslocal $HOME/sslocal.json &"
+	setup_polipo 7070 8213
+
+	# install tor
+	setup_tor '127.0.0.1:7070'
+
+	# others, for test
+	check_apt proxychains 
+	x11_forward_server
 	help_text
 }
 
@@ -39,12 +46,6 @@ help_text()
   tor:     0.0.0.0:9050
   http:    0.0.0.0:8213
 EOL
-}
-
-install_shadowsocks()
-{
-	check_apt shadowsocks 
-	ratpoisonrc "exec sslocal $HOME/sslocal.json &"
 }
 
 setup_socat()
