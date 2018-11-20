@@ -10,8 +10,11 @@ cd /
 if [ "$1" = 'restore' ]; then
 	echo 'RESTORE the os, Ctrl-C for Exit, Enter for continue.'
 	read input 
+	echo 'Waiting for "DONE" ......'
 
 	tar -xpzf backup.tar.gz -C / --numeric-owner
+
+	echo 'DONE'
 
 	if [ "$?" -ne 0 ]; then
 		echo 'restore error'
@@ -23,7 +26,6 @@ if [ "$1" = 'restore' ]; then
 			mkdir $item
 		fi
 	done
-
 else 
 	echo 'BACKUP the os, Ctrl-C for Exit, Enter for continue.'
 	read input 
