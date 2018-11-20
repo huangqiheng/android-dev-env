@@ -8,6 +8,8 @@ fi
 cd /
 
 if [ "$1" = 'restore' ]; then
+	read -p 'RESTORE the os, Ctrl-C for Exit, Enter for continue.'
+
 	tar -xvpzf backup.tar.gz -C / --numeric-owner
 
 	if [ "$?" -ne 0 ]; then
