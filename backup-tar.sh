@@ -27,6 +27,7 @@ if [ "$1" = 'restore' ]; then
 else 
 	echo 'BACKUP the os, Ctrl-C for Exit, Enter for continue.'
 	read input 
+	echo 'Waiting for "DONE" ......'
 
 	tar -cpzf __backup.tar.gz \ 
 		--exclude=/swap.img \
@@ -36,6 +37,7 @@ else
 	ret=$?
 
 	echo "tar return: ${ret}"
+	echo 'DONE'
 
 	if [ "$ret" -ne 2 ]; then
 		mv __backup.tar.gz backup.tar.gz
