@@ -354,11 +354,7 @@ auto_login()
 
 auto_startx()
 {
-	bashrc startx <<EOL
-if [ \$(tty) == "/dev/tty1" ]; then
-        startx
-fi
-EOL
+	bashrc startx 'if [ $(tty) == "/dev/tty1" ]; then startx fi'
 }
 
 full_sources()
