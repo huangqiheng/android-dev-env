@@ -229,6 +229,16 @@ check_sudo()
 	fi
 }
 
+exec_upgrade()
+{
+	if [ $# -gt 0 ]; then
+		for package in "$@"; do
+			apt upgrade -y $package
+		done
+	else
+		apt upgrade -y
+	fi 
+}
 
 check_update()
 {
@@ -236,7 +246,6 @@ check_update()
 
 	if [ "$1" = 'f' ]; then
 		apt update -y
-		apt upgrade -y
 		return 0
 	fi
 
@@ -265,10 +274,6 @@ check_update()
 	if [ $repo_changed -eq 1 ] || [ $diff_time -gt 604800 ]; then
 		apt update -y
 	fi
-
-	if [ $diff_time -gt 6048000 ]; then
-		apt upgrade -y
-	fi 
 }
 
 __is_update_checked=0
