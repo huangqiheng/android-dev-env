@@ -8,9 +8,10 @@ fi
 cd /
 
 if [ "$1" = 'restore' ]; then
-	read -p 'RESTORE the os, Ctrl-C for Exit, Enter for continue.'
+	echo 'RESTORE the os, Ctrl-C for Exit, Enter for continue.'
+	read input 
 
-	tar -xvpzf backup.tar.gz -C / --numeric-owner
+	tar -xpzf backup.tar.gz -C / --numeric-owner
 
 	if [ "$?" -ne 0 ]; then
 		echo 'restore error'
@@ -24,7 +25,14 @@ if [ "$1" = 'restore' ]; then
 	done
 
 else 
-	tar -cvpzf __backup.tar.gz --exclude=/backup.tar.gz --one-file-system / 
+	echo 'BACKUP the os, Ctrl-C for Exit, Enter for continue.'
+	read input 
+
+	tar -cpzf __backup.tar.gz \ 
+		--exclude=/swap.img \
+		--exclude=/backup.tar.gz \
+		--exclude=/__backup.tar.gz \ 
+		--one-file-system / 
 	ret=$?
 
 	echo "tar return: ${ret}"
