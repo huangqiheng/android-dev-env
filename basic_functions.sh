@@ -348,9 +348,13 @@ cmd_exists()
 
 auto_login()
 {
-	set_conf /etc/systemd/system/getty.target.wants/getty@tty1.service
-	set_conf ExecStart "-/sbin/agetty --autologin ${RUN_USER} --noclear %I \$TERM"
-	set_conf Type "simple"
+	local serviceDir=/etc/systemd/system/getty@tty1.service.d/
+	mkdir -p "${serviceDir}"
+	cat > ${serviceDir}/override.conf <<EOL
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin ${RUN_USER} --noclear %I \$TERM
+EOL
 }
 
 auto_startx()
