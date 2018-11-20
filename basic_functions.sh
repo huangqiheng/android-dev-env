@@ -85,6 +85,11 @@ bashrc()
 	echo "$2" >> $echo_file
 }
 
+ratpoisonrc_done()
+{
+	chownUser $HOME/.ratpoisonrc
+}
+
 ratpoisonrc()
 {
 	echo_file=$HOME/.ratpoisonrc

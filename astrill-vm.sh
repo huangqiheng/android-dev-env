@@ -19,20 +19,21 @@ main ()
 
 	# install astrill
 	install_astrill
-	check_apt Xvfb
+	check_apt xvfb
 	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24 -fbdir /var/tmp &"
 	ratpoisonrc "exec DISPLAY=:1 /usr/local/Astrill/astrill"
 	setup_socat 3213 3128
 
 	# install sslocal
 	check_apt shadowsocks 
-	ratpoisonrc "exec sslocal $HOME/sslocal.json &"
+	ratpoisonrc "exec sslocal -c $HOME/sslocal.json &"
 	setup_polipo 7070 8213
 
 	# install tor
 	setup_tor '127.0.0.1:7070'
 
 	# others, for test
+	ratpoisonrc_done
 	check_apt proxychains 
 	x11_forward_server
 	help_text
