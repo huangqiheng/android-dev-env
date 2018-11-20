@@ -355,7 +355,7 @@ auto_login()
 
 auto_startx()
 {
-	bashrc startx 'if [ $(tty) = "/dev/tty1" ]; then startx; fi'
+	bashrc startx 'if [ "$(tty)" = "/dev/tty1" ]; then startx; fi'
 }
 
 full_sources()
