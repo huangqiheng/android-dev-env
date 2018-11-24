@@ -44,9 +44,17 @@ main ()
 
 maintain()
 {
+	[ "$1" = 'clean' ] && clean_exit
 	[ "$1" = 'pack' ] && pack_exit $2
 	[ "$1" = 'kill' ] && pkill_exit
 	[ "$1" = 'help' ] && show_help_exit
+}
+
+clean_exit()
+{
+	cd $IMGS_DIR
+	rm -f *.jpg
+	exit
 }
 
 pack_exit()
