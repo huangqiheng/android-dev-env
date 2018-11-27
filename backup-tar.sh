@@ -31,12 +31,13 @@ else
 	read input 
 	echo 'Waiting for "DONE" ......'
 
-	tar -cpzf __backup.tar.gz \ 
-		--exclude=/swap.img \
-		--exclude=/backup.tar.gz \
-		--exclude=/__backup.tar.gz \ 
-		--exclude=/home \ 
-		--one-file-system / 
+	excludeStr="--exclude=/home"
+
+	if [ -f /swap.img ]; then
+		excludeStr="$excludeStr ----exclude=/swap.img"
+	fi
+
+	tar -cpzf __backup.tar.gz $excludeStr --one-file-system / 
 	ret=$?
 
 	echo "tar return: ${ret}"
