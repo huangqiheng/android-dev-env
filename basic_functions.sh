@@ -69,6 +69,11 @@ chownUser()
 	chown -R $RUN_USER:$RUN_USER $1
 }
 
+get_public_ip()
+{
+	curl -4 icanhazip.com
+}
+
 get_latest_release()  # $1="creationix/nvm"
 {
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |

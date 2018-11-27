@@ -1,10 +1,5 @@
 #!/bin/bash
 
-get_public_ip()
-{
-	curl -4 icanhazip.com
-}
-
 x11_forward_server()
 {
 	log 'setting ssh server'
