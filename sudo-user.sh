@@ -12,9 +12,9 @@ main ()
 		show_help_exit
 	fi
 
-	useradd -m $userName -p $passWord --groups sudo
+	useradd -m -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
+	usermod -aG sudo $userName
 
-	mkdir -p /home/$userName
 	cd /home/$userName
 	midir .ssh
 	chmod 700 .ssh
