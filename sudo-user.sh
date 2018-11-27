@@ -12,8 +12,18 @@ main ()
 		show_help_exit
 	fi
 
-	useradd -p $(openssl passwd -1 $passWord) $userName
-	usermod -aG sudo $userName
+	useradd -m $userName -p $passWord --groups sudo
+
+	mkdir -p /home/$userName
+	cd /home/$userName
+	midir .ssh
+	chmod 700 .ssh
+
+	cd .ssh
+	touch authorized_keys
+	chmod 600 authorized_keys
+
+	chownUser /home/$userName
 }
 
 maintain()

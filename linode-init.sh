@@ -9,7 +9,7 @@ main ()
 	passWord=$2
 	useradd -m $userName -p $passWord --groups sudo
 
-	cd /root/$userName
+	cd /home/$userName
 	midir .ssh
 	chmod 700 .ssh
 
