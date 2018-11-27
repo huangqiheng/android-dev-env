@@ -5,7 +5,7 @@ if [ $(whoami) != 'root' ]; then
 	exit 1
 fi
 
-cd /
+cd /home
 
 if [ "$1" = 'restore' ]; then
 	echo 'RESTORE the os, Ctrl-C for Exit, Enter for continue.'
@@ -35,6 +35,7 @@ else
 		--exclude=/swap.img \
 		--exclude=/backup.tar.gz \
 		--exclude=/__backup.tar.gz \ 
+		--exclude=/home \ 
 		--one-file-system / 
 	ret=$?
 
