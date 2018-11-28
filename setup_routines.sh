@@ -2,7 +2,7 @@
 
 x11_forward_server()
 {
-	log 'setting ssh server'
+	log_green 'setting ssh server'
 	check_update_once
 	check_apt xauth
 
@@ -16,7 +16,7 @@ x11_forward_server()
 
 x11_forward_client()
 {
-	log 'setting ssh client'
+	log_green 'setting ssh client'
 	cat > $HOME/.ssh/config <<EOL
 Host *
   ForwardAgent yes
@@ -27,7 +27,7 @@ EOL
 install_wps()
 {
 	if cmd_exists wps; then
-		echo "wps has been installed."
+		log_green "wps has been installed."
 		return
 	fi
 
@@ -46,7 +46,7 @@ install_wps()
 setup_objconv()
 {
 	if cmd_exists objconv; then
-		echo "objconv has been installed"
+		log_green "objconv has been installed"
 		return
 	fi
 
@@ -65,11 +65,11 @@ setup_objconv()
 cloudinit_remove()
 {
 	if [ ! -d /etc/cloud/ ]; then
-		log 'cloud-init isnt exists'
+		log_yellow 'cloud-init isnt exists'
 		return
 	fi
 
-	echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+	log_green 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
 	apt-get purge -y cloud-init
 	rm -rf /etc/cloud/
 	rm -rf /var/lib/cloud/
@@ -78,7 +78,7 @@ cloudinit_remove()
 install_astrill()
 {
 	if cmd_exists /usr/local/Astrill/astrill; then
-		echo "astrill has been installed."
+		log_green "astrill has been installed."
 		return
 	fi
 
@@ -95,7 +95,7 @@ install_astrill()
 		ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
 		return 0
 	else
-		log 'FIXME: download astrill-setup-linux64.deb please'
+		log_yellow 'FIXME: download astrill-setup-linux64.deb please'
 		return 1
 	fi
 }
@@ -103,7 +103,7 @@ install_astrill()
 setup_gotty()
 {
 	if cmd_exists gotty; then
-		log 'gotty is installed'
+		log_green 'gotty is installed'
 		return 0
 	fi
 
@@ -117,7 +117,7 @@ setup_gotty()
 setup_golang()
 {
 	if cmd_exists go; then
-		log 'golang is installed'
+		log_green 'golang is installed'
 		return 0
 	fi
 
@@ -145,7 +145,7 @@ setup_typescript()
 setup_nodejs()
 {
 	if cmd_exists /usr/bin/node; then
-		log "node has been installed"
+		log_green "node has been installed"
 		return
 	fi
 
@@ -158,14 +158,14 @@ setup_nodejs()
 setup_ffmpeg3()
 {
 	if need_ffmpeg 3.3.0; then
-		log 'need to update ffmpeg'
+		log_yellow 'need to update ffmpeg'
 		apt purge -y ffmpeg 
 		check_update ppa:jonathonf/ffmpeg-3
 	fi
 
 	check_apt ffmpeg libav-tools x264 x265
 
-	log "Now ffmpeg version is: $(ffmpeg_version)"
+	log_green "Now ffmpeg version is: $(ffmpeg_version)"
 }
 
 need_ffmpeg()
