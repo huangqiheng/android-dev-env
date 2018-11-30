@@ -14,13 +14,19 @@ main ()
 		wget https://github.com/MatcherAny/whitelist.pac/raw/master/whitelist.pac
 	fi
 
-	unixSocket='/var/run/pac-proxy.socket'
-
-	#/* Pattern */ 'http://unix:SOCKET:PATH'
-	#/* Example */ request.get('http://unix:/absolute/path/to/unix.socket:/request/path')
+	unixSocket=/var/run/pac-proxy.socket
+	unlink $unixSocket 2>&1
 
 	export NODE_PATH=/usr/local/lib/node_modules
-       	node <<EOL
+	echo "$(genNodeCode $unixSocket)" | node &
+
+	export PROXYPACPROXY_URL="http://unix:${unixSocket}:/wlist.pac?proxy=127.0.0.1&port=3213"
+	proxy-pac-proxy start --address 0.0.0.0 --port 8080 --foreground true
+}
+
+genNodeCode()
+{
+	cat <<EOL
 const fs = require('fs');
 const url = require('url');
 require('http-server').createServer({
@@ -28,8 +34,8 @@ require('http-server').createServer({
   before: [ (req, res)=>{
     if (url.parse(req.url).pathname === '/wlist.pac') {
 	console.log('req.url = '+req.url);
-	var proxy = req.headers.host+'3128';
-	req.query.proxy && (proxy = req.query.proxy);
+	var proxy = req.headers.host+':3128';
+	req.query.proxy && (proxy = req.query.proxy+':'+req.query.port);
 	fs.readFile('${DATA_DIR}/whitelist.pac', 'utf8', (err,data)=> {
 	  res.setHeader('Content-Type', 'application/javascript');
 	  return res.end(data.replace(/127.0.0.1:1080/, proxy));
@@ -37,12 +43,8 @@ require('http-server').createServer({
 	return;
     }
     res.emit('next');
-}]}).listen(${unixSocket});
-EOL 
-
-	export PROXYPACPROXY_URL="http://unix:${unixSocket}:/wlist.pac?proxy=192.168.1.20:3128"
-	export PROXYPACPROXY_URL=http://localhost/wlist.pac?proxy=192.168.1.20:3128
-	proxy-pac-proxy start --address 0.0.0.0 --port 8080 --foreground true
+}]}).listen('${1}');
+EOL
 }
 
 maintain()

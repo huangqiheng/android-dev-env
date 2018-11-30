@@ -322,8 +322,11 @@ ufw_actived()
 
 check_npm_g()
 {
-	check_apt npm
-	if cmd_exists "$1"; then
+	if ! cmd_exists npm; then
+		check_apt npm
+	fi
+
+	if npm list -g "$1" >/dev/null; then
 		log_green "$1 has been installed"
 	else 
 		npm install -g "$1"
