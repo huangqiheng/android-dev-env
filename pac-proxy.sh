@@ -17,7 +17,7 @@ main ()
 	unixSocket=/var/run/pac-proxy.socket
 	unlink $unixSocket 2>&1
 
-	export NODE_PATH=/usr/local/lib/node_modules
+	export NODE_PATH=$(dpkg -L nodejs |  grep -e "node_modules$" | head -1)
 	echo "$(genNodeCode $unixSocket)" | node &
 
 	export PROXYPACPROXY_URL="http://unix:${unixSocket}:/wlist.pac?proxy=127.0.0.1&port=3213"
