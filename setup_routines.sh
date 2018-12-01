@@ -144,7 +144,7 @@ setup_typescript()
 
 setup_nodejs()
 {
-	if cmd_exists /usr/bin/node; then
+	if cmd_exists node; then
 		log_green "node has been installed"
 		return
 	fi
