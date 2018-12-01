@@ -42,7 +42,9 @@ install_wallpaper()
 
 install_browser()
 {
-	check_apt chromium  chromium-l10n
+	if ! cmd_exists chromium; then
+		check_apt chromium  chromium-l10n
+	fi
 
 	ratpoisonrc "bind C-f exec firefox"
 	ratpoisonrc "bind C-o exec chromium"
