@@ -5,13 +5,33 @@
 
 main () 
 {
-	setup_nodejs
-	check_npm_g proxy-pac-proxy
-	check_npm_g http-server
+	if [ "$1" != 'daemon' ]; then
+		setup_nodejs
+		check_npm_g proxy-pac-proxy
+		check_npm_g http-server
 
-	cd $DATA_DIR 
-	if [ ! -f whitelist.pac ]; then
-		wget https://github.com/MatcherAny/whitelist.pac/raw/master/whitelist.pac
+		cd $DATA_DIR 
+		if [ ! -f whitelist.pac ]; then
+			wget https://github.com/MatcherAny/whitelist.pac/raw/master/whitelist.pac
+		fi
+	fi
+
+	if [ "$1" = 'service' ]; then
+		cat > /lib/systemd/system/pacproxy.service <<EOL
+[Unit]
+Description=Pac Http Proxy Server
+After=network.target
+
+[Service]
+ExecStart=/bin/dash ${THIS_DIR}/pac-proxy.sh daemon
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOL
+		systemctl enable pacproxy
+		systemctl start pacproxy
+		exit 0
 	fi
 
 	unixSocket=/var/run/pac-proxy.socket

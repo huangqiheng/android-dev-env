@@ -32,7 +32,7 @@ main ()
 }
 EOL
 
-	cat > /etc/systemd/system/sslocal.service <<EOL
+	cat > /lib/systemd/system/sslocal.service <<EOL
 [Unit]
 Description=Sslocal Server
 After=network.target
@@ -46,7 +46,7 @@ WantedBy=multi-user.target
 EOL
 
 	systemctl enable sslocal
-	systemctl start enable sslocal
+	systemctl start sslocal
 
 	log 'Now Socks5 listen on 0.0.0.0:1080'
 }
