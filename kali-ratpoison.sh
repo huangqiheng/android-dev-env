@@ -52,15 +52,18 @@ install_browser()
 
 install_terminal()
 {
-	check_apt xterm lxterminal
+	check_apt xterm 
+	check_apt lxterminal
+	check_apt tmux
+
 	ratpoisonrc "bind c exec lxterminal"
 	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind M-c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind M-c exec tmux"
 }
 
 install_ratpoison()
 {
-	check_apt xinit ratpoison 
+	check_apt ratpoison 
 
 	cat > /usr/share/xsessions/ratpoison.desktop <<EOL
 [Desktop Entry]
@@ -83,8 +86,9 @@ EOL
 
 install_pinyin()
 {
-	check_apt dbus-x11
-	check_apt fonts-wqy-zenhei fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+	check_apt ibus ibus-pinyin
+	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+	check_apt fonts-wqy-zenhei 
 
 	im-config -n fcitx
 	log '--Please run fcitx-config-gtk after installed.'

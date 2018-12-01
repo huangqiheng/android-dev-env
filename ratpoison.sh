@@ -42,7 +42,9 @@ install_virtualbox()
 
 install_utils()
 {
-	check_apt xclip shutter
+	check_apt xclip
+	check_apt shutter
+	check_apt tmux
 }
 
 install_wallpaper()
@@ -66,10 +68,13 @@ install_browser()
 
 install_terminal()
 {
-	check_apt xterm lxterminal
+	check_apt xterm 
+	check_apt lxterminal
+	check_apt tmux
+
 	ratpoisonrc "bind c exec lxterminal"
 	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind M-c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind M-c exec tmux"
 }
 
 install_ratpoison()
