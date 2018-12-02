@@ -16,7 +16,7 @@ main ()
 		fi
 	fi
 
-	if [ "$1" = 'service' ]; then
+	if [ "$1" = 'install' ]; then
 		cat > /lib/systemd/system/pacproxy.service <<EOL
 [Unit]
 Description=Pac Http Proxy Server
@@ -34,13 +34,25 @@ EOL
 		exit 0
 	fi
 
-	unixSocket=/var/run/pac-proxy.socket
-	unlink $unixSocket 2>&1
+	hostIpAddr='127.0.0.1'
+	hostPort='3213'
+	if [ ! -z $1 ]; then 
+		foundIP=$(ping -q -c 1 -t 1 $1 | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+		if [ ! -z $foundIP ]; then
+			hostIpAddr=$foundIP
+			if [ ! -z $2 ]; then
+				hostPort="$2"
+			fi
+		fi
+	fi
 
-	export NODE_PATH=$(dpkg -L nodejs |  grep -e "node_modules$" | head -1)
+	unixSocket=/var/run/pac-proxy.socket
+	unlink $unixSocket 2>/dev/null
+
+	export NODE_PATH=$(npm list -g 2>/dev/null | head -1)/node_modules
 	echo "$(genNodeCode $unixSocket)" | node &
 
-	export PROXYPACPROXY_URL="http://unix:${unixSocket}:/wlist.pac?proxy=127.0.0.1&port=3213"
+	export PROXYPACPROXY_URL="http://unix:${unixSocket}:/wlist.pac?proxy=${hostIpAddr}&port=${hostPort}"
 	proxy-pac-proxy start --address 0.0.0.0 --port 8080 --foreground true
 }
 
