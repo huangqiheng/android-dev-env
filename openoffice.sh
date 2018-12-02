@@ -7,7 +7,6 @@ main ()
 {
 	add-apt-repository ppa:libreoffice/libreoffice-prereleases
 	apt-get update
-	apt-get dist-upgrade
 	apt-get install libreoffice
 }
 
