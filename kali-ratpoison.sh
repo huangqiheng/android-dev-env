@@ -91,7 +91,7 @@ install_pinyin()
 	check_apt fonts-wqy-zenhei 
 
 	im-config -n fcitx
-	log '--Please run fcitx-config-gtk after installed.'
+	log_red '--Please run fcitx-config-gtk after installed.'
 
 	ratpoisonrc "exec fcitx"
 }
