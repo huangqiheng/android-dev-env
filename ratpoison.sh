@@ -44,7 +44,7 @@ install_utils()
 {
 	check_apt xclip
 	check_apt shutter
-	check_apt tmux
+	check_apt keynav
 }
 
 install_wallpaper()

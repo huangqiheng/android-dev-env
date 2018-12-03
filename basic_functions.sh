@@ -239,6 +239,31 @@ check_sudo()
 	fi
 }
 
+this_network_service()
+{
+	check_sudo
+
+	local this_param="$1"
+	local this_script=$(readlink -f $0)
+	local this_file=$(basename $this_script)
+	local this_name=${this_file%.*}
+
+	cat > /lib/systemd/system/${this_name}.service <<EOL
+[Unit]
+Description=Service For ${this_file}
+After=network.target
+
+[Service]
+ExecStart=/bin/dash ${this_script} ${this_param}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOL
+	systemctl enable ${this_name}
+	systemctl start ${this_name}
+}
+
 exec_upgrade()
 {
 	if [ $# -gt 0 ]; then

@@ -28,6 +28,7 @@ install_virtualbox()
 install_utils()
 {
 	check_apt xclip
+	check_apt keynav
 }
 
 install_wallpaper()
