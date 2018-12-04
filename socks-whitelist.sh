@@ -5,9 +5,8 @@ THIS_DIR=$(dirname $THIS_SCRIPT)
 
 main () 
 {
-	[ "$1" != 'daemon' ] && install_routine		
-
 	export NODE_PATH=$(npm list -g 2>/dev/null | head -1)/node_modules
+	[ "$1" != 'daemon' ] && install_routine		
 	echo "$(genNodeCode)" | node
 }
 
@@ -18,14 +17,18 @@ var socks = require('socksv5');
 var Redis = require('ioredis');
 var redis = new Redis();
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer((info, accept, deny)=> {
+  console.log(info);
   accept();
 });
-srv.listen(1080, 'localhost', function() {
+
+srv.useAuth(socks.auth.UserPassword((user, pass, cb)=> {
+  redis.hget('userpass',user,(err,res)=>{cb(pass===res);});
+}));
+
+srv.listen(1080, '0.0.0.0', ()=> {
   console.log('SOCKS server listening on port 1080');
 });
-
-srv.useAuth(socks.auth.None());
 EOL
 }
 
@@ -34,11 +37,22 @@ install_routine()
 	check_update
 	setup_nodejs
 	check_apt redis-server
-	check_npm_g socksv5 ioredis
+	check_npm_g ioredis
+
+	check_npm_g socksv5
+	authFile=${NODE_PATH}/socksv5/lib/auth/UserPassword.js
+	if ! grep -q "stream.user=user;" $authFile; then
+		sed -i '/stream.write(BUF_FAILURE);/a stream.user=user;' $authFile
+	fi
+
+	serverFile=${NODE_PATH}/socksv5/lib/server.js
+	if ! grep -q "reqInfo.user=socket.user;" $serverFile; then
+		sed -i '/reqInfo.srcPort = socket.remotePort;/a reqInfo.user=socket.user;' $serverFile
+	fi
 }
 
 #-------------------------------------------------------------------
-#-------------------- basic code below -----------------------------
+#--------------------  basic code below  ---------------------------
 #-------------------------------------------------------------------
 
 check_update()
@@ -94,7 +108,7 @@ show_help_exit()
 	local this_file=$(basename $THIS_SCRIPT)
 	cat << EOL
   sh ${this_file} install	; install as systemd service
-  sh ${this_file} help		; show this print
+  sh ${this_file} help  	; show this print
 EOL
 	exit 0
 }
