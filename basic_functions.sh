@@ -225,6 +225,14 @@ append_file()
 	echo "$1" >> $__cat_file
 }
 
+empty_exit()
+{
+	if [ -z $1 ]; then
+		log_red "ERROR. the $2 is invalid."
+		exit 1
+	fi
+}
+
 check_bash()
 {
 	[ -z "$BASH_VERSION" ] && log_yellow "Change to: bash $0" && setsid bash $0 $@ && exit

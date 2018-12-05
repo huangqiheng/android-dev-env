@@ -53,7 +53,7 @@ install_wallpaper()
 
 	#exec nitrogen --head=0 --restore --set-zoom-fill
 	#exec nitrogen --head=1 --restore --set-zoom-fill
-	ratpoisonrc "exec nitrogen --set-zoom-fill --restore $DATA_DIR"
+	ratpoisonrc "exec nitrogen --set-zoom-fill --restore $DATA_DIR/images"
 	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
 }
 
@@ -75,12 +75,12 @@ install_terminal()
 	# xrdb -merge ~/.Xdefaults
 	# Ctrl-Right mouse click for temporary change of font size
 	# select to copy, and shift+insert or shift+middleClick to paste
-	cat > ${HOME}/.Xdefaults <<EOL
-XTerm*utf8Title:true
-XTerm*cjkWidth:true
-XTerm*faceName:DejaVu Sans Mono:pixelsize=12
-XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
-XTerm*selectToClipboard:true
+	cat > ${HOME}/.Xdefaults <<-EOL
+	XTerm*utf8Title:true
+	XTerm*cjkWidth:true
+	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
+	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
+	XTerm*selectToClipboard:true
 EOL 
 	chownUser ${HOME}/.Xdefaults
 
