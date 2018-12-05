@@ -4,9 +4,19 @@ THIS_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
-	check_update ppa:mkusb/ppa
-	check_apt mkusb-nox gdisk
-	check_apt grub-pc-bin grub-efi-amd64-bin
+	if [ $(uname -n) = 'kali' ]; then
+		cd $CACHE_DIR
+		if [ ! -f mkusb-nox ]; then
+			wget https://phillw.net/isos/linux-tools/mkusb/mkusb-nox 
+		fi
+		cp mkusb-nox /usr/bin/
+		chown root:root /usr/bin/mkusb-nox
+		chmod a+x /usr/bin/mkusb-nox
+	else
+		check_update ppa:mkusb/ppa
+		check_apt mkusb-nox gdisk
+		check_apt grub-pc-bin grub-efi-amd64-bin
+	fi
 
 	echo "
        Make a USB install device from ISO or image file
@@ -38,7 +48,6 @@ main ()
        Wipe the first megabyte, show all mass storage devices
            sudo mkusb-nox wipe-1 all
 "
-
 }
 
 #-------------------------------------------------------
