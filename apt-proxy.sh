@@ -17,7 +17,7 @@ main ()
 	fi
 
 
-	cat "Acquire::http::Proxy \"http://${1}/\";" > /etc/apt/apt.conf.d/proxy.conf
+	echo "Acquire::http::Proxy \"http://${1}/\";" | cat > /etc/apt/apt.conf.d/proxy.conf
 }
 
 maintain()
