@@ -366,6 +366,18 @@ check_npm_g()
 	fi
 }
 
+check_service()
+{
+	for srvName in "$@"; do
+		if ! find /etc/systemc/system/ -name $srvName.service; then
+			systemctl enable $srvName
+		fi
+		if ! pgrep -x bluetoothd >/dev/null; then
+			systemctl start $srvName
+		fi
+	done
+}
+
 check_apt()
 {
 	for package in "$@"; do
