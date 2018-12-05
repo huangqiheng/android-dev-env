@@ -7,28 +7,29 @@ main ()
 {
 	export NODE_PATH=$(npm list -g 2>/dev/null | head -1)/node_modules
 	[ "$1" != 'daemon' ] && install_routine		
+
 	echo "$(genNodeCode)" | node
 }
 
 genNodeCode()
 {
-	cat <<EOL
-var socks = require('socksv5');
-var Redis = require('ioredis');
-var redis = new Redis();
+	cat <<-'EOL'
+	const socks = require('socksv5');
+	const Redis = require('ioredis');
+	const redis = new Redis();
 
-var srv = socks.createServer((info, accept, deny)=> {
-  console.log(info);
-  accept();
-});
+	var srv = socks.createServer((info, accept, deny)=> {
+	  console.log(info);
+	  accept();
+	});
 
-srv.useAuth(socks.auth.UserPassword((user, pass, cb)=> {
-  redis.hget('userpass',user,(err,res)=>{cb(pass===res);});
-}));
+	srv.useAuth(socks.auth.UserPassword((user, pass, cb)=> {
+	  redis.hget('userpass',user,(err,res)=>{cb(pass===res);});
+	}));
 
-srv.listen(1080, '0.0.0.0', ()=> {
-  console.log('SOCKS server listening on port 1080');
-});
+	srv.listen(1080, '0.0.0.0', ()=> {
+	  console.log('SOCKS server listening on port 1080');
+	});
 EOL
 }
 
@@ -36,9 +37,12 @@ install_routine()
 {
 	check_update
 	setup_nodejs
+	
 	check_apt redis-server
-	check_npm_g ioredis
+	systemctl enable redis-server 
+	systemctl start redis-server 
 
+	check_npm_g ioredis
 	check_npm_g socksv5
 	authFile=${NODE_PATH}/socksv5/lib/auth/UserPassword.js
 	if ! grep -q "stream.user=user;" $authFile; then
