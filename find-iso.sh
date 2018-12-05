@@ -5,7 +5,8 @@
 
 main () 
 {
-	find $1 -type f -name *.iso -size +500M
+	check_sudo
+	find / -type f -name *.iso -size +500M -a -size -10G
 }
 
 main "$@"; exit $?
