@@ -100,7 +100,7 @@ install_pinyin()
 
 install_xscreensaver()
 {
-	check_apt xscreensaver
+	check_apt xscreensaver xscreensaver-*
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }
