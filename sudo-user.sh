@@ -12,18 +12,23 @@ main ()
 		show_help_exit
 	fi
 
-	useradd -m -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
+	if [ -d "/home/$userName" ]; then
+		useradd -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
+	else
+		useradd -m -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
+	fi
+
 	usermod -aG sudo $userName
 
 	cd /home/$userName
-	midir .ssh
+	mkdir -p .ssh
 	chmod 700 .ssh
 
 	cd .ssh
 	touch authorized_keys
 	chmod 600 authorized_keys
 
-	chownUser /home/$userName
+	chown $userName:$userName /home/$userName 
 }
 
 maintain()
