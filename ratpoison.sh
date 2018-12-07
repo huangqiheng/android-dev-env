@@ -72,17 +72,17 @@ install_terminal()
 	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
 	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 
-	# xrdb -merge ~/.Xdefaults
+	# xrdb -merge ~/.Xresources
 	# Ctrl-Right mouse click for temporary change of font size
 	# select to copy, and shift+insert or shift+middleClick to paste
-	cat > ${HOME}/.Xdefaults <<-EOL
+	cat > ${HOME}/.Xresources <<-EOL
 	XTerm*utf8Title:true
 	XTerm*cjkWidth:true
 	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
 	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
 	XTerm*selectToClipboard:true
 EOL 
-	chownUser ${HOME}/.Xdefaults
+	chownUser ${HOME}/.Xresources
 
 	check_apt lxterminal
 	ratpoisonrc "bind M-c exec lxterminal"

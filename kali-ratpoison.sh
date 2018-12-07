@@ -54,12 +54,26 @@ install_browser()
 install_terminal()
 {
 	check_apt xterm 
-	check_apt lxterminal
-	check_apt tmux
-
-	ratpoisonrc "bind c exec lxterminal"
+	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
 	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind M-c exec tmux"
+
+	# xrdb -merge ~/.Xresources
+	# Ctrl-Right mouse click for temporary change of font size
+	# select to copy, and shift+insert or shift+middleClick to paste
+	cat > ${HOME}/.Xresources <<-EOL
+	XTerm*utf8Title:true
+	XTerm*cjkWidth:true
+	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
+	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
+	XTerm*selectToClipboard:true
+EOL 
+	chownUser ${HOME}/.Xresources
+
+	check_apt lxterminal
+	ratpoisonrc "bind M-c exec lxterminal"
+
+	check_apt tmux
+	ratpoisonrc "bind M-C exec tmux"
 }
 
 install_ratpoison()
