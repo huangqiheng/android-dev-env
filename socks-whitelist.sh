@@ -1,114 +1,11 @@
 #!/bin/dash
 
-THIS_SCRIPT=$(readlink -f $0)
-THIS_DIR=$(dirname $THIS_SCRIPT)
+. $THIS_DIR/basic_mini.sh
 
 main () 
 {
 	[ "$1" != 'daemon' ] && install_routine		
 	run_nodejs node_socks5_server
-}
-
-process_export()
-{
-	cat <<-EOL
-	const fs = require('fs');
-	const Redis = require('ioredis');
-	const redis = new Redis();
-	const async = require('async');
-
-	var data = {userpass:[], iplist:{}};
-	var appList=[];
-
-	async.waterfull([
-	  next=>{
-		redis.hgetall('userpass', (err,allUser)=>{
-			next(null, allUser);
-		});
-	  },
-	  (allUser,next)=>{
-		var counter = 0;
-		for (let id in allUser) {
-			counter++;
-			redis.smembers('usersapps-'+id).then(apps=>{
-				appList = appList.concat(apps);
-				data.userpass.push({id:id,pass:res[id],apps:apps});
-				if (--counter === 0) {
-					next(null, appList);
-				}
-			});
-		}
-	  },
-	  (appList,next)=>{
-		var appcounter = 0;
-		appList.forEach(appName=>{
-			appcounter++;
-			redis.smembers('appIpaddrs-'+appName).then(ips=>{
-				data.iplist[appName] = ips;
-				appcounter--;
-				if (appcounter) return;
-				next(null, data);
-			});
-		});
-	  },
-	  (data,next)=>{
-		fs.writeFile(process.argv[2], JSON.stringify(data), 'utf8', ()=>{
-			next(null, data);
-		});
-	  },
-	  (err,res)=>{
-		console.log('jobs done');
-		process.exit(0);
-	}]);
-	EOL
-}
-
-process_import()
-{
-	IFS='
-'
-	for user in $(cat "$1" | jq -c '.userpass[]'); do
-		echo -$user
-	done
-
-	exit
-
-}
-
-__process_import()
-{
-	cat <<-EOL
-	const Redis = require('ioredis');
-	const redis = new Redis();
-	var data = require(process.argv[2]);
-
-	if (process.argv[3] == 'true') {
-		redis.flushdb();
-	}
-
-	var counter = 0;
-
-	data.userpass.forEach((user)=>{
-		counter++;
-		redis.hset('userpass',user.id, user.pass).then(doneCb);
-		if (user.apps.length) {
-			counter++;
-			redis.sadd('usersapps-'+user.id, user.apps).then(doneCb);
-		}
-	});
-
-	for (let appName in data.iplist) {
-		counter++;
-		redis.sadd('appIpaddrs-'+appName, data.iplist[appName]).then(doneCb);
-	}
-
-	function doneCb(err,res){
-		counter--;
-		if (counter) return;
-		console.log('jobs done');
-		process.exit(0);
-	}
-	EOL
 }
 
 node_socks5_server()
@@ -119,8 +16,39 @@ node_socks5_server()
 	const redis = new Redis();
 
 	var srv = socks.createServer((info, accept, deny)=> {
-	  console.log(info);
-	  accept();
+	  let isDone=false;
+	  redis.smembers('usersapps-'+info.user).then(apps=>{
+	    if (apps.length===0) {
+	    	deny();
+		console.log('DENY for missing apps setting');
+		return;
+	    }
+	    let counter=apps.length;
+	    apps.forEach(app=>{
+		if (isDone){ 
+		  checkDone();
+		  return; 
+		}
+		redis.sismember('appIpaddrs-'+app, info.dstAddr).then(res=>{
+		    console.log(' -- check '+info.dstAddr+' in '+app+' : '+res);
+		    if (!isDone && (res === 1)) {
+		    	console.log('ACCEPT '+info.dstAddr+' by '+app);
+		    	accept();
+			isDone=true;
+		    }
+		    checkDone();
+	 	});
+	    });
+	    function checkDone(){
+		if (--counter===0) {
+		  console.log(' -- all request done');
+		  if (!isDone) {
+		    deny();
+		    console.log('DENY by no matching '+info.dstAddr);
+		  }
+	    	}
+	    }
+	  });
 	});
 
 	srv.useAuth(socks.auth.UserPassword((user, pass, cb)=> {
@@ -131,6 +59,105 @@ node_socks5_server()
 	  console.log('SOCKS server listening on port 1080');
 	});
 	EOL
+}
+
+process_export()
+{
+	local toFile=
+	local isViewUser=false
+	local isViewApps=false
+
+	if [ "$1" = 'user' ]; then
+		isViewUser=true
+	elif [ "$1" = 'apps' ]; then
+		isViewApps=true
+	elif [ "$1" = 'all' ]; then
+		isViewUser=true
+		isViewApps=true
+	else
+		local inputFile="$1"
+		if [ -z $inputFile ]; then
+			local this_file=$(basename $THIS_SCRIPT)
+			inputFile="$HOME/${this_file%.*}.json"
+		fi
+		if touch "$inputFile" 2>/dev/null; then
+			toFile="$inputFile"
+		else
+			return
+		fi
+	fi
+
+	local redisCmd_apps='del usersapps-union'
+	local userList_json=''
+	local ipList_json=''
+
+	LOGFLAG=; [ "$isViewUser" != 'true' ] && LOGFLAG='off'
+	log 'Show all users:'
+
+	IFS=','; set -- $(redis-cli --csv hgetall userpass | tr -d '"')
+	while [ "$1" != '' ]; do
+		local user="$1"; shift
+		local pass="$1"; shift
+
+		local apps=''
+		IFS=','; for app in $(redis-cli --csv smembers "usersapps-$user" | tr -d '"'); do
+			redisCmd_apps="$redisCmd_apps\nsadd usersapps-union $app"
+			if [ -z "$apps" ]; then apps="\"$app\""; else apps="$apps,\"$app\""; fi
+		done; 
+		log "  user=$user, pass=$pass, apps=$apps"
+		userList_json="$userList_json,{\"id\":\"$user\",\"pass\":\"$pass\",\"apps\":[$apps]}"
+	done
+
+	echo "$redisCmd_apps" | redis-cli >/dev/null
+	IFS=; local appList=$(redis-cli --csv smembers usersapps-union | tr -d '"' 2>/dev/null)
+	redis-cli del usersapps-union >/dev/null
+
+	LOGFLAG=; [ "$isViewApps" != 'true' ] && LOGFLAG='off'
+	log 'Show all whitelist ip address:'
+
+	IFS=','; for app in $appList; do
+		IFS=; local iplist=$(redis-cli --csv smembers "appIpaddrs-$app")
+		log "  $app: $iplist"
+		ipList_json="$ipList_json,\"$app\":[$iplist]"
+	done
+
+	if test -w "$toFile"; then
+		IFS=; 
+		local usersItem=$(echo $userList_json | cut -c 2-)
+		local iplistItem=$(echo $ipList_json | cut -c 2-)
+		local outputJson="{\"userpass\":[$usersItem],\"iplist\":{$iplistItem}}"
+
+		echo $outputJson | jq '.' > "$toFile"
+	fi
+}
+
+process_import()
+{
+	local fromFile="$1"
+	local redisCmds=''
+
+	IFS='
+';	for user in $(cat "$fromFile" | jq -c '.userpass[]'); do
+		local id=$(echo $user | jq -r '.id')
+		local pass=$(echo $user | jq -r '.pass')
+		IFS=; local apps=$(echo $user | jq -r '.apps[]' | tr "\n" ' ')
+		echo $id:$pass $apps
+		redisCmds="$redisCmds\nhset userpass $id $pass"
+		if [ ! -z $apps ]; then
+		       redisCmds="$redisCmds\nsadd usersapps-$id $apps"
+		fi	 
+	done
+
+	IFS='
+';	set -- $(cat "$fromFile" | jq -r '.iplist | to_entries[] | [.key],.value | join(" ")')
+	while [ "$1" != '' ]; do
+		local app="$1"; shift
+		local ips="$1"; shift
+		echo $app = $ips
+		redisCmds="$redisCmds\nsadd appIpaddrs-$app $ips"
+	done
+
+	echo "$redisCmds" | redis-cli >/dev/null 
 }
 
 run_nodejs()
@@ -149,6 +176,7 @@ install_routine()
 
 	check_update
 	setup_nodejs
+	check_apt jq
 	
 	check_apt redis-server
 	if ! pgrep -x redis-server >/dev/null; then
@@ -156,7 +184,7 @@ install_routine()
 		systemctl start redis-server 
 	fi
 
-	check_npm_g ioredis async socksv5 
+	check_npm_g ioredis socksv5 
 
 	local authFile=${nodeModuls}/socksv5/lib/auth/UserPassword.js
 	if ! grep -q "stream.user=user;" $authFile; then
@@ -238,45 +266,18 @@ ips_handler()
 
 list_infos()
 {
-	local target="$1"; shift
+	local target="$1"; 
+	[ -z $1 ] || shift
 
 	case $target in
-	'user')
-		echo 'Show all users:'
-		IFS=','; set -- $(redis-cli --csv hgetall userpass | tr -d '"')
-		while [ "$1" != '' ]; do
-			local user="$1"; shift
-			local pass="$1"; shift
-			IFS=; local apps=$(redis-cli --csv smembers "usersapps-$user" |tr -d '"'|sort|tr "\n" ',')
-			echo "  user=$user, pass=$pass, apps=${apps%?}"
-		done
+	u|user)
+		process_export user
 		;;
-	'app')
-		echo 'Show all whitelist ip address:'
-		IFS=','; set -- $(redis-cli --csv hkeys userpass | tr -d '"')
-
-		local appList=''
-		while [ "$1" != '' ]; do
-			local user="$1"; shift
-			IFS=; local apps=$(redis-cli --csv smembers "usersapps-$user" | tr -d '"')
-
-			IFS=','; for app in $apps; do
-				if echo "\"$appList\"" | grep -qv "\"$app\""; then
-					if [ -z $appList ]; then
-						appList="$app"
-					else
-						appList="$appList\"$app"
-					fi
-				fi
-			done
-		done
-
-		IFS=; local showApps=$(echo "$appList" | tr '"' ",")
-		IFS=','; for app in $showApps; do
-			echo "$app:"
-			IFS=; local iplist=$(redis-cli --csv smembers "appIpaddrs-$app" | tr -d '"')
-			echo "  -- $iplist"
-		done
+	a|apps)
+		process_export apps
+		;;
+	*|all)
+		process_export all
 		;;
 	esac
 }
@@ -299,49 +300,9 @@ maintain()
 	[ "$cmd" = 'userdel' ] && user_handler remove $@ && exit 0
 
 	[ "$cmd" = 'import' ] && process_import $@ && exit 0
-	[ "$cmd" = 'export' ] && run_nodejs process_export $@ && exit 0
+	[ "$cmd" = 'export' ] && process_export $@ && exit 0
 	[ "$cmd" = 'install' ] && this_network_service daemon && exit 0
 	[ "$cmd" = 'help' ] && show_help_exit
-}
-
-
-#-------------------------------------------------------------------
-#--------------------  basic code below  ---------------------------
-#-------------------------------------------------------------------
-
-check_update()
-{
-	check_sudo
-
-	if [ "$1" = 'f' ]; then
-		apt update -y
-		return 0
-	fi
-
-	local last_update=`stat -c %Y  /var/cache/apt/pkgcache.bin`
-	local nowtime=`date +%s`
-	local diff_time=$(($nowtime-$last_update))
-	local repo_changed=0
-
-	if [ $# -gt 0 ]; then
-		for the_param in "$@"; do
-			the_ppa=$(echo $the_param | sed 's/ppa:\(.*\)/\1/')
-
-			if [ ! -z $the_ppa ]; then 
-				if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-					add-apt-repository -y $the_param
-					repo_changed=1
-					break
-				else
-					log_y "repo ${the_ppa} has already exists"
-				fi
-			fi
-		done
-	fi 
-
-	if [ $repo_changed -eq 1 ] || [ $diff_time -gt 604800 ]; then
-		apt update -y
-	fi
 }
 
 install_service_exit()
@@ -374,17 +335,6 @@ setup_nodejs()
 	check_apt nodejs
 }
 
-log()  	     { echo "$@"; }
-log_r()      { echo "\033[0;31m$*\033[0m"; }
-log_g()      { echo "\033[0;32m$*\033[0m"; }
-log_y()      { echo "\033[0;33m$*\033[0m"; }
-cmd_exists() { type "$(which "$1")" > /dev/null 2>&1; }
-apt_exists() { [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -gt 0 ]; }
-check_sudo() { [ $(whoami) != 'root' ] && log_r "Must be run as root" && exit 1; }
-check_bash() { [ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit; }
-check_apt()  { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi done; }
-check_npm_g(){ for p in "$@";do [ ! -d $(npm ls -g|head -1)/node_modules/$p ] &&  npm i -g "$p";done; }
-empty_exit() { [ -z $1 ] && log_r "ERROR. the $2 is invalid." && exit 1; }
 
 this_network_service()
 {
