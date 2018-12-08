@@ -69,8 +69,8 @@ install_browser()
 install_terminal()
 {
 	check_apt xterm 
-	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
-	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
+	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
+	ratpoisonrc "bind C-c exec xterm -fa nonaco -fs 10"
 
 	# xrdb -merge ~/.Xresources
 	# Ctrl-Right mouse click for temporary change of font size
