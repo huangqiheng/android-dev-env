@@ -10,7 +10,7 @@ main ()
 	install_ratpoison 	# system
 	install_pinyin		# input
 
-	install_wallpaper	# appearance
+	#install_wallpaper	# appearance
 	install_xscreensaver 	# lock
 
 	install_terminal
@@ -78,7 +78,7 @@ EOL
 
 install_ratpoison()
 {
-	check_apt ratpoison 
+	check_apt xinit ratpoison 
 
 	cat > /usr/share/xsessions/ratpoison.desktop <<EOL
 [Desktop Entry]
@@ -101,24 +101,33 @@ EOL
 
 install_pinyin()
 {
-	check_apt ibus ibus-pinyin
-	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+	check_apt dbus-x11
+	check_apt ibus ibus-sunpinyin
 	check_apt fonts-wqy-zenhei 
 
-	im-config -n fcitx
-	log_red '--Please run fcitx-config-gtk after installed.'
+	check_apt zenity
+	im-config -s ibus
+	log_y 'run ibus-setup after installed.'
 
-	ratpoisonrc "exec fcitx"
+	bashrc 'GTK_IM_MODULE' 'export GTK_IM_MODULE=ibus'
+	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
+	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
+
+
+	ratpoisonrc 'exec ibus-daemon -x -d'
+	
 }
-
 
 install_xscreensaver()
 {
-	check_apt xscreensaver xscreensaver-*
+	check_apt xscreensaver 'xscreensaver-*'
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }
 
+maintain()
+{
+	[ "$1" = 'ratpoison' ] && install_ratpoison && exit 
+}
 
-main "$@"; exit $?
-
+maintain "$@"; main "$@"; exit $?

@@ -117,7 +117,7 @@ set_comt()
 	fi
 
 	if [ -z $__comment_file ]; then
-		log_red 'toggle_comment(): Please set ini file first.'
+		log_r 'toggle_comment(): Please set ini file first.'
 		exit
 	fi
 
@@ -144,7 +144,7 @@ set_conf()
 	fi
 
 	if [ -z $__ini_file ]; then
-		log_red 'set_conf(): Please set ini file first.'
+		log_r 'set_conf(): Please set ini file first.'
 		exit
 	fi
 
@@ -173,7 +173,7 @@ get_conf()
 		local input_path="$1"
 
 		if [ ! -f $input_path ]; then
-			log_red 'get_conf(): Please set ini file first.'
+			log_r 'get_conf(): Please set ini file first.'
 			exit
 		fi
 
@@ -201,7 +201,7 @@ insert_line()
 	fi
 
 	if [ -z $__insert_file ]; then
-		log_red 'insert_line(): Please set ini file first.'
+		log_r 'insert_line(): Please set ini file first.'
 		exit
 	fi
 
@@ -218,7 +218,7 @@ append_file()
 	fi
 
 	if [ -z $__cat_file ]; then
-		log_red 'append_file(): Please set file first.'
+		log_r 'append_file(): Please set file first.'
 		exit
 	fi
 
@@ -228,21 +228,21 @@ append_file()
 empty_exit()
 {
 	if [ -z $1 ]; then
-		log_red "ERROR. the $2 is invalid."
+		log_r "ERROR. the $2 is invalid."
 		exit 1
 	fi
 }
 
 check_bash()
 {
-	[ -z "$BASH_VERSION" ] && log_yellow "Change to: bash $0" && setsid bash $0 $@ && exit
+	[ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit
 }
 
 check_sudo()
 {
 	if [ $(whoami) != 'root' ]; then
-	    log_red "This script should be executed as root or with sudo:"
-	    log_red "	sudo sh $ORIARGS "
+	    log_r "This script should be executed as root or with sudo:"
+	    log_r "	sudo sh $ORIARGS "
 	    exit 1
 	fi
 }
@@ -308,7 +308,7 @@ check_update()
 					repo_changed=1
 					break
 				else
-					log_yellow "repo ${the_ppa} has already exists"
+					log_y "repo ${the_ppa} has already exists"
 				fi
 			fi
 		done
@@ -360,7 +360,7 @@ check_npm_g()
 	fi
 
 	if npm list -g "$1" >/dev/null; then
-		log_green "$1 has been installed"
+		log_g "$1 has been installed"
 	else 
 		npm install -g "$1"
 	fi
@@ -382,7 +382,7 @@ check_apt()
 {
 	for package in "$@"; do
 		if apt_exists $package; then
-			log_green "${package} has been installed."
+			log_g "${package} has been installed."
 		else
 			apt install -y "$package"
 		fi
@@ -395,17 +395,17 @@ log()
 	#logger -p user.notice -t install-scripts "$@"
 }
 
-log_yellow()
+log_y()
 {
     echo "${Yellow}$*${Color_Off}"
 }
 
-log_green()
+log_g()
 {
     echo "${Green}$*${Color_Off}"
 }
 
-log_red()
+log_r()
 {
     echo "${Red}$*${Color_Off}"
 }
@@ -428,7 +428,7 @@ EOL
 
 auto_startx()
 {
-	bashrc startx 'if [ "$(tty)" = "/dev/tty1" ]; then startx; fi'
+	bashrc startx "if [ \"$(tty)\" = \"/dev/tty1\" ]; then startx $1; fi"
 }
 
 full_sources()
@@ -445,7 +445,7 @@ EOL
 cmd_exists_exit()
 {
 	if cmd_exists "$1"; then
-		log_yellow "$1 is exists."
+		log_y "$1 is exists."
 		exit	
 	fi
 }
@@ -550,7 +550,7 @@ repo_update()
 		exit
 	fi
 
-	log_green ${pull_result}
+	log_g ${pull_result}
 
 	#---------------------------------------------------------------------
 	# config
@@ -605,7 +605,7 @@ repo_update()
 		exit
 	fi
 
-	log_green ${commit_result}
+	log_g ${commit_result}
 
 	git config --global credential.helper 'cache --timeout 21600'
 	git push
