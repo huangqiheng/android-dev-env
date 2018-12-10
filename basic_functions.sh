@@ -12,10 +12,6 @@ mkdir -p $RUN_DIR
 
 cd $THIS_DIR
 
-if [ -f $THIS_DIR/config.sh ]; then
-	. $THIS_DIR/config.sh
-fi
-
 #-------------------------------------------------------
 #		basic functions
 #-------------------------------------------------------
