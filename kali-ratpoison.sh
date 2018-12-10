@@ -102,7 +102,7 @@ EOL
 install_pinyin()
 {
 	check_apt dbus-x11
-	check_apt ibus ibus-sunpinyin
+	check_apt ibus ibus-pinyin ibus-libpinyin pinyin-database ibus-sunpinyin
 	check_apt fonts-wqy-zenhei 
 
 	check_apt zenity
