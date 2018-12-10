@@ -116,16 +116,16 @@ process_export()
 	log 'Show all whitelist ip address:'
 
 	IFS=','; for app in $appList; do
-		IFS=; local iplist=$(redis-cli --csv smembers "appIpaddrs-$app")
-		log "  $app: $iplist"
-		ipList_json="$ipList_json,\"$app\":[$iplist]"
+		IFS=; local whitelist=$(redis-cli --csv smembers "appIpaddrs-$app")
+		log "  $app: $whitelist"
+		ipList_json="$ipList_json,\"$app\":[$whitelist]"
 	done
 
 	if test -w "$toFile"; then
 		IFS=; 
 		local usersItem=$(echo $userList_json | cut -c 2-)
-		local iplistItem=$(echo $ipList_json | cut -c 2-)
-		local outputJson="{\"userpass\":[$usersItem],\"iplist\":{$iplistItem}}"
+		local whitelistItem=$(echo $ipList_json | cut -c 2-)
+		local outputJson="{\"userpass\":[$usersItem],\"whitelist\":{$whitelistItem}}"
 
 		echo $outputJson | jq '.' > "$toFile"
 	fi
@@ -149,7 +149,7 @@ process_import()
 	done
 
 	IFS='
-';	set -- $(cat "$fromFile" | jq -r '.iplist | to_entries[] | [.key],.value | join(" ")')
+';	set -- $(cat "$fromFile" | jq -r '.whitelist | to_entries[] | [.key],.value | join(" ")')
 	while [ "$1" != '' ]; do
 		local app="$1"; shift
 		local ips="$1"; shift
