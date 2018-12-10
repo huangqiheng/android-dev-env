@@ -66,7 +66,7 @@ install_terminal()
 	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
 	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
 	XTerm*selectToClipboard:true
-EOL 
+EOL
 	chownUser ${HOME}/.Xresources
 
 	check_apt lxterminal
@@ -80,14 +80,14 @@ install_ratpoison()
 {
 	check_apt xinit ratpoison 
 
-	cat > /usr/share/xsessions/ratpoison.desktop <<EOL
-[Desktop Entry]
-Encoding=UTF-8
-Name=Ratpoison
-Comment=Start Ratpoison as your window manager
-Exec=ratpoison
-Icon=
-Type=Application
+	cat > /usr/share/xsessions/ratpoison.desktop <<-EOL
+	[Desktop Entry]
+	Encoding=UTF-8
+	Name=Ratpoison
+	Comment=Start Ratpoison as your window manager
+	Exec=ratpoison
+	Icon=
+	Type=Application
 EOL
 	
 	ratpoisonrc "exec rpws init 6 -k"
