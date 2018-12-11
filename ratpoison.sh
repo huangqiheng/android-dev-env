@@ -106,14 +106,8 @@ install_ratpoison()
 
 install_pinyin()
 {
-	check_apt dbus-x11
-	check_apt fonts-wqy-zenhei fonts-wqy-microhei
-	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
-
-	im-config -n fcitx
-	log '--Please run fcitx-config-gtk after installed.'
-
-	ratpoisonrc "exec fcitx"
+	install_pinyin_fcitx
+	ratpoisonrc "exec fcitx -d"
 }
 
 install_graphics()

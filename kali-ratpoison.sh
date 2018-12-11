@@ -61,11 +61,13 @@ install_terminal()
 	# Ctrl-Right mouse click for temporary change of font size
 	# select to copy, and shift+insert or shift+middleClick to paste
 	cat > ${HOME}/.Xresources <<-EOL
+	XTerm*utf8:true
 	XTerm*utf8Title:true
 	XTerm*cjkWidth:true
 	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
-	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
+	XTerm*faceNameDoublesize:WenQuanYi Micro Hei:pixelsize=13
 	XTerm*selectToClipboard:true
+	XTerm*inputMethod:ibus
 EOL
 	chownUser ${HOME}/.Xresources
 
@@ -101,21 +103,8 @@ EOL
 
 install_pinyin()
 {
-	check_apt dbus-x11
-	check_apt ibus ibus-pinyin ibus-libpinyin pinyin-database ibus-sunpinyin
-	check_apt fonts-wqy-zenhei 
-
-	check_apt zenity
-	im-config -s ibus
-	log_y 'run ibus-setup after installed.'
-
-	bashrc 'GTK_IM_MODULE' 'export GTK_IM_MODULE=ibus'
-	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
-	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
-
-
+	install_pinyin_ibus
 	ratpoisonrc 'exec ibus-daemon -x -d'
-	
 }
 
 install_xscreensaver()

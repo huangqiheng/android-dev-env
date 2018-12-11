@@ -1,5 +1,34 @@
 #!/bin/bash
 
+install_pinyin_fcitx()
+{
+	check_apt dbus-x11
+	check_apt fonts-wqy-zenhei fonts-wqy-microhei
+	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+
+	check_apt zenity
+	im-config -n fcitx
+	log_y '--Remember to set running daemon on boot: fcitx -d'
+	log_y '--Please run fcitx-config-gtk after installed.'
+}
+
+install_pinyin_ibus()
+{
+	check_apt dbus-x11
+	check_apt fonts-wqy-zenhei fonts-wqy-microhei
+	check_apt ibus ibus-pinyin ibus-libpinyin pinyin-database ibus-sunpinyin
+
+	check_apt zenity
+	im-config -s ibus
+
+	bashrc 'GTK_IM_MODULE' 'export GTK_IM_MODULE=ibus'
+	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
+	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
+
+	log_y '--Remember to set running daemon on boot: ibus-daemon -x -d'
+	log_y '--Run ibus-setup after installed.'
+}
+
 x11_forward_server()
 {
 	log_g 'setting ssh server'
