@@ -8,7 +8,7 @@ main ()
 	[ "$1" = 'check' ] || check_update f
 
 	install_ratpoison 	# system
-	install_pinyin		# input
+	install_pinyin_ibus 	# input
 
 	#install_wallpaper	# appearance
 	install_xscreensaver 	# lock
@@ -53,28 +53,10 @@ install_browser()
 
 install_terminal()
 {
-	check_apt xterm 
+	install_terminals
 	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
 	ratpoisonrc "bind C-c exec xterm -fa nonaco -fs 10"
-
-	# xrdb -merge ~/.Xresources
-	# Ctrl-Right mouse click for temporary change of font size
-	# select to copy, and shift+insert or shift+middleClick to paste
-	cat > ${HOME}/.Xresources <<-EOL
-	XTerm*utf8:true
-	XTerm*utf8Title:true
-	XTerm*cjkWidth:true
-	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
-	XTerm*faceNameDoublesize:WenQuanYi Micro Hei:pixelsize=13
-	XTerm*selectToClipboard:true
-	XTerm*inputMethod:ibus
-EOL
-	chownUser ${HOME}/.Xresources
-
-	check_apt lxterminal
 	ratpoisonrc "bind M-c exec lxterminal"
-
-	check_apt tmux
 	ratpoisonrc "bind M-C exec tmux"
 }
 
@@ -99,17 +81,16 @@ EOL
 	ratpoisonrc "bind M-4 exec rpws 4"
 	ratpoisonrc "bind M-5 exec rpws 5"
 	ratpoisonrc "bind M-6 exec rpws 6"
-}
-
-install_pinyin()
-{
-	install_pinyin_ibus
-	ratpoisonrc 'exec ibus-daemon -x -d'
+	return 0
 }
 
 install_xscreensaver()
 {
-	check_apt xscreensaver 'xscreensaver-*'
+	check_apt xscreensaver
+	check_apt xscreensaver-data
+	check_apt xscreensaver-data-extra
+	check_apt xscreensaver-gl
+	check_apt xscreensaver-gl-extra
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }

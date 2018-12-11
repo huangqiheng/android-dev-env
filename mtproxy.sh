@@ -28,7 +28,7 @@ main ()
 		curl -s https://core.telegram.org/getProxyConfig -o proxy-multi.conf
 	fi
 
-	if [ ! -f proxy-secret ]; then
+	if [ ! -f client-secret ]; then
 		local secret=$(head -c 16 /dev/urandom | xxd -ps)
 		echo "$secret" > client-secret
 		chown root:root client-secret
@@ -56,7 +56,7 @@ regist_service()
 
 		[Service]
 		Type=simple
-		ExecStart=${THIS_DIR}/mtproxy.sh daemon
+		ExecStart=/usr/bin/sh ${THIS_DIR}/mtproxy.sh daemon
 		Restart=on-failure
 
 		[Install]

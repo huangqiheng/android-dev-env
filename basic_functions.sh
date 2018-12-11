@@ -77,14 +77,17 @@ get_latest_release()  # $1="creationix/nvm"
 	sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-bashrc()
+handle_rc()
 {
-	echo_file=$HOME/.bashrc
+	local echo_file="$1"; shift
 	if grep -iq "$1" $echo_file; then
 		return 1
 	fi
 	echo "$2" >> $echo_file
 }
+
+xinitrc() { handle_rc "$HOME/.xinitrc" $1 $2; }
+bashrc()  { handle_rc "$HOME/.bashrc" $1 $2; }
 
 ratpoisonrc_done()
 {

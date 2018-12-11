@@ -1,5 +1,27 @@
 #!/bin/bash
 
+install_terminals()
+{
+	check_apt xterm 
+	check_apt lxterminal
+	check_apt tmux
+
+	# xrdb -merge ~/.Xresources
+	# Ctrl-Right mouse click for temporary change of font size
+	# select to copy, and shift+insert or shift+middleClick to paste
+	cat > ${HOME}/.Xresources <<-EOL
+	XTerm*utf8:true
+	XTerm*utf8Title:true
+	XTerm*cjkWidth:true
+	XTerm*faceName:DejaVu Sans Mono:pixelsize=12
+	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
+	XTerm*selectToClipboard:true
+	XTerm*inputMethod:fcitx
+EOL 
+	chownUser ${HOME}/.Xresources
+	xinitrc "xrdb -merge ${HOME}/.Xresources"
+}
+
 install_pinyin_fcitx()
 {
 	check_apt dbus-x11
@@ -8,7 +30,9 @@ install_pinyin_fcitx()
 
 	check_apt zenity
 	im-config -n fcitx
-	log_y '--Remember to set running daemon on boot: fcitx -d'
+
+	xinitrc 'fcitx' 'fcitx -d' 
+	
 	log_y '--Please run fcitx-config-gtk after installed.'
 }
 
@@ -25,7 +49,7 @@ install_pinyin_ibus()
 	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
 	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
 
-	log_y '--Remember to set running daemon on boot: ibus-daemon -x -d'
+	xinitrc 'ibus-daemon' 'ibus-daemon -x -d'
 	log_y '--Run ibus-setup after installed.'
 }
 
