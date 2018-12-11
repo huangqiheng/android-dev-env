@@ -29,13 +29,19 @@ main ()
 	fi
 
 	if [ ! -f client-secret ]; then
-		local secret=$(head -c 16 /dev/urandom | xxd -ps)
-		echo "$secret" > client-secret
-		chown root:root client-secret
-		chmod 600 client-secret
+		gen_new_secret
 	fi
 
 	run
+}
+
+gen_new_secret()
+{
+	cd $CACHE_DIR/MTProxy/objs/bin
+	local secret=$(head -c 16 /dev/urandom | xxd -ps)
+	echo "$secret" > client-secret
+	chown root:root client-secret
+	chmod 600 client-secret
 }
 
 run()
@@ -43,11 +49,20 @@ run()
 	cd $CACHE_DIR/MTProxy/objs/bin
 	local secret=$(cat client-secret)
 	./mtproto-proxy -u nobody -p 8888 -H 443 -S "$secret" --aes-pwd proxy-secret proxy-multi.conf -M 1
+	return 0
+}
+
+update_secret()
+{
+	gen_new_secret
+	systemctl restart mtproxy
+	return 0
 }
 
 regist_service()
 {
-	serviceFile=/etc/systemd/system/mtproxy.service
+	local sh=$(which sh)
+	local serviceFile=/etc/systemd/system/mtproxy.service
 	if [ ! -f "$serviceFile" ]; then
 		cat > "$serviceFile" <<-EOL
 		[Unit]
@@ -56,7 +71,7 @@ regist_service()
 
 		[Service]
 		Type=simple
-		ExecStart=/usr/bin/sh ${THIS_DIR}/mtproxy.sh daemon
+		ExecStart=${sh} ${THIS_DIR}/mtproxy.sh daemon
 		Restart=on-failure
 
 		[Install]
@@ -65,7 +80,8 @@ EOL
 		systemctl enable mtproxy.service
 	fi
 
-	systemctl start mtproxy.service
+	systemctl start mtproxy
+	return 0
 }
 
 share()
@@ -80,6 +96,7 @@ maintain()
 {
 	[ "$1" = 'share' ] && share && exit
 	[ "$1" = 'daemon' ] && run && exit
+	[ "$1" = 'new' ] && update_secret && exit
 	[ "$1" = 'service' ] && regist_service && exit
 	[ "$1" = 'help' ] && show_help_exit $2
 }
