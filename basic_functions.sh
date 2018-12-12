@@ -3,10 +3,9 @@ THIS_SCRIPT=$(readlink -f $0)
 THIS_DIR=$(dirname $THIS_SCRIPT)
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
-if [ "X$SUDO_USER" = 'X' ];then echo UHOME="$HOME";else UHOME="/home/$SUDO_USER"; fi
+UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"
 RUN_DIR=$UHOME/runCodes
 RUN_USER=$(basename $UHOME)
-WIRELESS_IFACE=${WIRELESS_IFACE:-'wlp2s0'}
 
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
