@@ -3,7 +3,7 @@ THIS_SCRIPT=$(readlink -f $0)
 THIS_DIR=$(dirname $THIS_SCRIPT)
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
-if [ "X$SUDO_USER" = 'X' ];then echo UHOME=$HOME;else UHOME="/home/$SUDO_USER"; fi
+if [ "X$SUDO_USER" = 'X' ];then echo UHOME="$HOME";else UHOME="/home/$SUDO_USER"; fi
 RUN_DIR=$UHOME/runCodes
 RUN_USER=$(basename $UHOME)
 WIRELESS_IFACE=${WIRELESS_IFACE:-'wlp2s0'}
