@@ -17,7 +17,7 @@ main ()
 		exit
 	fi
 
-	rcfile=$HOME/.fwknoprc
+	rcfile=$UHOME/.fwknoprc
 	if ! grep -q KEY $rcfile; then
 		check_update
 		check_apt fwknop-client fwknop-gui
@@ -86,7 +86,7 @@ rngd()
 
 clean_fwknoprc_exit()
 {
-	rcfile=$HOME/.fwknoprc
+	rcfile=$UHOME/.fwknoprc
 	unlink $rcfile
 	exit
 }

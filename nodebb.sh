@@ -7,8 +7,8 @@ MONGOD_ADMIN_PASS=admin
 MONGOD_USER=nodebb
 MONGOD_PASS=nodebbpw
 NODEBB_PATH=/var/www/nodebb
-BACKUP_DB=$HOME/nodebb.mongodb.archive
-BACKUP_UPLOADS=$HOME/nodebb.uploads.tar.gz
+BACKUP_DB=$UHOME/nodebb.mongodb.archive
+BACKUP_UPLOADS=$UHOME/nodebb.uploads.tar.gz
 
 main () 
 {

@@ -112,7 +112,7 @@ EOL
 
 disable_bash_history()
 {
-	for bashfile in '/root/.bashrc' "$HOME/.bashrc"; do
+	for bashfile in '/root/.bashrc' "$UHOME/.bashrc"; do
 		set_comt $bashfile
 		set_comt on '#' 'unset HISTFILE'
 		set_comt on '#' 'unset HISTFILESIZE'

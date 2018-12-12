@@ -8,9 +8,9 @@ main ()
 	if [ "$1" = 'sdkman' ]; then
 		check_apt zip unzip
 
-		if [ ! -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+		if [ ! -f "$UHOME/.sdkman/bin/sdkman-init.sh" ]; then
 			curl -s https://get.sdkman.io | bash
-			source "$HOME/.sdkman/bin/sdkman-init.sh"
+			source "$UHOME/.sdkman/bin/sdkman-init.sh"
 		fi
 		sdk install kotlin
 		exit 0

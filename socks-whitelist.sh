@@ -78,7 +78,7 @@ process_export()
 		local inputFile="$1"
 		if [ -z $inputFile ]; then
 			local this_file=$(basename $THIS_SCRIPT)
-			inputFile="$HOME/${this_file%.*}.json"
+			inputFile="$UHOME/${this_file%.*}.json"
 		fi
 		if touch "$inputFile" 2>/dev/null; then
 			toFile="$inputFile"

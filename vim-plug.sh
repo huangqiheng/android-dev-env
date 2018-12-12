@@ -4,14 +4,14 @@
 
 main () 
 {
-	plugfile=$HOME/.vim/autoload/plug.vim
+	plugfile=$UHOME/.vim/autoload/plug.vim
 
 	if [ ! -f $plugfile ]; then
 		curl -fLo $plugfile --create-dirs \
 			https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 	fi
 
-	tsvim_file=$HOME/.vim/bundle/typescript-vim
+	tsvim_file=$UHOME/.vim/bundle/typescript-vim
 
 	if [ ! -d $tsvim_file ]; then
 		git clone https://github.com/leafgarland/typescript-vim.git $tsvim_file
@@ -30,7 +30,7 @@ END
 
 vimrc()
 {
-	echo_file=$HOME/.vimrc
+	echo_file=$UHOME/.vimrc
 
 	if [ -f $echo_file ]; then
 		if grep -iq "$1" $echo_file; then

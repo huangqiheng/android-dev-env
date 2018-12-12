@@ -5,7 +5,8 @@
 
 main () 
 {
-	adb_root=$HOME/Android
+	adb_root=$UHOME/Android
+
 	mkdir -p $adb_root 
 	cd $adb_root
 

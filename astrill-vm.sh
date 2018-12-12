@@ -9,7 +9,7 @@ main ()
 	auto_login
 	auto_startx
 
-	if [ ! -f $HOME/sslocal.json ]; then
+	if [ ! -f $UHOME/sslocal.json ]; then
 		log 'Please prepare the sslocal.json file'
 		exit 1
 	fi
@@ -49,7 +49,7 @@ Description=Sslocal Server
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/sslocal -c ${HOME}/sslocal.json
+ExecStart=/usr/bin/sslocal -c ${UHOME}/sslocal.json
 Restart=always
 
 [Install]

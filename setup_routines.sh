@@ -122,18 +122,39 @@ install_astrill()
 	fi
 }
 
-setup_gotty()
+setup_github_go()
 {
-	if cmd_exists gotty; then
-		log_g 'gotty is installed'
+	local owner="$1"
+	local cmd="$2"
+
+	if cmd_exists "$cmd"; then
+		log_g "$cmd has been installed"
 		return 0
 	fi
 
 	setup_golang
-	go get github.com/yudai/gotty
+	go get "github.com/$owner/$cmd"
 
 	gopath=$(go env GOPATH)
-	cp $gopath/bin/gotty /usr/local/bin
+
+	local cmdPath="$gopath/bin/$cmd"
+	if [ -f "$cmdPath" ]; then
+		cp "$cmdPath" /usr/local/bin
+		return 0
+	else
+		log_r "$cmd install failure"
+		return 1
+	fi
+}
+
+setup_pup()
+{
+	setup_github_go ericchiang pup
+}
+
+setup_gotty()
+{
+	setup_github_go yudai gotty
 }
 
 setup_golang()
@@ -144,7 +165,9 @@ setup_golang()
 	fi
 
 	if [ "$1" = "" ]; then
-		check_update ppa:longsleep/golang-backports
+		if ! apt_exists golang-go; then
+			check_update ppa:longsleep/golang-backports
+		fi
 		check_apt golang-go
 		return 1
 	fi

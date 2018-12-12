@@ -18,20 +18,20 @@ main ()
 	set_comt $CACHE_DIR/egret-core/tools/commands/run.js
 	set_comt off 'toolsList = project_1.launcher.getLauncherLibrary().getInstalledTools();' '//'
 
-	mkdir -p $HOME/egret-src
+	mkdir -p $UHOME/egret-src
 
-	if [ ! -d $HOME/egret-src/helloWorld ]; then
-		cd $HOME/egret-src
+	if [ ! -d $UHOME/egret-src/helloWorld ]; then
+		cd $UHOME/egret-src
 		egret create helloWorld
 
-		insert_line $HOME/egret-src/helloWorld/src/Main.ts
+		insert_line $UHOME/egret-src/helloWorld/src/Main.ts
 		insert_line 'private createGameScene' 'console.log("hello egret world");'
 
 		cd helloWorld
 		egret run
 	fi
 
-	chownUser $HOME/egret-src
+	chownUser $UHOME/egret-src
 }
 
 maintain()

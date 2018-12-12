@@ -7,7 +7,7 @@ main ()
 {
 	check_apt cpanminus
 
-	chownUser "$HOME/.cpanm"
+	chownUser "$UHOME/.cpanm"
 	
 	cpanm Net::Whois::IP
 	cpanm Net::IP 

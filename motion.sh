@@ -1,6 +1,6 @@
 #!/bin/dash
 
-IMGS_DIR=$HOME/motion-pics
+IMGS_DIR=$UHOME/motion-pics
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh

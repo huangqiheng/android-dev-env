@@ -5,7 +5,7 @@
 
 main () 
 {
-	cd $HOME
+	cd $UHOME
 
 	if [ -f .gdbinit ]; then
 		log "gdb-dashboard  has been installed"
@@ -14,7 +14,7 @@ main ()
 
 	setup_gotty
 	wget -P ~ git.io/.gdbinit
-	chownUser $HOME/.gdbinit
+	chownUser $UHOME/.gdbinit
 }
 
 maintain()
