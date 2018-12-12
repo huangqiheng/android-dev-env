@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 install_terminals()
 {
@@ -9,7 +9,7 @@ install_terminals()
 	# xrdb -merge ~/.Xresources
 	# Ctrl-Right mouse click for temporary change of font size
 	# select to copy, and shift+insert or shift+middleClick to paste
-	cat > ${HOME}/.Xresources <<-EOL
+	cat > ${UHOME}/.Xresources <<-EOL
 	XTerm*utf8:true
 	XTerm*utf8Title:true
 	XTerm*cjkWidth:true
@@ -18,39 +18,8 @@ install_terminals()
 	XTerm*selectToClipboard:true
 	XTerm*inputMethod:fcitx
 EOL 
-	chownUser ${HOME}/.Xresources
-	xinitrc "xrdb -merge ${HOME}/.Xresources"
-}
-
-install_pinyin_fcitx()
-{
-	check_apt dbus-x11
-	check_apt fonts-wqy-zenhei fonts-wqy-microhei
-	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
-
-	check_apt zenity
-	im-config -n fcitx
-
-	xinitrc 'fcitx' 'fcitx -d' 
-	
-	log_y '--Please run fcitx-config-gtk after installed.'
-}
-
-install_pinyin_ibus()
-{
-	check_apt dbus-x11
-	check_apt fonts-wqy-zenhei fonts-wqy-microhei
-	check_apt ibus ibus-pinyin ibus-libpinyin pinyin-database ibus-sunpinyin
-
-	check_apt zenity
-	im-config -s ibus
-
-	bashrc 'GTK_IM_MODULE' 'export GTK_IM_MODULE=ibus'
-	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
-	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
-
-	xinitrc 'ibus-daemon' 'ibus-daemon -x -d'
-	log_y '--Run ibus-setup after installed.'
+	chownUser ${UHOME}/.Xresources
+	xinitrc "xrdb -merge ${UHOME}/.Xresources"
 }
 
 x11_forward_server()
@@ -70,7 +39,7 @@ x11_forward_server()
 x11_forward_client()
 {
 	log_g 'setting ssh client'
-	cat > $HOME/.ssh/config <<EOL
+	cat > $UHOME/.ssh/config <<EOL
 Host *
   ForwardAgent yes
   ForwardX11 yes
@@ -184,7 +153,7 @@ setup_golang()
 	wget https://dl.google.com/go/go${1}.linux-amd64.tar.gz
 	tar -C /usr/local -xzf go${1}.linux-amd64.tar.gz
 	echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
-	echo 'export PATH=$PATH:$HOME/go/bin' >> /etc/profile
+	echo 'export PATH=$PATH:$UHOME/go/bin' >> /etc/profile
 
 	return 2
 }

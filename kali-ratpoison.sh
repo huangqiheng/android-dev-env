@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
@@ -7,16 +7,33 @@ main ()
 {
 	[ "$1" = 'check' ] || check_update f
 
-	install_ratpoison 	# system
-	install_pinyin_ibus 	# input
+	install_ratpoison	
+	install_pinyin_ibus
 
-	#install_wallpaper	# appearance
-	install_xscreensaver 	# lock
+	install_wallpaper	
+	install_xscreensaver
 
 	install_terminal
 	install_browser
 	install_virtualbox
 	install_utils
+}
+
+install_pinyin_ibus()
+{
+	check_apt dbus-x11
+	check_apt fonts-wqy-zenhei fonts-wqy-microhei
+	check_apt ibus ibus-pinyin ibus-libpinyin pinyin-database ibus-sunpinyin
+
+	check_apt zenity
+	im-config -n ibus
+
+	bashrc 'GTK_IM_MODULE' 'export GTK_IM_MODULE=ibus'
+	bashrc 'XMODIFIERS' 'export XMODIFIERS=@im=ibus'
+	bashrc 'QT_IM_MODULE' 'export QT_IM_MODULE=ibus'
+
+	xinitrc 'ibus-daemon' 'ibus-daemon -x -d'
+	log_y '--Run ibus-setup after installed.'
 }
 
 install_virtualbox()

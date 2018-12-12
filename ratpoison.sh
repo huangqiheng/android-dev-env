@@ -22,6 +22,21 @@ main ()
 	install_utils
 }
 
+install_pinyin_fcitx()
+{
+	check_apt dbus-x11
+	check_apt fonts-wqy-zenhei fonts-wqy-microhei
+	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+
+	check_apt zenity
+	im-config -n fcitx
+
+	xinitrc 'fcitx' 'fcitx -d' 
+	
+	log_y '--Please run fcitx-config-gtk after installed.'
+}
+
+
 check_apt_sources()
 {
 	line_count=$(grep "main restricted universe multiverse" /etc/apt/sources.list | wc -l)

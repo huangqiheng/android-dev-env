@@ -3,8 +3,9 @@ THIS_SCRIPT=$(readlink -f $0)
 THIS_DIR=$(dirname $THIS_SCRIPT)
 CACHE_DIR=$THIS_DIR/cache
 DATA_DIR=$THIS_DIR/data
-RUN_DIR=$HOME/runCodes
-RUN_USER=$(basename $HOME)
+UHOME=$HOME
+RUN_DIR=$UHOME/runCodes
+RUN_USER=$(basename $UHOME)
 WIRELESS_IFACE=${WIRELESS_IFACE:-'wlp2s0'}
 
 mkdir -p $CACHE_DIR
@@ -86,17 +87,17 @@ handle_rc()
 	echo "$2" >> $echo_file
 }
 
-xinitrc() { handle_rc "$HOME/.xinitrc" $1 $2; }
-bashrc()  { handle_rc "$HOME/.bashrc" $1 $2; }
+xinitrc() { handle_rc "$UHOME/.xinitrc" "$1" "$2"; }
+bashrc()  { handle_rc "$UHOME/.bashrc" "$1" "$2"; }
 
 ratpoisonrc_done()
 {
-	chownUser $HOME/.ratpoisonrc
+	chownUser $UHOME/.ratpoisonrc
 }
 
 ratpoisonrc()
 {
-	echo_file=$HOME/.ratpoisonrc
+	echo_file=$UHOME/.ratpoisonrc
 	if grep -iq "$1" $echo_file; then
 		return 1
 	fi
