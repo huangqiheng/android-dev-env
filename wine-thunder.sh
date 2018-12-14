@@ -4,15 +4,44 @@
 
 main () 
 {
-	check_apt wine-stable
+	dpkg --add-architecture i386 
+	check_update f
+	check_apt wine-stable  wine32
+	check_apt winetricks
+
+	if [ $(winetricks apps list-installed | grep -c fakechinese) -eq 0 ]; then
+		winetricks fakechinese
+	fi
 
 	if [ ! -d $RUN_DIR/wine-thunder-for-linux ]; then
-		cd $DATA_DIR
 		tar xzvf wine-thunder-for-linux.tar.gz -C $RUN_DIR
+		chownUser wine-thunder-for-linux
 	fi
 
 	cd $RUN_DIR/wine-thunder-for-linux
-	runUser 'wine Thunder.exe'
+
+	if cmd_exists wine; then
+		extract_bin wine
+		return 0
+	fi
+
+	if cmd_exists wine32; then
+		extract_bin wine32
+		return 0
+	fi
+
+	log_r 'wine is not installed'
+}
+
+extract_bin()
+{
+	cat > /usr/local/bin/thunder <<-EOF
+	#!/bin/bash
+	cd $RUN_DIR/wine-thunder-for-linux
+	env LANG=zh_CN.GB18030 $1 Thunder.exe
+EOF
+	chmod a+x /usr/local/bin/thunder
+	log_y "Please run \"$thunder\" to open thunder"
 }
 
 install_wine()
