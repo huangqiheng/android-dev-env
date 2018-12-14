@@ -18,6 +18,11 @@ main ()
 		chownUser wine-thunder-for-linux
 	fi
 
+	if [ ! -d $UHOME/download ]; then
+		mkdir -p $UHOME/download
+		chownUser $UHOME/download
+	fi
+
 	cd $RUN_DIR/wine-thunder-for-linux
 
 	if cmd_exists wine; then
