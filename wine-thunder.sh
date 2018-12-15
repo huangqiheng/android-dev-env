@@ -40,13 +40,11 @@ main ()
 
 extract_bin()
 {
-	cat > /usr/local/bin/thunder <<-EOF
+	make_cmdline thunder <<-EOF
 	#!/bin/bash
 	cd $RUN_DIR/wine-thunder-for-linux
 	env LANG=zh_CN.GB18030 $1 Thunder.exe
 EOF
-	chmod a+x /usr/local/bin/thunder
-	log_y "Please run \"$thunder\" to open thunder"
 }
 
 install_wine()

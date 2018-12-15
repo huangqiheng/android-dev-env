@@ -9,6 +9,7 @@ main ()
 
 	install_ratpoison	
 	install_pinyin_ibus
+	install_sounds
 
 	install_wallpaper	
 	install_xscreensaver
@@ -17,6 +18,13 @@ main ()
 	install_browser
 	install_virtualbox
 	install_utils
+}
+
+install_sounds()
+{
+	check_apt alsa-base alsa-utils pulseaudio linux-sound-base libasound2
+
+	ratpoisonrc "exec pulseaudio"
 }
 
 install_pinyin_ibus()

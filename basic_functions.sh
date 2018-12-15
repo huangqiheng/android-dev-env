@@ -16,6 +16,13 @@ cd $THIS_DIR
 #		basic functions
 #-------------------------------------------------------
 
+make_cmdline()
+{
+	cat "$2" > "/usr/local/bin/$1"
+	chmod a+x "/usr/local/bin/$1"
+	log_y "Extracts script \"$1\" to /usr/local/bin, for easy run."
+}
+
 sshhost_parse()
 {
 	SSH_sshHost="$1"
