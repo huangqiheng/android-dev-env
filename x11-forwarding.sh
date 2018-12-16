@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
@@ -11,9 +11,9 @@ main ()
 		exit 0
 	fi
 
-	if [ "$1" = 'client' ];then
+	if [ "$1" = 'client' ]; then
 		x11_forward_client
-		exit 0
+		return 0
 	fi
 
 	ssh_target=$1

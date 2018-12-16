@@ -18,7 +18,8 @@ cd $THIS_DIR
 
 make_cmdline()
 {
-	cat "$2" > "/usr/local/bin/$1"
+	local inputScript="$(cat /dev/stdin)"
+	echo "$inputScript" > "/usr/local/bin/$1"
 	chmod a+x "/usr/local/bin/$1"
 	log_y "Extracts script \"$1\" to /usr/local/bin, for easy run."
 }
