@@ -11,8 +11,9 @@ main ()
 		check_npm_g http-server
 
 		cd $DATA_DIR 
-		if [ ! -f whitelist.pac ]; then
-			wget https://github.com/MatcherAny/whitelist.pac/raw/master/whitelist.pac
+		if [ ! -f gfwlist.pac ]; then
+			#wget https://github.com/MatcherAny/whitelist.pac/raw/master/whitelist.pac
+			wget https://raw.githubusercontent.com/petronny/gfwlist2pac/master/gfwlist.pac
 		fi
 	fi
 
@@ -68,7 +69,7 @@ require('http-server').createServer({
 	console.log('req.url = '+req.url);
 	var proxy = req.headers.host+':3128';
 	req.query.proxy && (proxy = req.query.proxy+':'+req.query.port);
-	fs.readFile('${DATA_DIR}/whitelist.pac', 'utf8', (err,data)=> {
+	fs.readFile('${DATA_DIR}/gfwlist.pac', 'utf8', (err,data)=> {
 	  res.setHeader('Content-Type', 'application/javascript');
 	  return res.end(data.replace(/127.0.0.1:1080/, proxy));
 	});
