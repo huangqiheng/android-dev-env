@@ -1,9 +1,9 @@
 #!/bin/dash
 
-IMGS_DIR=$UHOME/motion-pics
-
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
+
+IMGS_DIR=$UHOME/motion-pics
 
 main () 
 {
@@ -33,7 +33,7 @@ main ()
 	set_conf /etc/motion/motion.conf
 	set_conf width $width ' '
 	set_conf height $height ' '
-	set_conf target_dir $target_dir ' '
+	set_conf target_dir $IMGS_DIR ' '
 
 	set_conf output_pictures on ' '
 	set_conf ffmpeg_output_movies off ' '
