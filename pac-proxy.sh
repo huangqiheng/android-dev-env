@@ -18,17 +18,17 @@ main ()
 	fi
 
 	if [ "$1" = 'install' ]; then
-		cat > /lib/systemd/system/pacproxy.service <<EOL
-[Unit]
-Description=Pac Http Proxy Server
-After=network.target
+		cat > /lib/systemd/system/pacproxy.service <<- EOL
+		[Unit]
+		Description=Pac Http Proxy Server
+		After=network.target
 
-[Service]
-ExecStart=/bin/dash ${THIS_DIR}/pac-proxy.sh daemon
-Restart=always
+		[Service]
+		ExecStart=/bin/dash ${THIS_DIR}/pac-proxy.sh daemon
+		Restart=always
 
-[Install]
-WantedBy=multi-user.target
+		[Install]
+		WantedBy=multi-user.target
 EOL
 		systemctl enable pacproxy
 		systemctl start pacproxy
