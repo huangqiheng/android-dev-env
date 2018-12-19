@@ -385,6 +385,17 @@ check_service()
 	done
 }
 
+clean_apt()
+{
+	for package in "$@"; do
+		if apt_exists $package; then
+			apt remove -y "$package"
+			log_y "${package} has been removed."
+		fi
+	done
+	apt autoremove
+}
+
 check_apt()
 {
 	for package in "$@"; do
