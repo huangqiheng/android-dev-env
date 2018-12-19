@@ -8,7 +8,7 @@ main ()
 	check_update
 	check_apt docker.io
 
-	cd $DATA_DIR
+	cd $RUN_DIR
 
 	if [ ! -d mitm-router ]; then
 		git clone https://github.com/brannondorsey/mitm-router
