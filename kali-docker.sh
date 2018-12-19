@@ -7,7 +7,7 @@ main ()
 {
 	check_update
 
-	clean_apt docker docker-engine docker.io* lxc-docker*
+	clean_apt docker docker-engine docker.io
 	rm -rf /var/lib/docker-engine
 
 	check_apt apt-transport-https ca-certificates curl gnupg2 software-properties-common
