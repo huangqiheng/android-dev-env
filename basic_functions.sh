@@ -40,27 +40,27 @@ get_wifi_ifaces()
 	lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g'
 }
 
-get_ifaces()
+iface_to_mac()
+{
+	ifconfig "$1" | awk '/ether/{print $2}'
+}
+
+iface_list()
 {
 	ifconfig -s | tail -n +2 | awk '{print $1}' | grep -v 'lo'
 }
 
-get_localnet_ips()
+ipaddr_list()
 {
-	for iface in $(get_ifaces); do
+	for iface in $(iface_list); do
 		arp-scan --interface=$iface --localnet 2>/dev/null | awk '{print $1}' | tail -n +3 | head -n -2
 	done
 }
 
 
-ip_to_interface()
+ipaddr_to_iface()
 {
 	ifconfig | grep -B1 "$1" | grep -o "^\w*"
-}
-
-extra_wifi_interface()
-{
-	WIRELESS_IFACE=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g')
 }
 
 runUser()
@@ -111,7 +111,27 @@ ratpoisonrc()
 	echo "$1" >> $echo_file
 }
 
+__crudini_file=''
 
+set_ini()
+{
+	if [ $# -eq 1 ]; then
+		__crudini_file="$1"
+		ensure_apt crudini
+		return
+	fi
+
+	if [ "X$__crudini_file" = 'X' ]; then
+		log_r 'set_ini(): Please set ini file first.'
+		exit
+	fi
+
+	empty_exit "$1" 'session'
+	empty_exit "$2" 'key'
+	empty_exit "$3" 'value'
+
+	crudini --set "$__crudini_file" "$1" "$2" "$3"
+}
 
 __comment_file=''
 
@@ -234,7 +254,7 @@ append_file()
 
 empty_exit()
 {
-	if [ -z $1 ]; then
+	if [ "X$1" = 'X' ]; then
 		log_r "ERROR. the $2 is invalid."
 		exit 1
 	fi
@@ -394,6 +414,15 @@ clean_apt()
 		fi
 	done
 	apt autoremove
+}
+
+ensure_apt()
+{
+	for package in "$@"; do
+		if ! apt_exists $package; then
+			apt install -y "$package"
+		fi
+	done
 }
 
 check_apt()

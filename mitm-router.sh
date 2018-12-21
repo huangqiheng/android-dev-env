@@ -3,31 +3,97 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
+
+ImageName='brannondorsey/mitm-router'
+
 main () 
 {
-	check_update
-	check_apt docker.io
+	if ! cmd_exists docker; then
+		log_y 'Please install docker'
+		exit 1
+	fi
 
 	cd $RUN_DIR
 
 	if [ ! -d mitm-router ]; then
-		git clone https://github.com/brannondorsey/mitm-router
+		git clone https://github.com/${ImageName}
 	fi
 	cd mitm-router
 
-	docker.io build . -t brannondorsey/mitm-router
+	if [ $(docker images | grep -c "$ImageName") -eq 0 ]; then
+		docker build . -t "$ImageName"
+	fi
 
-	docker.io run -it --net host --privileged \
-		-e AP_IFACE="wlan0" \
-		-e INTERNET_IFACE="eth0" \
-		-e SSID="PublicSSID" \
-		-v "$(pwd)/data:/root/data" \
-		brannondorsey/mitm-router
+	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+
+	if [ "X$containerId" = 'X' ]; then
+		docker run -it --net host --privileged \
+		  -e MAC="unchanged" \
+		  -e AP_IFACE="wlan0" \
+		  -e INTERNET_IFACE="eth0" \
+		  -e SSID="CYLON-BASESTAR" \
+		  -e PASSWORD="SoSayWeAll" \
+		  -v "$(pwd)/data:/root/data" \
+		  "$ImageName"
+	else
+		docker start -i "$containerId"
+	fi
+}
+
+start_container_exit()
+{
+	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+	docker start -i "$containerId"
+	exit 0
+}
+
+stop_container_exit()
+{
+	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+	docker stop $containerId
+	exit 0
+}
+
+getshell_exit()
+{
+	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+	docker exec -it "$containerId" /bin/bash
+	exit 0
+}
+
+hostapd_issue_exit()
+{
+	local mac=$(iface_to_mac wlan0)
+	set_ini '/etc/NetworkManager/NetworkManager.conf'
+	set_ini 'keyfile' 'unmanaged-devices' "mac:$mac"
+	set_ini 'device' 'wifi.scan-rand-mac-address' 'no'
+
+	systemctl restart NetworkManager
+
+	airmon-ng check kill
+
+	exit 0
 }
 
 maintain()
 {
-	[ "$1" = 'help' ] && show_help_exit $2
+	case "$1" in
+	'bash'|'shell'|'sh') 
+		getshell_exit
+		;;
+	'start'|'open'|'run')
+		start_container_exit
+		;;
+	'stop'|'close'|'shutdown')
+		stop_container_exit
+		;;
+	'hostapd')
+		hostapd_issue_exit
+		;;
+	'help')
+		show_help_exit
+		;;
+	esac
 }
 
 show_help_exit()

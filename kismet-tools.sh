@@ -16,7 +16,7 @@ main ()
 	set_conf /etc/kismet/kismet.conf
 	set_conf logprefix $logprefix
 
-	extra_wifi_interface
+	WIRELESS_IFACE=$(get_wifi_ifaces)
 	set_conf ncsource $WIRELESS_IFACE
 	set_conf listen 'tcp://0.0.0.0:2501'
 	set_conf allowedhosts '0.0.0.0'

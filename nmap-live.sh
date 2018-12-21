@@ -12,7 +12,7 @@ main ()
 		wget https://svn.nmap.org/nmap/nmap-os-db
 	fi
 
-	for ip in $(get_localnet_ips); do
+	for ip in $(ipaddr_list); do
 		log ""
 		log "------------------- detecting $ip -------------------------"
 		nmap -O -Pn $ip
