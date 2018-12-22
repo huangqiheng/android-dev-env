@@ -252,6 +252,16 @@ append_file()
 	echo "$1" >> $__cat_file
 }
 
+nocmd_exit()
+{
+	empty_exit $1 'command name'
+	empty_exit $2 'command descripts'
+	if ! cmd_exists "$1"; then
+		log_y "$2"
+		exit 1
+	fi
+}
+
 empty_exit()
 {
 	if [ "X$1" = 'X' ]; then
@@ -395,14 +405,19 @@ check_npm_g()
 
 check_service()
 {
-	for srvName in "$@"; do
-		if ! find /etc/systemc/system/ -name $srvName.service; then
-			systemctl enable $srvName
-		fi
-		if ! pgrep -x bluetoothd >/dev/null; then
-			systemctl start $srvName
-		fi
-	done
+	empty_exit "$1" 'service name'
+
+	procName="$2"
+	if [ "X$procName" = 'X' ]; then
+		procName="$1"
+	fi
+
+	if ! find /etc/systemc/system/ -name $1.service; then
+		systemctl enable "$1"
+	fi
+	if ! pgrep -x "$procName" >/dev/null; then
+		systemctl start "$1"
+	fi
 }
 
 clean_apt()
@@ -413,7 +428,7 @@ clean_apt()
 			log_y "${package} has been removed."
 		fi
 	done
-	apt autoremove
+	apt autoremove -y
 }
 
 ensure_apt()

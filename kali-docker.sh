@@ -12,7 +12,7 @@ main ()
 
 	check_apt apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
-	if ! apt-key fingerprint 0EBFCD88 >/dev/null 2>&1; then
+	if ! apt-key fingerprint 0EBFCD88 2>&1 | grep -q 'docker@docker.com'; then
 		curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 		echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" > \
 			/etc/apt/sources.list.d/docker.list
@@ -22,6 +22,8 @@ main ()
 	check_apt docker-ce
 
 	usermod -aG docker "$RUN_USER"
+	check_service docker docker
+
 	log_y '--- PLEASE REBOOT! ---'
 }
 
