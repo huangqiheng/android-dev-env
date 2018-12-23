@@ -451,6 +451,46 @@ check_apt()
 	done
 }
 
+__is_docker_firstRun=true
+
+init_docker()
+{
+	if cmd_exists docker; then
+		if "$__is_docker_firstRun" = 'true'; then
+			log_g 'docker is ready.'
+			__is_docker_firstRun=false
+		fi
+		return 
+	fi
+
+	check_sudo
+
+	cd $CACHE_DIR
+	if [ ! -f get-docker.sh ]; then
+		curl -fsSL get.docker.com -o get-docker.sh
+	fi
+
+	sh get-docker.sh --mirror Aliyun
+
+	usermod -aG docker "$RUN_USER"
+	check_service docker
+}
+
+
+check_image()
+{
+	init_docker
+
+	for imageName in "$@"; do
+		if docker images --all | grep -q "$imageName"; then
+			log_g "image is ready ($imageName)"
+		else
+			docker pull "$imageName"
+		fi
+	done
+}
+
+
 log() 
 {
 	echo "$@"

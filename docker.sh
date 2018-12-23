@@ -3,36 +3,35 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
-ImageName='rastasheep/ubuntu-sshd'
+empty_exit "$1" 'container name'
+
+ContainerName="$1"
+ImageName='ubuntu'
+ContainerHome="$RUN_DIR/dockerHome/$ContainerName"; 
 
 main () 
 {
-	empty_exit "$1" 'container name'
-	local containerName="$1"
+	check_image $ImageName
 
-	install_docker
-
-	if ! docker images --all | grep -q "$ImageName"; then
-		docker pull "$ImageName"
-	fi
-
-	local containerHome="$RUN_DIR/dockerHome/$containerName"; mkdir -p "$containerHome"
-	local imageId=$(docker images -q "$ImageName")
-
-	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+	local containerId=$(get_containerId)
 
 	if [ "X$containerId" = 'X' ]; then
-		docker run -it --net host --privileged \
-		  -e MAC="unchanged" \
-		  -e AP_IFACE="wlan0" \
-		  -e INTERNET_IFACE="eth0" \
-		  -e SSID="CYLON-BASESTAR" \
-		  -e PASSWORD="SoSayWeAll" \
-		  -v "$(pwd)/data:/root/data" \
-		  "$ImageName"
+		mkdir -p "$ContainerHome"
+		shortId=$(docker run --net host --detach \
+			--hostname "$ContainerName" \
+			-v "$ContainerHome:/home" \
+			--name "$ContainerName" "$ImageName")
+		log_g "container is first running ($ContainerName: $shortId)"
 	else
-		docker start -i "$containerId"
+		shortId=$(docker start "$containerId")
+		log_g "container is ready ($ContainerName: $shortId)"
 	fi
+}
+
+get_containerId()
+{
+	local containerId=$(docker ps -aq --filter=ancestor=$ImageName --filter=volume=$ContainerHome)
+	echo $containerId
 }
 
 

@@ -1,25 +1,5 @@
 #!/bin/sh
 
-install_docker()
-{
-	if cmd_exists docker; then
-		log_g 'docker is ready.'
-		return 
-	fi
-
-	check_sudo
-
-	cd $CACHE_DIR
-	if [ ! -f get-docker.sh ]; then
-		curl -fsSL get.docker.com -o get-docker.sh
-	fi
-
-	sh get-docker.sh --mirror Aliyun
-
-	usermod -aG docker "$RUN_USER"
-	check_service docker
-}
-
 install_terminals()
 {
 	check_apt xterm 
