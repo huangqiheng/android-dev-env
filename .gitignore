@@ -3,5 +3,6 @@
 config.sh
 debug.sh
 temp/
+.ssh
 cache/
 \'

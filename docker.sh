@@ -17,42 +17,53 @@ main ()
 
 	if [ "X$containerId" = 'X' ]; then
 		mkdir -p "$ContainerHome"
-		shortId=$(docker run --net host --detach \
+		log_g "container is created ($ContainerName)"
+		docker run \
+			--interactive --tty \
+			--net host \
 			--hostname "$ContainerName" \
-			-v "$ContainerHome:/home" \
-			--name "$ContainerName" "$ImageName")
-		log_g "container is first running ($ContainerName: $shortId)"
+			--volume "$ContainerHome:/home" \
+			--volume "$THIS_DIR:/root/install-scripts" \
+			--name "$ContainerName" \
+			"$ImageName" /bin/bash
 	else
-		shortId=$(docker start "$containerId")
-		log_g "container is ready ($ContainerName: $shortId)"
+		if is_container_running; then
+			log_g "container is ready ($ContainerName: $containerId)"
+			docker exec -it "$containerId" /bin/bash
+		else
+			log_g "container is opened ($ContainerName: $containerId)"
+			docker start -ai "$containerId"
+		fi
 	fi
+}
+
+is_container_running()
+{
+	[ $(docker inspect -f '{{.State.Running}}' $ContainerName) = 'true' ]
 }
 
 get_containerId()
 {
-	local containerId=$(docker ps -aq --filter=ancestor=$ImageName --filter=volume=$ContainerHome)
-	echo $containerId
-}
-
-
-start_container_exit()
-{
-	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
-	docker start -i "$containerId"
-	exit 0
+	docker ps -aq --filter=ancestor=$ImageName --filter=volume=$ContainerHome
 }
 
 stop_container_exit()
 {
-	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
-	docker stop $containerId
+	docker stop "$(get_containerId)"
+	exit 0
+}
+
+remove_container_exit()
+{
+	local containerId="$(get_containerId)"
+	docker stop "$containerId" >/dev/null
+	docker rm "$containerId"  >/dev/null
 	exit 0
 }
 
 getshell_exit()
 {
-	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
-	docker exec -it "$containerId" /bin/bash
+	docker exec -it "$(get_containerId)" /bin/bash
 	exit 0
 }
 
@@ -72,15 +83,16 @@ hostapd_issue_exit()
 
 maintain()
 {
+	shift
 	case "$1" in
 	'bash'|'shell'|'sh') 
 		getshell_exit
 		;;
-	'start'|'open'|'run')
-		start_container_exit
-		;;
 	'stop'|'close'|'shutdown')
 		stop_container_exit
+		;;
+	'rm'|'remove'|'clean')
+		remove_container_exit
 		;;
 	'hostapd')
 		hostapd_issue_exit

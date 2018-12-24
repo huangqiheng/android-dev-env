@@ -5,6 +5,8 @@
 
 main () 
 {
+	check_apt openssl
+
 	userName="$1"
 	passWord="$2"
 

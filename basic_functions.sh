@@ -329,11 +329,15 @@ check_update()
 		return 0
 	fi
 
-	local last_update=`stat -c %Y  /var/cache/apt/pkgcache.bin`
-	local nowtime=`date +%s`
-	local diff_time=$(($nowtime-$last_update))
-
 	local repo_changed=0
+
+	if [ -f /var/cache/apt/pkgcache.bin ]; then
+		local last_update=`stat -c %Y  /var/cache/apt/pkgcache.bin`
+		local nowtime=`date +%s`
+		local diff_time=$(($nowtime-$last_update))
+	else 
+		repo_changed=1
+	fi
 
 	if [ $# -gt 0 ]; then
 		for the_param in "$@"; do
