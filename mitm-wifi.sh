@@ -55,6 +55,7 @@ setup_dbus()
 
 setup_iptables()
 {
+	check_apt iptables
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv4.conf.all.send_redirects=0
 
@@ -97,7 +98,7 @@ setup_dnsmasq()
 {
 	check_apt dnsmasq
 
-	cat > /etc/dnsmasq.conf <<-EOF
+	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
 	interface=$AP_IFACE
 	listen-address=${AP_SUBNET%/*}
 	bind-interfaces

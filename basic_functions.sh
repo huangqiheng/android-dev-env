@@ -416,7 +416,7 @@ check_service()
 		procName="$1"
 	fi
 
-	if ! find /etc/systemc/system/ -name $1.service; then
+	if ! find /etc/systemd/system/ -name $1.service; then
 		systemctl enable "$1"
 	fi
 	if ! pgrep -x "$procName" >/dev/null; then

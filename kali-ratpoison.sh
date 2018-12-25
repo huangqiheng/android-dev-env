@@ -22,7 +22,7 @@ main ()
 
 install_sounds()
 {
-	check_apt alsa-base alsa-utils pulseaudio linux-sound-base libasound2
+	check_apt alsa-tools alsa-utils pulseaudio linux-sound-base libasound2
 
 	ratpoisonrc "exec pulseaudio"
 }

@@ -19,6 +19,7 @@ main ()
 		mkdir -p "$ContainerHome"
 		log_g "container is created ($ContainerName)"
 		docker run \
+			--privileged \
 			--interactive --tty \
 			--net host \
 			--hostname "$ContainerName" \
