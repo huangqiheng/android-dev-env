@@ -124,15 +124,31 @@ on_exit_handler()
 	echo "received shutdown signal, exiting."
 }
 
+release_host_wifi()
+{
+	check_sudo
+
+	local mac=$(iface_to_mac $AP_IFACE)
+	set_ini '/etc/NetworkManager/NetworkManager.conf'
+	set_ini 'keyfile' 'unmanaged-devices' "mac:$mac"
+	set_ini 'device' 'wifi.scan-rand-mac-address' 'no'
+
+	systemctl restart NetworkManager
+	exit 0
+}
+
 maintain()
 {
+	[ "$1" = 'release' ] && release_host_wifi  $2
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 
 show_help_exit()
 {
-	cat << EOL
-
+	local thisFile=$(basename $THIS_SCRIPT)
+	cat <<- EOL
+	AP_IFACE=wlan0 INTERNET_IFACE=eth0 sh $thisFile ;; run in docker
+	AP_IFACE=wlan0 sudo sh $thisFile release	;; run in host
 EOL
 	exit 0
 }
