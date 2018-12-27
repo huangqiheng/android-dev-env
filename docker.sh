@@ -19,9 +19,11 @@ main ()
 		mkdir -p "$ContainerHome"
 		log_g "container is created ($ContainerName)"
 		docker run \
-			--privileged \
 			--interactive --tty \
-			--net host \
+			--net=bridge \
+			--privileged \
+			--cat-add=NET_ADMIN \
+			--cat-add=NET_RAW \
 			--hostname "$ContainerName" \
 			--volume "$ContainerHome:/home" \
 			--volume "$THIS_DIR:/root/install-scripts" \
@@ -36,11 +38,18 @@ main ()
 			docker start -ai "$containerId"
 		fi
 	fi
+
+
 }
 
 is_container_running()
 {
 	[ $(docker inspect -f '{{.State.Running}}' $ContainerName) = 'true' ]
+}
+
+get_pid()
+{
+	docker inspect -f '{{.State.Pid}}' "$(get_containerId)"
 }
 
 get_containerId()
