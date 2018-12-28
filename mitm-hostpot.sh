@@ -3,19 +3,23 @@
 . $(dirname $(readlink -f $0))/basic_mini.sh
 
 AP_IFACE="${AP_IFACE:-wlan0}"
-INTERNET_IFACE="${INTERNET_IFACE:-docker0}"
+NET_IFACE="${NET_IFACE:-eth0}"
 
 SSID="${SSID:-DangerousHotspot}"
 PASSWORD="${PASSWORD:-DontConnectMe}"
-SUBNET="${SUBNET:-192.168.234.1/24}"
+GATEWAY="${GATEWAY:-192.168.234.1}"
 
+SUBNET="${GATEWAY%.*}.0/24"
 CAPTURE_FILE="${CAPTURE_FILE:-/home/http-traffic.cap}"
 
 main () 
 {
 	nocmd_update mitmdump
-	check_apt net-tools
-	ifconfig "$AP_IFACE" "$SUBNET"
+	check_apt net-tools wireless-tools iproute2
+
+	ifconfig "$AP_IFACE" down
+	iwconfig "$AP_IFACE" mode monitor 
+	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 2552.255.255.0
 
 	setup_dbus
 	setup_dnsmasq
@@ -30,23 +34,77 @@ main ()
 
 make_nat_router()
 {
-	nocmd_update hostapd
-	check_apt iptables haveged
+	if [ ! -w '/sys' ]; then
+		log_r 'Not running in privileged mode.'
+		exit 1
+	fi
 
-	ifconfig "$AP_IFACE" "$SUBNET"
+	nocmd_update hostapd
+	check_apt hostapd dnsmasq iptables haveged wireless-tools
+
+	#-------------------------------------------------------
+
+	cat > /etc/hostapd/hostapd.conf <<-EOF
+	interface=$AP_IFACE
+	driver=nl80211
+	beacon_int=25
+	ssid=$SSID
+	hw_mode=g
+	channel=6
+	ieee80211n=1
+	ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+	macaddr_acl=0
+	wmm_enabled=0
+	ignore_broadcast_ssid=0
+	auth_algs=1
+	wpa=2
+	wpa_key_mgmt=WPA-PSK
+	wpa_passphrase=$PASSWORD
+	rsn_pairwise=CCMP
+EOF
+	ip addr flush dev $AP_IFACE
+	ip link set $AP_IFACE up
+	ip addr add $GATEWAY/24 dev $AP_IFACE
+
+	pkill hostapd
+	hostapd /etc/hostapd/hostapd.conf &
+
+	#-------------------------------------------------------
+
+	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
+	interface=$AP_IFACE
+	except-interface=$NET_IFACE
+	listen-address=$GATEWAY
+	dhcp-range=${GATEWAY%.*}.100,${GATEWAY%.*}.200,12h
+	bind-interfaces
+	server=114.114.114.114
+	domain-needed
+	bogus-priv
+EOF
+
+	pkill dnsmasq
+	dnsmasq -d -C /etc/dnsmasq.d/dnsmasq.conf &
+
+	#-------------------------------------------------------
 
 	iptables -F
 	iptables -t nat -F
-	iptables -X
-	iptables -t nat -X
-	iptables -t nat -A POSTROUTING -o "$INTERNET_IFACE" -j MASQUERADE
-	iptables -A FORWARD -i "$INTERNET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
-	iptables -A FORWARD -i "$AP_IFACE" -o "$INTERNET_IFACE" -j ACCEPT
+	iptables -t nat -A POSTROUTING -s ${SUBNET} -o ${NET_IFACE} -j MASQUERADE
+	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
+	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
-	setup_dnsmasq
-	setup_hostapd
+	#-------------------------------------------------------
+
+	wait_die "$(cat <<-EOL
+	iptables -F
+	iptables -t nat -F
+	ip addr flush dev $AP_IFACE
+	sysctl -w net.ipv4.ip_forward=0
+	sysctl -w net.ipv6.conf.all.forwarding=0
+EOL
+)"
 	return 0
 }
 
@@ -87,9 +145,9 @@ setup_iptables()
 
 	iptables -F
 	iptables -t nat -F
-	iptables -t nat -A POSTROUTING -s $SUBNET -o "$INTERNET_IFACE" -j MASQUERADE
-	iptables -A FORWARD -i "$INTERNET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
-	iptables -A FORWARD -i "$AP_IFACE" -o "$INTERNET_IFACE" -j ACCEPT
+	iptables -t nat -A POSTROUTING -s $SUBNET -o "$NET_IFACE" -j MASQUERADE
+	iptables -A FORWARD -i "$NET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
+	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
 	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
 	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 443 -j REDIRECT --to-port 1337
 	ip6tables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
@@ -124,21 +182,58 @@ EOF
 	/etc/init.d/hostapd restart
 }
 
+setup_dhcp()
+{
+	check_apt dnsmasq
+
+	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
+	interface=$AP_IFACE
+	except-interface=$NET_IFACE
+	listen-address=$GATEWAY
+	dhcp-range=${GATEWAY%.*}.50,${GATEWAY%.*}.150,12h
+	bind-interfaces
+	server=114.114.114.114
+	server=8.8.8.8
+	domain-needed
+	bogus-priv
+EOF
+
+	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 255.255.255.0
+	route add -net ${GATEWAY%.*}.0 netmask 255.255.255.0 gw $GATEWAY
+	/etc/init.d/dnsmasq restart
+}
+
+traffic_forward()
+{
+	iptables -F
+	iptables -t nat -F
+	iptables -X
+	iptables -t nat -X
+	iptables -t nat -A POSTROUTING -o "$NET_IFACE" -j MASQUERADE
+	#iptables -A FORWARD -i "$NET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
+	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
+	sysctl -w net.ipv4.ip_forward=1
+	sysctl -w net.ipv6.conf.all.forwarding=1
+}
+
 setup_dnsmasq()
 {
 	check_apt dnsmasq
 
 	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
 	interface=$AP_IFACE
-	except-interface=$INTERNET_IFACE
-	listen-address=${SUBNET%/*}
+	except-interface=$NET_IFACE
+	listen-address=$GATEWAY
+	dhcp-range=${GATEWAY%.*}.50,${GATEWAY%.*}.150,12h
 	bind-interfaces
 	server=114.114.114.114
 	server=8.8.8.8
 	domain-needed
 	bogus-priv
-	dhcp-range=${SUBNET%.*}.50,${SUBNET%.*}.150,12h
 EOF
+
+	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 255.255.255.0
+	route add -net ${GATEWAY%.*}.0 netmask 255.255.255.0 gw $GATEWAY
 	/etc/init.d/dnsmasq restart
 }
 
@@ -180,7 +275,7 @@ show_help_exit()
 {
 	local thisFile=$(basename $THIS_SCRIPT)
 	cat <<- EOL
-	AP_IFACE=wlan0 INTERNET_IFACE=eth0 sh $thisFile ;; run in docker
+	AP_IFACE=wlan0 NET_IFACE=eth0 sh $thisFile ;; run in docker
 	AP_IFACE=wlan0 sudo sh $thisFile release	;; run in host
 EOL
 	exit 0

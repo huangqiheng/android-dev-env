@@ -10,7 +10,7 @@ main ()
 maintain()
 {
 	check_update
-	[ "$1" = 'help' ] && show_help_exit $2
+	[ "$1" = 'help' ] && show_help_exit
 }
 
 show_help_exit()
@@ -20,4 +20,5 @@ show_help_exit()
 EOL
 	exit 0
 }
+
 maintain "$@"; main "$@"; exit $?

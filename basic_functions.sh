@@ -16,6 +16,19 @@ cd $THIS_DIR
 #		basic functions
 #-------------------------------------------------------
 
+wait_die()
+{
+	sleep infinity &
+	CHILD=$!
+
+	if [ ! "X$1" = 'X' ]; then
+		trap "${1}; kill -TERM $CHILD 2> /dev/null" INT TERM KILL
+	fi
+
+	wait "$CHILD"
+}
+
+
 make_cmdline()
 {
 	local inputScript="$(cat /dev/stdin)"

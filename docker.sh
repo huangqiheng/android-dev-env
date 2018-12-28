@@ -20,26 +20,24 @@ main ()
 		log_g "container is created ($ContainerName)"
 		docker run \
 			--interactive --tty \
-			--net=bridge \
+			--net=host \
 			--privileged \
-			--cat-add=NET_ADMIN \
-			--cat-add=NET_RAW \
 			--hostname "$ContainerName" \
 			--volume "$ContainerHome:/home" \
 			--volume "$THIS_DIR:/root/install-scripts" \
 			--name "$ContainerName" \
 			"$ImageName" /bin/bash
-	else
-		if is_container_running; then
-			log_g "container is ready ($ContainerName: $containerId)"
-			docker exec -it "$containerId" /bin/bash
-		else
-			log_g "container is opened ($ContainerName: $containerId)"
-			docker start -ai "$containerId"
-		fi
+		return 0
 	fi
 
+	if ! is_container_running; then
+		log_g "container is opened ($ContainerName: $containerId)"
+		docker start -ai "$containerId"
+		return 0
+	fi
 
+	log_g "container is ready ($ContainerName: $containerId)"
+	docker exec -it "$containerId" /bin/bash
 }
 
 is_container_running()
