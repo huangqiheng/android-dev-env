@@ -45,7 +45,7 @@ make_nat_router()
 	check_apt wireless-tools haveged
 
 	local PHY=$(cat /sys/class/net/"$AP_IFACE"/phy80211/name)
-	if ! iw phy "$PHY" info | grep -E "^\s+\* AP$"; then
+	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
 		log_r "Wireless card doesn't support AP mode."
 		exit 1
 	fi
@@ -78,8 +78,9 @@ EOF
 
 	pkill hostapd
 	hostapd /etc/hostapd/hostapd.conf &
+	local pidHostapd=$!
 
-	#-------------------------------------------------------- dhcp -----
+	#--------------------------------------------------------- dhcp -----
 
 	check_apt dnsmasq
 
@@ -96,27 +97,31 @@ EOF
 
 	pkill dnsmasq
 	dnsmasq -d -C /etc/dnsmasq.d/dnsmasq.conf &
+	local pidDnsmasq=$!
 
-	#---------------------------------------------------- ip forwards ---
+	#------------------------------------------------------ nat mode ----
 
 	check_apt iptables 
+	iptables-save > /home/hostap-iptables.rules
 
-	iptables -F
-	iptables -t nat -F
+	iptables -t nat -D POSTROUTING -s ${SUBNET} -o ${NET_IFACE} -j MASQUERADE > /dev/null 2>&1 || true
 	iptables -t nat -A POSTROUTING -s ${SUBNET} -o ${NET_IFACE} -j MASQUERADE
+	iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT > /dev/null 2>&1 || true
 	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
+	iptables -D FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT > /dev/null 2>&1 || true
 	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
-	#----------------------------------------------------- clean up ----
+	#------------------------------------------------------ clean up ----
 
-	wait_die "$(cat <<-EOL
-	iptables -F
-	iptables -t nat -F
-	ip addr flush dev $AP_IFACE
+	waitfor_die "$(cat <<-EOL
+	iptables-restore < /home/hostap-iptables.rules
 	sysctl -w net.ipv4.ip_forward=0
 	sysctl -w net.ipv6.conf.all.forwarding=0
+	kill $pidHostapd
+	kill $idDnsmasq
+	ip addr flush dev $AP_IFACE
 EOL
 )"
 	return 0

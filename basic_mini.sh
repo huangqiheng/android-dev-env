@@ -14,8 +14,8 @@ check_apt()   { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi do
 check_npm_g() { for p in "$@";do [ ! -d $(npm ls -g|head -1)/node_modules/$p ] &&  npm i -g "$p";done; }
 empty_exit()  { [ -z $1 ] && log_r "ERROR. the $2 is invalid." && exit 1; }
 check_update(){ check_sudo; apt update -y; }
-nocmd_update() { for cmd in "$@"; do if ! cmd_exists $cmd; then check_update;return 0;fi done; }
+nocmd_update(){ for cmd in "$@"; do if ! cmd_exists $cmd; then check_update;return 0;fi done; }
 check_repo()  { add-apt-repository -y $1; check_update; }
 set_ini()     { if [ $# -eq 1 ];then _crud="$1";check_apt crudini;return;fi;crudini --set $_crud $@; }
-wait_die()    { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
+waitfor_die() { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
 

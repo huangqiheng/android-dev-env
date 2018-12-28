@@ -16,7 +16,7 @@ cd $THIS_DIR
 #		basic functions
 #-------------------------------------------------------
 
-wait_die()
+waitfor_die()
 {
 	sleep infinity &
 	CHILD=$!
