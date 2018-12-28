@@ -15,7 +15,7 @@ CAPTURE_FILE="${CAPTURE_FILE:-/home/http-traffic.cap}"
 main () 
 {
 	MITM_READY=true
-	make_nat_router
+	entry_nat_router
 }
 
 on_internet_ready()
@@ -25,7 +25,15 @@ on_internet_ready()
 		return 0
 	fi
 
+	run_mitmproxy
+}
+
+run_mitmproxy()
+{
 	log_y 'starting mitmproxy'
+
+	nocmd_update mitmdump
+	check_apt iptables 
 
 	if ! cmd_exists mitmdump; then
 		cd /home
@@ -42,9 +50,24 @@ on_internet_ready()
 		--listen-port 1337 \
 		--save-stream-file "$CAPTURE_FILE" "$FILTER" &
 	PIDS2KILL="$PIDS2KILL $!"
+
+	iptables -t nat -D PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
+	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
 }
 
-make_nat_router()
+entry_mitmproxy()
+{
+	run_mitmproxy
+
+	waitfor_die "$(cat <<-EOL
+	iptables -t nat -D PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
+	kill $PIDS2KILL >/dev/null 2>&1
+EOL
+)"
+	return 0
+}
+
+entry_nat_router()
 {
 	#----------------------------------------------------- conditions ---
 
@@ -144,39 +167,6 @@ EOL
 	return 0
 }
 
-run_mitmproxy()
-{
-	if ! cmd_exists mitmdump; then
-		cd /home
-		if [ ! -f mitmproxy-4.0.4-linux.tar.gz ]; then
-			check_apt wget
-			wget https://snapshots.mitmproxy.org/4.0.4/mitmproxy-4.0.4-linux.tar.gz
-		fi
-		tar -xzvf mitmproxy-4.0.4-linux.tar.gz --directory=/usr/bin
-	fi
-
-	mitmdump --mode transparent --showhost --rawtcp --ignore-hosts '^.*:443$' --listen-port 1337 --save-stream-file "$CAPTURE_FILE" "$FILTER" &
-	MITMDUMP_PID=$!
-}
-
-setup_iptables()
-{
-	check_apt iptables
-	sysctl -w net.ipv4.ip_forward=1
-	sysctl -w net.ipv6.conf.all.forwarding=1
-	sysctl -w net.ipv4.conf.all.send_redirects=0
-
-	iptables -F
-	iptables -t nat -F
-	iptables -t nat -A POSTROUTING -s $SUBNET -o "$NET_IFACE" -j MASQUERADE
-	iptables -A FORWARD -i "$NET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
-	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
-	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
-	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 443 -j REDIRECT --to-port 1337
-	ip6tables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
-	ip6tables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 443 -j REDIRECT --to-port 1337
-}
-
 release_host_wifi()
 {
 	check_sudo
@@ -192,7 +182,8 @@ release_host_wifi()
 
 maintain()
 {
-	[ "$1" = 'nat' ] && make_nat_router && exit
+	[ "$1" = 'mitm' ] && entry_mitmproxy && exit
+	[ "$1" = 'nat' ] && entry_nat_router && exit
 	[ "$1" = 'host' ] && release_host_wifi
 	[ "$1" = 'help' ] && show_help_exit
 }
