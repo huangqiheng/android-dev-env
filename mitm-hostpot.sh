@@ -34,23 +34,25 @@ main ()
 
 make_nat_router()
 {
+	#----------------------------------------------------- conditions ---
+
 	if [ ! -w '/sys' ]; then
 		log_r 'Not running in privileged mode.'
 		exit 1
 	fi
 
 	nocmd_update hostapd
-	check_apt wireless-tools
+	check_apt wireless-tools haveged
 
 	local PHY=$(cat /sys/class/net/"$AP_IFACE"/phy80211/name)
-	if ! iw phy ${PHY} info | grep -E "^\s+\* AP$"; then
+	if ! iw phy "$PHY" info | grep -E "^\s+\* AP$"; then
 		log_r "Wireless card doesn't support AP mode."
 		exit 1
 	fi
 
-	check_apt hostapd dnsmasq iptables haveged 
+	#--------------------------------------------------- access point ---
 
-	#-------------------------------------------------------
+	check_apt hostapd
 
 	cat > /etc/hostapd/hostapd.conf <<-EOF
 	interface=$AP_IFACE
@@ -77,7 +79,9 @@ EOF
 	pkill hostapd
 	hostapd /etc/hostapd/hostapd.conf &
 
-	#-------------------------------------------------------
+	#-------------------------------------------------------- dhcp -----
+
+	check_apt dnsmasq
 
 	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
 	interface=$AP_IFACE
@@ -93,7 +97,9 @@ EOF
 	pkill dnsmasq
 	dnsmasq -d -C /etc/dnsmasq.d/dnsmasq.conf &
 
-	#-------------------------------------------------------
+	#---------------------------------------------------- ip forwards ---
+
+	check_apt iptables 
 
 	iptables -F
 	iptables -t nat -F
@@ -103,7 +109,7 @@ EOF
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
-	#-------------------------------------------------------
+	#----------------------------------------------------- clean up ----
 
 	wait_die "$(cat <<-EOL
 	iptables -F
