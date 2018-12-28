@@ -43,7 +43,7 @@ make_nat_router()
 	check_apt wireless-tools
 
 	if ! iw list | grep -E "^\s+\* AP$"; then
-		log_r "Wireless card doesn\'t support AP mode."
+		log_r "Wireless card doesn't support AP mode."
 		exit 1
 	fi
 
