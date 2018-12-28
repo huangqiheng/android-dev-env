@@ -42,7 +42,8 @@ make_nat_router()
 	nocmd_update hostapd
 	check_apt wireless-tools
 
-	if ! iw list | grep -E "^\s+\* AP$"; then
+	local PHY=$(cat /sys/class/net/"$AP_IFACE"/phy80211/name)
+	if ! iw phy ${PHY} info | grep -E "^\s+\* AP$"; then
 		log_r "Wireless card doesn\'t support AP mode."
 		exit 1
 	fi
