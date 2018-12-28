@@ -283,6 +283,16 @@ empty_exit()
 	fi
 }
 
+cmd_exists() 
+{
+	type "$(which "$1")" > /dev/null 2>&1
+}
+
+fun_exists()  
+{ 
+	type "$1" 2>/dev/null | grep -q 'function'
+}
+
 check_bash()
 {
 	[ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit
@@ -537,11 +547,6 @@ log_g()
 log_r()
 {
     echo "${Red}$*${Color_Off}"
-}
-
-cmd_exists() 
-{
-	type "$(which "$1")" > /dev/null 2>&1
 }
 
 auto_login()

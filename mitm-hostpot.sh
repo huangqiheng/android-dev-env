@@ -14,22 +14,34 @@ CAPTURE_FILE="${CAPTURE_FILE:-/home/http-traffic.cap}"
 
 main () 
 {
-	nocmd_update mitmdump
-	check_apt net-tools wireless-tools iproute2
+	MITM_READY=true
+	make_nat_router
+}
 
-	ifconfig "$AP_IFACE" down
-	iwconfig "$AP_IFACE" mode monitor 
-	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 2552.255.255.0
+on_internet_ready()
+{
+	if [ ! "X$MITM_READY" = Xtrue ]; then
+		log_y 'ignore on_internet_ready'
+		return 0
+	fi
 
-	setup_dbus
-	setup_dnsmasq
-	setup_hostapd
-	setup_iptables
+	log_y 'starting mitmproxy'
 
-	trap on_exit_handler TERM KILL
+	if ! cmd_exists mitmdump; then
+		cd /home
+		if [ ! -f mitmproxy-4.0.4-linux.tar.gz ]; then
+			check_apt wget
+			wget https://snapshots.mitmproxy.org/4.0.4/mitmproxy-4.0.4-linux.tar.gz
+		fi
+		tar -xzvf mitmproxy-4.0.4-linux.tar.gz --directory=/usr/bin
+	fi
 
-	run_mitmproxy
-	wait_until_die
+	mitmdump --mode transparent \
+		--showhost \
+		--rawtcp \
+		--listen-port 1337 \
+		--save-stream-file "$CAPTURE_FILE" "$FILTER" &
+	PIDS2KILL="$PIDS2KILL $!"
 }
 
 make_nat_router()
@@ -51,10 +63,11 @@ make_nat_router()
 	fi
 
 	#--------------------------------------------------- access point ---
+	log_y 'starting hostapd'
 
-	check_apt hostapd
+	check_apt hostapd iproute2
 
-	cat > /etc/hostapd/hostapd.conf <<-EOF
+	cat > /home/hostapd.conf <<-EOF
 	interface=$AP_IFACE
 	driver=nl80211
 	beacon_int=25
@@ -77,14 +90,15 @@ EOF
 	ip addr add $GATEWAY/24 dev $AP_IFACE
 
 	pkill hostapd
-	hostapd /etc/hostapd/hostapd.conf &
-	local pidHostapd=$!
+	hostapd /home/hostapd.conf &
+	PIDS2KILL="$PIDS2KILL $!"
 
 	#--------------------------------------------------------- dhcp -----
+	log_y 'starting dnsmasq dhcp'
 
 	check_apt dnsmasq
 
-	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
+	cat > /home/dnsmasq.conf <<-EOF
 	interface=$AP_IFACE
 	except-interface=$NET_IFACE
 	listen-address=$GATEWAY
@@ -96,10 +110,11 @@ EOF
 EOF
 
 	pkill dnsmasq
-	dnsmasq -d -C /etc/dnsmasq.d/dnsmasq.conf &
-	local pidDnsmasq=$!
+	dnsmasq -d -C /home/dnsmasq.conf &
+	PIDS2KILL="$PIDS2KILL $!"
 
 	#------------------------------------------------------ nat mode ----
+	log_y 'enable internet access'
 
 	check_apt iptables 
 	iptables-save > /home/hostap-iptables.rules
@@ -113,14 +128,16 @@ EOF
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
+	fun_exists 'on_internet_ready' && on_internet_ready
+
 	#------------------------------------------------------ clean up ----
+	log_y 'access point is ready'
 
 	waitfor_die "$(cat <<-EOL
 	iptables-restore < /home/hostap-iptables.rules
 	sysctl -w net.ipv4.ip_forward=0
 	sysctl -w net.ipv6.conf.all.forwarding=0
-	kill $pidHostapd
-	kill $idDnsmasq
+	kill $PIDS2KILL >/dev/null 2>&1
 	ip addr flush dev $AP_IFACE
 EOL
 )"
@@ -142,19 +159,6 @@ run_mitmproxy()
 	MITMDUMP_PID=$!
 }
 
-wait_until_die()
-{
-	sleep infinity &
-	CHILD=$!
-	wait "$CHILD"
-}
-
-setup_dbus()
-{
-	check_apt dbus 
-	/etc/init.d/dbus restart
-}
-
 setup_iptables()
 {
 	check_apt iptables
@@ -171,103 +175,6 @@ setup_iptables()
 	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 443 -j REDIRECT --to-port 1337
 	ip6tables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
 	ip6tables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 443 -j REDIRECT --to-port 1337
-}
-
-setup_hostapd()
-{
-	check_apt hostapd 
-
-	cat > /etc/hostapd/hostapd.conf <<-EOF
-	interface=$AP_IFACE
-	driver=nl80211
-	beacon_int=25
-	ssid=$SSID
-	hw_mode=g
-	channel=6
-	ieee80211n=1
-	ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
-	macaddr_acl=0
-	wmm_enabled=0
-	ignore_broadcast_ssid=0
-	auth_algs=1
-	wpa=2
-	wpa_key_mgmt=WPA-PSK
-	wpa_passphrase=$PASSWORD
-	rsn_pairwise=CCMP
-EOF
-	sed -ri 's|^[;# ]*DAEMON_CONF[ ]*=.*|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
-	sed -ri 's|^[;# ]*DAEMON_OPTS[ ]*=.*|DAEMON_OPTS="-d"|' /etc/default/hostapd
-
-	/etc/init.d/hostapd restart
-}
-
-setup_dhcp()
-{
-	check_apt dnsmasq
-
-	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
-	interface=$AP_IFACE
-	except-interface=$NET_IFACE
-	listen-address=$GATEWAY
-	dhcp-range=${GATEWAY%.*}.50,${GATEWAY%.*}.150,12h
-	bind-interfaces
-	server=114.114.114.114
-	server=8.8.8.8
-	domain-needed
-	bogus-priv
-EOF
-
-	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 255.255.255.0
-	route add -net ${GATEWAY%.*}.0 netmask 255.255.255.0 gw $GATEWAY
-	/etc/init.d/dnsmasq restart
-}
-
-traffic_forward()
-{
-	iptables -F
-	iptables -t nat -F
-	iptables -X
-	iptables -t nat -X
-	iptables -t nat -A POSTROUTING -o "$NET_IFACE" -j MASQUERADE
-	#iptables -A FORWARD -i "$NET_IFACE" -o "$AP_IFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 
-	iptables -A FORWARD -i "$AP_IFACE" -o "$NET_IFACE" -j ACCEPT
-	sysctl -w net.ipv4.ip_forward=1
-	sysctl -w net.ipv6.conf.all.forwarding=1
-}
-
-setup_dnsmasq()
-{
-	check_apt dnsmasq
-
-	cat > /etc/dnsmasq.d/dnsmasq.conf <<-EOF
-	interface=$AP_IFACE
-	except-interface=$NET_IFACE
-	listen-address=$GATEWAY
-	dhcp-range=${GATEWAY%.*}.50,${GATEWAY%.*}.150,12h
-	bind-interfaces
-	server=114.114.114.114
-	server=8.8.8.8
-	domain-needed
-	bogus-priv
-EOF
-
-	ifconfig "$AP_IFACE" up "$GATEWAY" netmask 255.255.255.0
-	route add -net ${GATEWAY%.*}.0 netmask 255.255.255.0 gw $GATEWAY
-	/etc/init.d/dnsmasq restart
-}
-
-on_exit_handler() 
-{
-	iptables -F
-	iptables -t nat -F
-
-	/etc/init.d/dnsmasq stop
-	/etc/init.d/hostapd stop
-	/etc/init.d/dbus stop
-
-	kill $MITMDUMP_PID
-	kill -TERM "$CHILD" 2> /dev/null
-	echo "received shutdown signal, exiting."
 }
 
 release_host_wifi()

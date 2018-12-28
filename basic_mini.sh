@@ -6,7 +6,8 @@ log()         { if [ "$LOGFLAG" != 'off' ]; then echo "$@"; fi }
 log_r()       { log "\033[0;31m$*\033[0m"; }
 log_g()       { log "\033[0;32m$*\033[0m"; }
 log_y()       { log "\033[0;33m$*\033[0m"; }
-cmd_exists()  { type "$(which "$1")" > /dev/null 2>&1; }
+cmd_exists()  { type "$(which $1)" > /dev/null 2>&1; }
+fun_exists()  { type "$1" 2>/dev/null | grep -q 'function'; }
 apt_exists()  { [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -gt 0 ]; }
 check_sudo()  { [ $(whoami) != 'root' ] && log_r "Must be run as root" && exit 1; }
 check_bash()  { [ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit; }
@@ -18,4 +19,3 @@ nocmd_update(){ for cmd in "$@"; do if ! cmd_exists $cmd; then check_update;retu
 check_repo()  { add-apt-repository -y $1; check_update; }
 set_ini()     { if [ $# -eq 1 ];then _crud="$1";check_apt crudini;return;fi;crudini --set $_crud $@; }
 waitfor_die() { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
-
