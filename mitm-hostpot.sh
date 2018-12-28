@@ -40,7 +40,14 @@ make_nat_router()
 	fi
 
 	nocmd_update hostapd
-	check_apt hostapd dnsmasq iptables haveged wireless-tools
+	check_apt wireless-tools
+
+	if ! iw list | grep -E "^\s+\* AP$"; then
+		log_r "Wireless card doesn\'t support AP mode."
+		exit 1
+	fi
+
+	check_apt hostapd dnsmasq iptables haveged 
 
 	#-------------------------------------------------------
 
