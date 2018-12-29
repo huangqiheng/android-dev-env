@@ -8,15 +8,7 @@ NET_IFACE="${NET_IFACE:-eth0}"
 SSID="${SSID:-DangerousHotspot}"
 PASSWORD="${PASSWORD:-DontConnectMe}"
 GATEWAY="${GATEWAY:-192.168.234.1}"
-
 SUBNET="${GATEWAY%.*}.0/24"
-CAPTURE_FILE="${CAPTURE_FILE:-/home/http-traffic.cap}"
-
-main () 
-{
-	MITM_READY=true
-	entry_nat_router
-}
 
 on_internet_ready()
 {
@@ -25,49 +17,12 @@ on_internet_ready()
 		return 0
 	fi
 
-	run_mitmproxy
-}
-
-run_mitmproxy()
-{
-	log_y 'starting mitmproxy'
-
-	nocmd_update mitmdump
-	check_apt iptables 
-
-	if ! cmd_exists mitmdump; then
-		cd /home
-		if [ ! -f mitmproxy-4.0.4-linux.tar.gz ]; then
-			check_apt wget
-			wget https://snapshots.mitmproxy.org/4.0.4/mitmproxy-4.0.4-linux.tar.gz
-		fi
-		tar -xzvf mitmproxy-4.0.4-linux.tar.gz --directory=/usr/bin
-	fi
-
-	mitmdump --mode transparent \
-		--showhost \
-		--rawtcp \
-		--listen-port 1337 \
-		--save-stream-file "$CAPTURE_FILE" "$FILTER" &
+	cd $THIS_DIR
+	sh mitm-mitmproxy.sh &
 	PIDS2KILL="$PIDS2KILL $!"
-
-	iptables -t nat -D PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
-	iptables -t nat -A PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
 }
 
-entry_mitmproxy()
-{
-	run_mitmproxy
-
-	waitfor_die "$(cat <<-EOL
-	iptables -t nat -D PREROUTING -i "$AP_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
-	kill $PIDS2KILL >/dev/null 2>&1
-EOL
-)"
-	return 0
-}
-
-entry_nat_router()
+main () 
 {
 	#----------------------------------------------------- conditions ---
 
@@ -182,8 +137,7 @@ release_host_wifi()
 
 maintain()
 {
-	[ "$1" = 'mitm' ] && entry_mitmproxy && exit
-	[ "$1" = 'nat' ] && entry_nat_router && exit
+	[ "$1" = 'proxy' ] && MITM_READY=true
 	[ "$1" = 'host' ] && release_host_wifi
 	[ "$1" = 'help' ] && show_help_exit
 }
