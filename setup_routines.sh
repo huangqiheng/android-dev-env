@@ -127,6 +127,16 @@ setup_github_go()
 	local owner="$1"
 	local cmd="$2"
 
+	empty_exit $owner 'github owner' 
+
+	if [ "X$cmd" = 'X' ]; then
+		IFS=/; set -- $(echo "$owner"); IFS=
+		owner="$1"
+		cmd="$2"
+	fi
+
+	empty_exit $cmd 'github repo' 
+
 	if cmd_exists "$cmd"; then
 		log_g "$cmd has been installed"
 		return 0
@@ -139,7 +149,7 @@ setup_github_go()
 
 	local cmdPath="$gopath/bin/$cmd"
 	if [ -f "$cmdPath" ]; then
-		cp "$cmdPath" /usr/local/bin
+		ln -sf "$cmdPath" /usr/local/bin/
 		return 0
 	else
 		log_r "$cmd install failure"
