@@ -19,8 +19,6 @@ main ()
 	iptables -t nat -D PREROUTING -i $AP_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666 > /dev/null 2>&1 || true
 	iptables -t nat -A PREROUTING -i $AP_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666
 
-	#iptables_chain_bypass_LAN nat PREROUTING 
-
 	cd "$(go env GOPATH)/src/github.com/kelbyludwig/trudy"
 	trudy &
 	PIDS2KILL="$PIDS2KILL $!"

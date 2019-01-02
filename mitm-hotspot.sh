@@ -26,6 +26,13 @@ on_internet_ready()
 		return 0
 	fi
 
+	if [ "X$MITM_PROXY" = 'Xredsocks' ]; then
+		cd $THIS_DIR
+		sh mitm-redsocks.sh &
+		PIDS2KILL="$PIDS2KILL $!"
+		return 0
+	fi
+
 	log_y 'ignore on_internet_ready'
 }
 
@@ -155,6 +162,7 @@ maintain()
 	[ "$1" = 'help' ] && show_help_exit
 	[ "$1" = 'mitmproxy' ] && MITM_PROXY=mitmproxy
 	[ "$1" = 'trudy' ] && MITM_PROXY=trudy
+	[ "$1" = 'redsocks' ] && MITM_PROXY=redsocks
 }
 
 show_help_exit()

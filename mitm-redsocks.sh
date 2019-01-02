@@ -5,6 +5,11 @@
 
 AP_IFACE="${AP_IFACE:-wlan0}"
 
+set_redsocks()
+{
+	sed -ri "s|^\s*${1}\s*=.*|${1}=${2};|" /etc/redsocks.conf
+}
+
 main () 
 {
 	log_y 'starting redsocks'
@@ -13,32 +18,20 @@ main ()
 	check_apt redsocks
 
 	# https://github.com/darkk/redsocks/blob/master/redsocks.conf.example
-	cat > $CACHE_DIR/redsocks.conf <<-EOF
-	base {
-		log_debug = off;
-		log_info = on;
-		log = stderr;
-		daemon = off;
-		user = nobody;
-		group = nobody;
-		chroot = "/var/chroot";
-		redirector = iptables;
-	}
-	redsocks {
-		local_ip = 127.0.0.1;
-		local_port = 12345;
-		type = socks4;
-		ip = 192.168.2.92;
-		port = 3128;
-	}
-EOF
+	set_redsocks daemon off
+	set_redsocks log_debug on
+	set_redsocks log stderr
+	set_redsocks redirector iptables
+	set_redsocks local_ip 0.0.0.0
+	set_redsocks type http-connect
+	set_redsocks ip 192.168.2.92
+	set_redsocks port 8080
 
 	iptables -t nat -D PREROUTING -i $AP_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
 	iptables -t nat -A PREROUTING -i $AP_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345
 
-	cd $CACHE_DIR
-	redsocks
-	PIDS2KILL="$PIDS2KILL $!"
+	redsocks -p /tmp/redsocks.pid &
+	PIDS2KILL="$PIDS2KILL $(cat /tmp/redsocks.pid) $!"
 
 	waitfor_die "$(cat <<-EOL
 	iptables -t nat -D PREROUTING -i $AP_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
