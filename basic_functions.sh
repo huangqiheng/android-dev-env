@@ -353,6 +353,16 @@ nocmd_udpate()
 	done
 }
 
+nocmd_update()
+{ 
+	for cmd in "$@"; do 
+		if ! cmd_exists $cmd; then 
+			check_update
+			return 0
+		fi 
+	done 
+}
+
 check_update()
 {
 	check_sudo

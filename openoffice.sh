@@ -5,14 +5,18 @@
 
 main () 
 {
-	add-apt-repository ppa:libreoffice/libreoffice-prereleases
-	apt-get update
-	apt-get install libreoffice
+	nocmd_update libreoffice
+
+	if  uname -n | grep kali; then
+		apt-get install libreoffice
+	else
+		add-apt-repository ppa:libreoffice/libreoffice-prereleases
+		apt-get install libreoffice
+	fi
 }
 
 maintain()
 {
-	check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 
