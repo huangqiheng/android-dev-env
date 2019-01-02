@@ -12,14 +12,21 @@ SUBNET="${GATEWAY%.*}.0/24"
 
 on_internet_ready()
 {
-	if [ ! "X$MITM_READY" = Xtrue ]; then
-		log_y 'ignore on_internet_ready'
+	if [ "X$MITM_PROXY" = 'Xmitmproxy' ]; then
+		cd $THIS_DIR
+		sh mitm-mitmproxy.sh &
+		PIDS2KILL="$PIDS2KILL $!"
 		return 0
 	fi
 
-	cd $THIS_DIR
-	sh mitm-mitmproxy.sh &
-	PIDS2KILL="$PIDS2KILL $!"
+	if [ "X$MITM_PROXY" = 'Xtrudy' ]; then
+		cd $THIS_DIR
+		sh mitm-trudy.sh &
+		PIDS2KILL="$PIDS2KILL $!"
+		return 0
+	fi
+
+	log_y 'ignore on_internet_ready'
 }
 
 main () 
@@ -135,11 +142,19 @@ release_host_wifi()
 	exit 0
 }
 
+tcpdump_exit()
+{
+	tcpdump -i $AP_IFACE
+	exit 0
+}
+
 maintain()
 {
-	[ "$1" = 'proxy' ] && MITM_READY=true
+	[ "$1" = 'dump' ] && tcpdump_exit
 	[ "$1" = 'host' ] && release_host_wifi
 	[ "$1" = 'help' ] && show_help_exit
+	[ "$1" = 'mitmproxy' ] && MITM_PROXY=mitmproxy
+	[ "$1" = 'trudy' ] && MITM_PROXY=trudy
 }
 
 show_help_exit()
