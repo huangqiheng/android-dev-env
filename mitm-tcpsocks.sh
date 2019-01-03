@@ -9,6 +9,7 @@ main ()
 {
 	log_y 'starting tcpsocks'
 
+	nocmd_update tcpsocks
 	check_apt iptables 
 
 	cd $RUN_DIR
@@ -37,7 +38,6 @@ EOL
 
 maintain()
 {
-	check_update
 	[ "$1" = 'help' ] && show_help_exit
 }
 
