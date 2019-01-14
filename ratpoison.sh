@@ -68,8 +68,18 @@ install_wallpaper()
 
 	#exec nitrogen --head=0 --restore --set-zoom-fill
 	#exec nitrogen --head=1 --restore --set-zoom-fill
-	ratpoisonrc "exec nitrogen --set-zoom-fill --restore $DATA_DIR/images"
+	ratpoisonrc "exec nitrogen --random --set-zoom-fill --restore $DATA_DIR/images"
 	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
+
+	cat > $HOME/.config/nitrogen/bg-saved.cfg <<-EOL
+	[xin_0]
+	file=/home/and/install-scripts/data/images/skylake.jpg
+	mode=5
+	bgcolor=#000000
+EOL
+
+	set_ini $HOME/.config/nitrogen/nitrogen.cfg
+	set_ini nitrogen dirs "$DATA_DIR/images;"
 }
 
 install_browser()
