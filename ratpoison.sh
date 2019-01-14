@@ -84,8 +84,8 @@ install_browser()
 install_terminal()
 {
 	install_terminals
-	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind C-c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 	ratpoisonrc "bind M-c exec lxterminal"
 	ratpoisonrc "bind M-C exec tmux"
 }
@@ -93,6 +93,16 @@ install_terminal()
 install_ratpoison()
 {
 	check_apt xinit ratpoison 
+
+	cat > /usr/share/xsessions/ratpoison.desktop <<-EOL
+	[Desktop Entry]
+	Encoding=UTF-8
+	Name=Ratpoison
+	Comment=Start Ratpoison as your window manager
+	Exec=ratpoison
+	Icon=
+	Type=Application
+EOL
 	
 	ratpoisonrc "exec rpws init 6 -k"
 	ratpoisonrc "bind M-1 exec rpws 1"

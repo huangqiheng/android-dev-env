@@ -10,12 +10,16 @@ main ()
 	userName="$1"
 	passWord="$2"
 
-	if [ -z $userName ] || [ -z $passWord ]; then
-		show_help_exit
+	empty_exists $userName 'UserName'
+	empty_exists $passWord 'PassWord'
+
+	if [ "$passWord" = 'remove' ]; then
+		userdel -r -f "$userName"
+		return
 	fi
 
 	if [ -d "/home/$userName" ]; then
-		useradd -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
+		useradd    -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
 	else
 		useradd -m -p $(openssl passwd -1 $passWord) -s /bin/bash $userName
 	fi
@@ -43,6 +47,7 @@ show_help_exit()
 {
 	cat << EOL
 	sudo sh sudo-user.sh USERNAME PASSWORD
+	sudo sh sudo-user.sh USERNAME remove
 EOL
 	exit 0
 }
