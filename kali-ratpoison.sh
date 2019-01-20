@@ -79,8 +79,8 @@ install_browser()
 install_terminal()
 {
 	install_terminals
-	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind C-c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 	ratpoisonrc "bind M-c exec lxterminal"
 	ratpoisonrc "bind M-C exec tmux"
 }
