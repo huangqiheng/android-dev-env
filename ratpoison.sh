@@ -68,8 +68,18 @@ install_wallpaper()
 
 	#exec nitrogen --head=0 --restore --set-zoom-fill
 	#exec nitrogen --head=1 --restore --set-zoom-fill
-	ratpoisonrc "exec nitrogen --set-zoom-fill --restore $DATA_DIR/images"
+	ratpoisonrc "exec nitrogen --random --set-zoom-fill --restore $DATA_DIR/images"
 	ratpoisonrc "exec xcompmgr -c -f -D 5 &"
+
+	cat > $HOME/.config/nitrogen/bg-saved.cfg <<-EOL
+	[xin_0]
+	file=/home/and/install-scripts/data/images/skylake.jpg
+	mode=5
+	bgcolor=#000000
+EOL
+
+	set_ini $HOME/.config/nitrogen/nitrogen.cfg
+	set_ini nitrogen dirs "$DATA_DIR/images;"
 }
 
 install_browser()
@@ -84,8 +94,8 @@ install_browser()
 install_terminal()
 {
 	install_terminals
-	ratpoisonrc "bind c exec xterm -rv -fa nonaco -fs 10"
-	ratpoisonrc "bind C-c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind c exec xterm -fa nonaco -fs 10"
+	ratpoisonrc "bind C-c exec xterm -rv -fa nonaco -fs 10"
 	ratpoisonrc "bind M-c exec lxterminal"
 	ratpoisonrc "bind M-C exec tmux"
 }
@@ -93,6 +103,16 @@ install_terminal()
 install_ratpoison()
 {
 	check_apt xinit ratpoison 
+
+	cat > /usr/share/xsessions/ratpoison.desktop <<-EOL
+	[Desktop Entry]
+	Encoding=UTF-8
+	Name=Ratpoison
+	Comment=Start Ratpoison as your window manager
+	Exec=ratpoison
+	Icon=
+	Type=Application
+EOL
 	
 	ratpoisonrc "exec rpws init 6 -k"
 	ratpoisonrc "bind M-1 exec rpws 1"
