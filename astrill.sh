@@ -5,6 +5,9 @@
 
 main () 
 {
+	check_apt language-pack-zh-hans
+	check_apt libgtk2.0-0
+
 	cloudinit_remove
 	auto_login
 	auto_startx
@@ -25,13 +28,25 @@ main ()
 	apt autoremove
 }
 
+x11_forward_server()
+{
+	log_g 'setting ssh server'
+	check_update_once
+	check_apt xauth
+
+	set_conf /etc/ssh/sshd_config
+	set_conf X11Forwarding yes ' '
+	set_conf X11DisplayOffset 10 ' '
+	set_conf X11UseLocalhost no ' '
+
+	cat /var/run/sshd.pid | xargs kill -1
+}
+
+
 help_text()
 {
 	cat << EOL
   astrill: 0.0.0.0:3128
-  ssocks:  0.0.0.0:7070
-  tor:     0.0.0.0:9050
-  http:    0.0.0.0:8213
 EOL
 }
 
