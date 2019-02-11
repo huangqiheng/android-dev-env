@@ -19,6 +19,7 @@ main ()
 	check_apt xvfb
 	ratpoisonrc "exec Xvfb :1 -screen 0 1920x1080x24 -fbdir /var/tmp &"
 	ratpoisonrc "exec DISPLAY=:1 /usr/local/Astrill/astrill"
+	setup_socat 3213 3128
 
 	# others, for test
 	ratpoisonrc_done
@@ -26,6 +27,15 @@ main ()
 	x11_forward_server
 	help_text
 	apt autoremove
+}
+
+setup_socat()
+{
+	localport=$1
+	openport=$2
+
+	check_apt socat 
+	ratpoisonrc "exec socat tcp-listen:${openport},reuseaddr,fork tcp:localhost:${localport} &"
 }
 
 x11_forward_server()
