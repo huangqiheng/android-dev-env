@@ -572,7 +572,7 @@ EOL
 
 auto_startx()
 {
-	bashrc startx "if [ \"$(tty)\" = \"/dev/tty1\" ]; then startx $1; fi"
+	bashrc startx "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then startx $1; fi"
 }
 
 full_sources()
