@@ -12,23 +12,34 @@ SUBNET="${GATEWAY%.*}.0/24"
 
 on_internet_ready()
 {
+	cd $THIS_DIR
+
 	if [ "X$MITM_PROXY" = 'Xmitmproxy' ]; then
-		cd $THIS_DIR
 		sh mitm-mitmproxy.sh &
 		PIDS2KILL="$PIDS2KILL $!"
 		return 0
 	fi
 
 	if [ "X$MITM_PROXY" = 'Xtrudy' ]; then
-		cd $THIS_DIR
 		sh mitm-trudy.sh &
 		PIDS2KILL="$PIDS2KILL $!"
 		return 0
 	fi
 
 	if [ "X$MITM_PROXY" = 'Xredsocks' ]; then
-		cd $THIS_DIR
 		sh mitm-redsocks.sh &
+		PIDS2KILL="$PIDS2KILL $!"
+		return 0
+	fi
+
+	if [ "X$MITM_PROXY" = 'Xredsocks2' ]; then
+		sh mitm-redsocks2.sh &
+		PIDS2KILL="$PIDS2KILL $!"
+		return 0
+	fi
+
+	if [ "X$MITM_PROXY" = 'Xtcpsocks' ]; then
+		sh mitm-tcpsocks.sh &
 		PIDS2KILL="$PIDS2KILL $!"
 		return 0
 	fi
@@ -163,14 +174,15 @@ maintain()
 	[ "$1" = 'mitmproxy' ] && MITM_PROXY=mitmproxy
 	[ "$1" = 'trudy' ] && MITM_PROXY=trudy
 	[ "$1" = 'redsocks' ] && MITM_PROXY=redsocks
+	[ "$1" = 'tcpsocks' ] && MITM_PROXY=tcpsocks
 }
 
 show_help_exit()
 {
 	local thisFile=$(basename $THIS_SCRIPT)
 	cat <<- EOL
-	AP_IFACE=wlan0 NET_IFACE=eth0 sh $thisFile ;; run in docker
-	AP_IFACE=wlan0 sudo sh $thisFile release	;; run in host
+	AP_IFACE=wlan0 NET_IFACE=eth0 
+	sudo sh $thisFile (tcpsocks|redsocks|trudy|mitmproxy)
 EOL
 	exit 0
 }

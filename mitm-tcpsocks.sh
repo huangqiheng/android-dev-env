@@ -4,6 +4,8 @@
 . $THIS_DIR/setup_routines.sh
 
 AP_IFACE="${AP_IFACE:-wlan0}"
+SOCKS_HOST="${HOST:-127.0.0.1}"
+SOCKS_PORT="${PORT:-3128}"
 
 main () 
 {
@@ -26,7 +28,7 @@ main ()
 	iptables -t nat -D PREROUTING -i $AP_IFACE -p tcp  -j REDIRECT --to-ports 1234 > /dev/null 2>&1 || true
 	iptables -t nat -A PREROUTING -i $AP_IFACE -p tcp  -j REDIRECT --to-ports 1234
 
-	tcpsocks 0.0.0.0 1234 REDIRECT REDIRECT 192.168.2.92 7070 &
+	tcpsocks 0.0.0.0 1234 REDIRECT REDIRECT "$SOCKS_HOST" "$SOCKS_PORT" &
 	PIDS2KILL="$PIDS2KILL $!"
 
 	waitfor_die "$(cat <<-EOL
