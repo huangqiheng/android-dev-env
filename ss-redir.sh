@@ -5,8 +5,6 @@
 
 main () 
 {
-	apt install --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libmbedtls-dev libsodium-dev libc-ares-dev
-
 	#---------------------------------------------
 
 	cd $CACHE_DIR
@@ -16,6 +14,7 @@ main ()
 	fi
 
 	if [ ! -f /usr/lib/libsodium.a ]; then 
+		hit_once
 		tar xvf libsodium-$LIBSODIUM_VER.tar.gz
 		cd libsodium-stable
 		./configure --prefix=/usr && make
@@ -34,6 +33,7 @@ main ()
 	fi
 
 	if [ ! -f /usr/lib/libmbedcrypto.a ]; then 
+		hit_once
 		tar xvf mbedtls-$MBEDTLS_VER-gpl.tgz
 		cd mbedtls-$MBEDTLS_VER
 		make SHARED=1 CFLAGS=-fPIC
@@ -53,6 +53,7 @@ main ()
 	fi
 
 	if [ ! -f /usr/local/bin/ss-redir ]; then
+		hit_once
 		cd shadowsocks-libev
 		./autogen.sh && ./configure && make
 		make install
@@ -60,6 +61,36 @@ main ()
 
 	log_y 'done: ss-local ss-tunnel ss-server ss-manager ss-redir'
 }
+
+__hit_once_flag=false
+
+hit_once()
+{
+	if [ "$__hit_once_flag" = 'true' ]; then
+		return
+	fi
+	__hit_once_flag=true
+
+	apt install --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libmbedtls-dev libsodium-dev libc-ares-dev
+}
+
+
+server_config()
+{
+	mkdir -p /etc/ss-libev
+	cat > /etc/ss-libev/ss-server.config <<EOL
+{
+        "server":"${1}",
+        "mode":"tcp_and_udp",
+        "server_port":6666,
+        "password":"${2}",
+        "method":"aes-256-gcm",
+        "timeout":300,
+        "fast_open":false
+}
+EOL
+}
+
 
 maintain()
 {
