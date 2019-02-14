@@ -71,7 +71,7 @@ hit_once()
 	fi
 	__hit_once_flag=true
 
-	apt install --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libmbedtls-dev libsodium-dev libc-ares-dev
+	apt install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libmbedtls-dev libsodium-dev libc-ares-dev
 }
 
 
