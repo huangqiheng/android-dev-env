@@ -8,7 +8,7 @@ main ()
 	#---------------------------------------------
 
 	cd $CACHE_DIR
-	export LIBSODIUM_VER=stable-2019-02-13
+	export LIBSODIUM_VER=1.0.17
 	if [ ! -f libsodium-$LIBSODIUM_VER.tar.gz ]; then
 		wget https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VER.tar.gz
 	fi
@@ -16,7 +16,7 @@ main ()
 	if [ ! -f /usr/lib/libsodium.a ]; then 
 		hit_once
 		tar xvf libsodium-$LIBSODIUM_VER.tar.gz
-		cd libsodium-stable
+		cd libsodium-$LIBSODIUM_VER
 		./configure --prefix=/usr && make
 		make install
 		ldconfig
