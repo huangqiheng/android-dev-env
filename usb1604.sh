@@ -4,13 +4,13 @@
 . $THIS_DIR/setup_routines.sh
 
 ## http://bernaerts.dyndns.org/linux/75-debian/53-debian-server-compact-flash
-## only one root partition formated with ext2
-## no swap partition
+## (1) only one root partition formated with ext2
+## (2) no swap partition
 
 main() 
 {
 	check_update
-	check_apt libblockdev-crypto2 libblockdev-mdraid2
+	#check_apt libblockdev-crypto2 libblockdev-mdraid2
 
 	handle_fstab
 	link_mtab
@@ -25,6 +25,7 @@ set_permanent()
 {
 	mkdir -p "$1"
 	chmod 777 "$1"
+	log_y "prepare $1"
 }
 
 add_fstab_tmpfs()
@@ -33,11 +34,13 @@ add_fstab_tmpfs()
 	if ! grep -q "$target_str" /etc/fstab; then
 		echo $target_str >> /etc/fstab  
 	fi
+	log_y "ensure tmpfs: $target_str"
 }
 
 disable_swap()
 {
 	sed -i '/\sswap\s/s/^/#/' /etc/fstab 
+	log_y 'remove swap partition'
 }
 
 handle_fstab()
@@ -49,15 +52,18 @@ handle_fstab()
 	add_fstab_tmpfs /var/log
 	add_fstab_tmpfs /var/mail
 
-	rootLine=$(sed -n "/\s\/\s/p" /etc/fstab)
+	rootLine=$(sed -n "/\s\/\s*ext/p" /etc/fstab)
 	IFS=' '; set -- $rootLine
 	sed -i "/\s\/\s/s/$4 $5 $6/noatime 0 1/" /etc/fstab
+	
+	log_y "ensure root: $rootLine"
 }
 
 link_mtab()
 {
 	rm -f /etc/mtab
 	ln -s /proc/mounts /etc/mtab
+	log_y 'link /etc/mtab'
 }
 
 set_apt_env()
@@ -99,6 +105,7 @@ esac
 EOL
 	chmod +x /etc/init.d/apt-tmpfs
 	update-rc.d apt-tmpfs defaults 90 10
+	log_y 'prepare apt tempfs'
 }
 
 daily_clean_tmp()
@@ -113,6 +120,7 @@ daily_clean_tmp()
 
 ls /tmp/test/* -t1 | sed '1,4d' | sed 's/\(.*\)/"\1"/g' | xargs rm -f $$.dummy
 EOL
+	log_y 'clean daily rubbish'
 }
 
 disable_bash_history()
@@ -123,6 +131,7 @@ disable_bash_history()
 		set_comt on '#' 'unset HISTFILESIZE'
 		set_comt on '#' 'unset HISTSIZE'
 	done
+	log_y 'disalbe bash history'
 }
 
 set_kernel_behavior()
@@ -134,6 +143,7 @@ set_kernel_behavior()
 	set_conf vm.dirty_expire_centisecs 12000
 	set_conf vm.dirty_ratio 10
 	set_conf vm.dirty_background_ratio 1
+	log_y 'set kernel behavior'
 }
 
 maintain()
