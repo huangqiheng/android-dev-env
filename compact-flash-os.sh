@@ -3,6 +3,10 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
+## http://bernaerts.dyndns.org/linux/75-debian/53-debian-server-compact-flash
+## only one root partition formated with ext2
+## no swap partition
+
 main () 
 {
 	check_apt libblockdev-crypto2 libblockdev-mdraid2
