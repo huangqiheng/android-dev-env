@@ -59,8 +59,25 @@ main ()
 		make install
 	fi
 
-	log_y 'done: ss-local ss-tunnel ss-server ss-manager ss-redir'
+	log_y 'ready: ss-local ss-tunnel ss-server ss-manager ss-redir'
+
+	server_config
 }
+
+
+repo_install()
+{
+	if lsb_release -d | grep -iq 'Ubuntu 16.04'; then
+		apt install software-properties-common -y
+		add-apt-repository ppa:max-c-lv/shadowsocks-libev -y
+		apt update -y
+		apt install -y shadowsocks-libev
+
+		server_config
+		exit 0
+	fi
+}
+
 
 __hit_once_flag=false
 
@@ -71,24 +88,33 @@ hit_once()
 	fi
 	__hit_once_flag=true
 
-	apt install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libmbedtls-dev libsodium-dev libc-ares-dev
+	apt install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libc-ares-dev
+
+	#apt install libmbedtls-dev libsodium-dev 
 }
 
 
 server_config()
 {
+	local host='serverip'
+	local port='6666'
+	local pass='password'
+
+
 	mkdir -p /etc/ss-libev
 	cat > /etc/ss-libev/ss-server.config <<EOL
 {
-        "server":"${1}",
+        "server":"${host}",
         "mode":"tcp_and_udp",
-        "server_port":6666,
-        "password":"${2}",
-        "method":"aes-256-gcm",
+        "server_port": "${port}",
+        "password":"${pass}",
+        "method":"xchacha20-ietf-poly1305",
         "timeout":300,
         "fast_open":false
 }
 EOL
+
+	log_y 'Please edit: /etc/ss-libev/ss-server.config'
 }
 
 
