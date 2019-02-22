@@ -86,6 +86,11 @@ chownUser()
 	chown -R $RUN_USER:$RUN_USER $1
 }
 
+chownHome()
+{
+	chown -R $RUN_USER:$RUN_USER $UHOME
+}
+
 get_public_ip()
 {
 	curl -4 icanhazip.com
