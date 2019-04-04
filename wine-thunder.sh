@@ -16,7 +16,7 @@ main ()
 	if [ ! -d $RUN_DIR/wine-thunder-for-linux ]; then
 		cd $DATA_DIR
 		tar xzvf wine-thunder-for-linux.tar.gz -C $RUN_DIR
-		chownUser wine-thunder-for-linux
+		chownUser $RUN_DIR/wine-thunder-for-linux
 	fi
 
 	if [ ! -d $UHOME/download ]; then
