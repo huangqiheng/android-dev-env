@@ -43,9 +43,12 @@ install_virtualbox()
 
 install_utils()
 {
+	check_apt proxychains
 	check_apt xclip
 	check_apt shutter
 	check_apt keynav
+
+	ratpoisonrc "exec keynav &"
 }
 
 install_wallpaper()

@@ -3,6 +3,16 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
+x11_forward_client()
+{
+	log_g 'setting ssh client'
+	cat > $UHOME/.ssh/config <<EOL
+Host *
+  ForwardAgent yes
+  ForwardX11 yes
+EOL
+}
+
 main () 
 {
 	num_param=$#
