@@ -10,7 +10,11 @@ main ()
 	cd $CACHE_DIR
 	export LIBSODIUM_VER=1.0.17
 	if [ ! -f libsodium-$LIBSODIUM_VER.tar.gz ]; then
-		wget https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VER.tar.gz
+		if [ -f $DATA_DIR/libsodium-$LIBSODIUM_VER.tar.gz ]; then
+			cp $DATA_DIR/libsodium-$LIBSODIUM_VER.tar.gz ./
+		else
+			wget https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VER.tar.gz
+		fi
 	fi
 
 	if [ ! -f /usr/lib/libsodium.a ]; then 
@@ -29,7 +33,11 @@ main ()
 	cd $CACHE_DIR
 	export MBEDTLS_VER=2.16.0
 	if [ ! -f mbedtls-$MBEDTLS_VER-gpl.tgz ]; then
-		wget https://tls.mbed.org/download/mbedtls-$MBEDTLS_VER-gpl.tgz
+		if [ -f $DATA_DIR/mbedtls-$MBEDTLS_VER-gpl.tgz ]; then
+			cp $DATA_DIR/mbedtls-$MBEDTLS_VER-gpl.tgz ./
+		else
+			wget https://tls.mbed.org/download/mbedtls-$MBEDTLS_VER-gpl.tgz
+		fi
 	fi
 
 	if [ ! -f /usr/lib/libmbedcrypto.a ]; then 
