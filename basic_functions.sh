@@ -76,6 +76,11 @@ ipaddr_to_iface()
 	ifconfig | grep -B1 "$1" | grep -o "^\w*"
 }
 
+iface_to_ipaddr()
+{
+	ifconfig | grep -A1 "$1" | grep "inet " | head -1 | awk -F' ' '{print $2}'
+}
+
 runUser()
 {
 	runuser -l $RUN_USER -c "$1"
@@ -194,13 +199,13 @@ set_conf()
 	fi
 
 	if [ $num_param -eq 2 ]; then
-		if grep "${1}\s*=\s*" $__ini_file; then
+		if grep -q "${1}\s*=\s*" $__ini_file; then
 			sed -ri "s|^[;# ]*${1}[ ]*=.*|${1}=${2}|" $__ini_file
 		else
 			echo "${1}=${2}" >> $__ini_file
 		fi
 	else
-		if grep "${1}\s*${3}\s*" $__ini_file; then
+		if grep -q "${1}\s*${3}\s*" $__ini_file; then
 			sed -ri "s|^[;# ]*${1}[ ]*${3}.*|${1}${3}${2}|" $__ini_file
 		else
 			echo "${1}${3}${2}" >> $__ini_file

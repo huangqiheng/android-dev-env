@@ -1,5 +1,68 @@
 #!/bin/sh
 
+
+install_chinadns()
+{
+	if  cmd_exists 'chinadns'; then
+		log_y 'chinadns is ready'
+		return
+	fi
+
+	local chinadns=chinadns-1.3.2
+	cd $CACHE_DIR
+	if [ ! -f ${chinadns}.tar.gz ]; then
+		wget https://github.com/shadowsocks/ChinaDNS/releases/download/1.3.2/${chinadns}.tar.gz
+	fi
+	tar xf ${chinadns}.tar.gz
+	cd ${chinadns}
+	./configure
+	make && make install
+}
+
+install_ssredir()
+{
+	check_apt haveged rng-tools shadowsocks-libev
+
+	if [ ! -f /etc/shadowsocks-libev/bwghost.json ]; then
+		read -p "Please input Shadowsocks server: " inputServer 
+
+		if [ -z "$inputServer" ]; then
+			log 'inputed server error'
+			exit 1
+		fi
+
+		read -p "Input PASSWORD: " inputPass
+
+		if [ -z "$inputPass" ]; then
+			log 'pasword must be set'
+			exit 2
+		fi
+
+		cat > /etc/shadowsocks-libev/bwghost.json <<EOL
+{
+	"server":"${inputServer}",
+	"password":"${inputPass}",
+        "mode":"tcp_and_udp",
+        "server_port":16666,
+        "local_address": "0.0.0.0",
+        "local_port":6666,
+        "method":"xchacha20-ietf-poly1305",
+        "timeout":300,
+        "fast_open":false
+}
+EOL
+	else
+		inputServer=$(grep '"server":' /etc/shadowsocks-libev/bwghost.json | tr '":,' ' ' | awk -F' ' '{print $2}')
+	fi
+
+	log_y "shadowsocks server: $inputServer"
+
+	systemctl enable shadowsocks-libev-redir@bwghost
+	systemctl daemon-reload
+	systemctl start shadowsocks-libev-redir@bwghost
+}
+
+
 install_terminals()
 {
 	check_apt xterm 

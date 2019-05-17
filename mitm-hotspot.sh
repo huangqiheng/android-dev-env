@@ -99,6 +99,8 @@ EOF
 	#--------------------------------------------------------- dhcp -----
 	log_y 'starting dnsmasq dhcp'
 
+	systemctl stop systemd-resolved
+	systemctl disable systemd-resolved
 	check_apt dnsmasq
 
 	cat > /home/dnsmasq.conf <<-EOF

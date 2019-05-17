@@ -5,6 +5,13 @@
 
 main () 
 {
+	ssver=$(dpkg-query --show --showformat '${Version}' shadowsocks-libev)
+
+	if dpkg --compare-versions "$ssver" gt 3.1.2; then
+		install_ssredir
+		exit 0
+	fi
+
 	#---------------------------------------------
 
 	cd $CACHE_DIR
