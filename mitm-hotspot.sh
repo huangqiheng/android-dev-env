@@ -2,13 +2,21 @@
 
 . $(dirname $(readlink -f $0))/basic_mini.sh
 
-AP_IFACE="${AP_IFACE:-wlan0}"
-NET_IFACE="${NET_IFACE:-eth0}"
-
 SSID="${SSID:-DangerousHotspot}"
 PASSWORD="${PASSWORD:-DontConnectMe}"
-GATEWAY="${GATEWAY:-192.168.234.1}"
-SUBNET="${GATEWAY%.*}.0/24"
+
+export_hotspot_config()
+{
+	check_apt lshw
+	local ap_iface=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g')
+	local gateway=$(ifconfig | grep -A1 "$ap_iface" | grep "inet " | head -1 | awk -F' ' '{print $2}')
+	local net_iface=$(route | grep '^default' | grep -o '[^ ]*$')
+
+	export AP_IFACE="${AP_IFACE:-$ap_iface}"
+	export NET_IFACE="${NET_IFACE:-$net_iface}"
+	export GATEWAY="${GATEWAY:-$gateway}"
+	export SUBNET="${GATEWAY%.*}.0/24"
+}
 
 on_internet_ready()
 {
@@ -49,6 +57,8 @@ on_internet_ready()
 
 main () 
 {
+	export_hotspot_config
+
 	#----------------------------------------------------- conditions ---
 
 	if [ ! -w '/sys' ]; then

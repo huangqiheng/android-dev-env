@@ -1,0 +1,110 @@
+#!/bin/dash
+
+. $(dirname $(readlink -f $0))/basic_functions.sh
+. $THIS_DIR/setup_routines.sh
+
+main () 
+{
+	#----------------------------------------------- install ss-redir
+
+	check_apt haveged rng-tools shadowsocks-libev
+	check_apt jq
+
+	confile=/etc/shadowsocks-libev/ssredir.json
+	if [ ! -f "$confile" ]; then
+		read -p "Please input Shadowsocks server: " inputServer 
+
+		if [ -z "$inputServer" ]; then
+			log 'inputed server error'
+			exit 1
+		fi
+
+		read -p "Input PASSWORD: " inputPass
+
+		if [ -z "$inputPass" ]; then
+			log 'pasword must be set'
+			exit 2
+		fi
+
+		cat > "$confile" <<EOL
+{
+	"server":"${inputServer}",
+	"password":"${inputPass}",
+        "mode":"tcp_and_udp",
+        "server_port":16666,
+        "local_address": "0.0.0.0",
+        "local_port":6666,
+        "method":"xchacha20-ietf-poly1305",
+        "timeout":300,
+        "fast_open":false
+}
+EOL
+	fi
+
+	log_y "shadowsocks server: $inputServer"
+
+	inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
+	server_port=$(cat $confile | jq -c '.server_port')
+	local_port=$(cat $confile | jq -c '.local_port')
+
+	#------------------------------------------------ install ss-tproxy
+
+	check_apt ipset iproute2 perl curl
+	install_chinadns
+
+	if ! cmd_exists 'ss-tproxy'; then
+		cd $CACHE_DIR
+
+		if [ ! -d ss-tproxy ]; then
+			git clone https://github.com/zfl9/ss-tproxy
+		fi
+
+		cd ss-tproxy
+		cp -af ss-tproxy /usr/local/bin
+		chmod 0755 /usr/local/bin/ss-tproxy
+		chown root:root /usr/local/bin/ss-tproxy
+
+		mkdir -m 0755 -p /etc/ss-tproxy
+		cp -af ss-tproxy.conf gfwlist.* chnroute.* /etc/ss-tproxy
+		chmod 0644 /etc/ss-tproxy/* 
+		chown -R root:root /etc/ss-tproxy
+	fi
+
+	set_conf /etc/ss-tproxy/ss-tproxy.conf
+	set_conf proxy_server "\(${inputServer}\)"
+	set_conf proxy_dports "\'${server_port}\'"
+	set_conf proxy_tcport "\'${local_port}\'"
+	set_conf proxy_udport "\'${local_port}\'"
+	set_conf proxy_runcmd "\'ss-redir -c ${confile}\'"
+	set_conf proxy_kilcmd "\'kill -9 \$(pidof ssr-redir)\'"
+	set_conf ipts_intranet "\(${SUBNET}\)"
+
+	ss-tproxy start
+
+	waitfor_die "$(cat <<-EOL
+	ss-tproxy stop
+	ss-tproxy flush-iptables
+EOL
+)"
+	return 0
+}
+
+maintain()
+{
+	if [ -z "$SUBNET" ]; then
+		log_y 'Please call by mitm-hotspot.sh'
+		exit 1
+	fi
+
+	check_update
+	[ "$1" = 'help' ] && show_help_exit
+}
+
+show_help_exit()
+{
+	cat << EOL
+EOL
+	exit 0
+}
+
+maintain "$@"; main "$@"; exit $?
