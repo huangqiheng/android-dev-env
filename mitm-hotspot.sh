@@ -11,6 +11,7 @@ export_hotspot_config()
 	local ap_iface=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g')
 	local gateway=$(ifconfig | grep -A1 "$ap_iface" | grep "inet " | head -1 | awk -F' ' '{print $2}')
 	local net_iface=$(route | grep '^default' | grep -o '[^ ]*$')
+	gateway="${gateway:-192.168.234.1}"
 
 	export AP_IFACE="${AP_IFACE:-$ap_iface}"
 	export NET_IFACE="${NET_IFACE:-$net_iface}"
@@ -21,6 +22,12 @@ export_hotspot_config()
 on_internet_ready()
 {
 	cd $THIS_DIR
+
+	if [ "X$MITM_PROXY" = 'Xssredir' ]; then
+		sh mitm-ssredir.sh &
+		PIDS2KILL="$PIDS2KILL $!"
+		return 0
+	fi
 
 	if [ "X$MITM_PROXY" = 'Xmitmproxy' ]; then
 		sh mitm-mitmproxy.sh &
@@ -183,6 +190,7 @@ maintain()
 	[ "$1" = 'dump' ] && tcpdump_exit
 	[ "$1" = 'host' ] && release_host_wifi
 	[ "$1" = 'help' ] && show_help_exit
+	[ "$1" = 'ssredir' ] && MITM_PROXY=ssredir
 	[ "$1" = 'mitmproxy' ] && MITM_PROXY=mitmproxy
 	[ "$1" = 'trudy' ] && MITM_PROXY=trudy
 	[ "$1" = 'redsocks' ] && MITM_PROXY=redsocks

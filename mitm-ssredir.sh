@@ -12,24 +12,10 @@ main ()
 
 	confile=/etc/shadowsocks-libev/ssredir.json
 	if [ ! -f "$confile" ]; then
-		read -p "Please input Shadowsocks server: " inputServer 
-
-		if [ -z "$inputServer" ]; then
-			log 'inputed server error'
-			exit 1
-		fi
-
-		read -p "Input PASSWORD: " inputPass
-
-		if [ -z "$inputPass" ]; then
-			log 'pasword must be set'
-			exit 2
-		fi
-
 		cat > "$confile" <<EOL
 {
-	"server":"${inputServer}",
-	"password":"${inputPass}",
+	"server":"",
+	"password":"",
         "mode":"tcp_and_udp",
         "server_port":16666,
         "local_address": "0.0.0.0",
@@ -39,13 +25,17 @@ main ()
         "fast_open":false
 }
 EOL
+		log_y "Please input SERVER and PASSWORD in ${confile}"
+		exit 1
 	fi
 
-	log_y "shadowsocks server: $inputServer"
-
 	inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
+	password=$(cat $confile | jq -c '.password' | tr -d '"')
 	server_port=$(cat $confile | jq -c '.server_port')
 	local_port=$(cat $confile | jq -c '.local_port')
+
+	empty_exit "$inputServer" "inputed server in $confile"
+	empty_exit "$password" "inputed password in $confile"
 
 	#------------------------------------------------ install ss-tproxy
 
@@ -75,13 +65,17 @@ EOL
 	set_conf proxy_dports "\'${server_port}\'"
 	set_conf proxy_tcport "\'${local_port}\'"
 	set_conf proxy_udport "\'${local_port}\'"
-	set_conf proxy_runcmd "\'ss-redir -c ${confile}\'"
-	set_conf proxy_kilcmd "\'kill -9 \$(pidof ssr-redir)\'"
+	set_conf proxy_runcmd "\'true\'"
+	set_conf proxy_kilcmd "\'true\'"
 	set_conf ipts_intranet "\(${SUBNET}\)"
+
+	ss-redir -c ${confile} &
+	PIDS2KILL="$PIDS2KILL $!"
 
 	ss-tproxy start
 
 	waitfor_die "$(cat <<-EOL
+	kill $PIDS2KILL >/dev/null 2>&1
 	ss-tproxy stop
 	ss-tproxy flush-iptables
 EOL
