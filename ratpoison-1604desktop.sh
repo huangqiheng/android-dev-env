@@ -65,7 +65,7 @@ install_wallpaper()
 
 	cat > $HOME/.config/nitrogen/bg-saved.cfg <<-EOL
 	[xin_0]
-	file=/home/and/install-scripts/data/images/skylake.jpg
+	file=${DATA_DIR}/images/skylake.jpg
 	mode=5
 	bgcolor=#000000
 EOL
@@ -121,9 +121,12 @@ install_xscreensaver()
 {
 	check_apt xscreensaver
 	check_apt xscreensaver-data
-	check_apt xscreensaver-data-extra
 	check_apt xscreensaver-gl
-	check_apt xscreensaver-gl-extra
+
+	set_conf $HOME/.xscreensaver
+	set_conf mode one ':'
+	set_conf selected 142 ':'
+
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }

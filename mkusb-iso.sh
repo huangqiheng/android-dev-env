@@ -48,6 +48,9 @@ main ()
 
        Wipe the first megabyte, show all mass storage devices
            sudo mkusb-nox wipe-1 all
+	   
+       Write iso/img to Hardisk? don't use mkusb-nox, just:
+           sudo dd if=/path/to/image.iso of=/dev/sdx bs=8M
 "
 }
 
