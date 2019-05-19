@@ -47,6 +47,7 @@ install_utils()
 	check_apt xclip
 	check_apt shutter
 	check_apt keynav
+	check_apt feh xpdf 
 
 	ratpoisonrc "exec keynav &"
 }
