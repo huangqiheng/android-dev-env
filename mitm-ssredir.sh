@@ -72,6 +72,7 @@ EOL
 	ss-redir -c ${confile} &
 	PIDS2KILL="$PIDS2KILL $!"
 
+	ss-tproxy update-chnroute
 	ss-tproxy start
 
 	waitfor_die "$(cat <<-EOL
