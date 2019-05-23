@@ -82,6 +82,13 @@ main ()
 		exit 1
 	fi
 
+	#--------------------------------------------------- release wlan ---
+
+	log_y 'release wifi for hostapd'
+	nmcli radio wifi off
+	rfkill unblock wlan
+	sleep 1
+
 	#--------------------------------------------------- access point ---
 	log_y 'starting hostapd'
 
