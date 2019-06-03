@@ -85,6 +85,7 @@ main ()
 	#--------------------------------------------------- release wlan ---
 
 	log_y 'release wifi for hostapd'
+	check_apt rfkill network-manager
 	nmcli radio wifi off
 	rfkill unblock wlan
 	sleep 1

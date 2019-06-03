@@ -7,6 +7,7 @@ main ()
 {
 	#----------------------------------------------- install ss-redir
 
+	check_apt make
 	check_apt haveged rng-tools shadowsocks-libev
 	check_apt jq
 

@@ -8,6 +8,8 @@ install_chinadns()
 		return
 	fi
 
+	check_apt build-essential
+
 	local chinadns=chinadns-1.3.2
 	cd $CACHE_DIR
 	if [ ! -f ${chinadns}.tar.gz ]; then

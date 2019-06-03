@@ -6,8 +6,21 @@
 
 main () 
 {
-	cloudinit-remove
+	cloud_init_remove
 	log 'Please reboot.'
+}
+
+cloud_init_remove()
+{
+        if [ ! -d /etc/cloud/ ]; then
+                log_y 'cloud-init isnt exists'
+                return
+        fi
+
+        log_g 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+        apt-get purge -y cloud-init
+        rm -rf /etc/cloud/
+        rm -rf /var/lib/cloud/
 }
 
 maintain()
