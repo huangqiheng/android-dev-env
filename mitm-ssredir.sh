@@ -11,6 +11,7 @@ main ()
 	check_apt haveged rng-tools shadowsocks-libev
 	check_apt jq
 
+	mkdir -p /etc/shadowsocks-libev
 	confile=/etc/shadowsocks-libev/ssredir.json
 	if [ ! -f "$confile" ]; then
 		cat > "$confile" <<EOL
