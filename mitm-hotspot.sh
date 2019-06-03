@@ -134,7 +134,8 @@ EOF
 	listen-address=$GATEWAY
 	dhcp-range=${GATEWAY%.*}.100,${GATEWAY%.*}.200,12h
 	bind-interfaces
-	server=114.114.114.114
+	#server=114.114.114.114
+	server=8.8.8.8
 	domain-needed
 	bogus-priv
 EOF

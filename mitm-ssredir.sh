@@ -7,17 +7,30 @@ main ()
 {
 	#----------------------------------------------- install ss-redir
 
-	check_apt make
-	check_apt haveged rng-tools shadowsocks-libev
+	if cmd_exists "ss-redir"; then
+		log_y 'ss-redir is ready'
+	else
+		ssver=$(dpkg-query --show --showformat '${Version}' shadowsocks-libev)
+
+		if dpkg --compare-versions "$ssver" gt 3.1.2; then
+			check_apt make
+			check_apt haveged rng-tools shadowsocks-libev
+		else
+			ssrdir_source
+		fi
+	fi
+
 	check_apt jq
 
 	mkdir -p /etc/shadowsocks-libev
 	confile=/etc/shadowsocks-libev/ssredir.json
 	if [ ! -f "$confile" ]; then
+		read -p 'Input Shadowsocks SERVER: ' SSSERVER
+		read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
 		cat > "$confile" <<EOL
 {
-	"server":"",
-	"password":"",
+	"server":"${SSSERVER}",
+	"password":"${SSPASSWORD}",
         "mode":"tcp_and_udp",
         "server_port":16666,
         "local_address": "0.0.0.0",
@@ -27,8 +40,6 @@ main ()
         "fast_open":false
 }
 EOL
-		log_y "Please input SERVER and PASSWORD in ${confile}"
-		exit 1
 	fi
 
 	inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
@@ -85,6 +96,83 @@ EOL
 )"
 	return 0
 }
+
+__hit_once_flag=false
+hit_once()
+{
+	if [ "$__hit_once_flag" = 'true' ]; then
+		return
+	fi
+	__hit_once_flag=true
+
+	apt install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libc-ares-dev
+}
+
+ssrdir_source()
+{
+	#---------------------------------------------
+
+	cd $CACHE_DIR
+	export LIBSODIUM_VER=1.0.17
+	if [ ! -f libsodium-$LIBSODIUM_VER.tar.gz ]; then
+		if [ -f $DATA_DIR/libsodium-$LIBSODIUM_VER.tar.gz ]; then
+			cp $DATA_DIR/libsodium-$LIBSODIUM_VER.tar.gz ./
+		else
+			wget https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VER.tar.gz
+		fi
+	fi
+
+	if [ ! -f /usr/lib/libsodium.a ]; then 
+		hit_once
+		tar xvf libsodium-$LIBSODIUM_VER.tar.gz
+		cd libsodium-$LIBSODIUM_VER
+		./configure --prefix=/usr && make
+		make install
+		ldconfig
+	fi
+
+	log_y 'libsodium ready'
+
+	#---------------------------------------------
+
+	cd $CACHE_DIR
+	export MBEDTLS_VER=2.16.0
+	if [ ! -f mbedtls-$MBEDTLS_VER-gpl.tgz ]; then
+		if [ -f $DATA_DIR/mbedtls-$MBEDTLS_VER-gpl.tgz ]; then
+			cp $DATA_DIR/mbedtls-$MBEDTLS_VER-gpl.tgz ./
+		else
+			wget https://tls.mbed.org/download/mbedtls-$MBEDTLS_VER-gpl.tgz
+		fi
+	fi
+
+	if [ ! -f /usr/lib/libmbedcrypto.a ]; then 
+		hit_once
+		tar xvf mbedtls-$MBEDTLS_VER-gpl.tgz
+		cd mbedtls-$MBEDTLS_VER
+		make SHARED=1 CFLAGS=-fPIC
+		make DESTDIR=/usr install
+		ldconfig
+	fi
+
+	log_y 'libmbedcrypto ready'
+
+	#---------------------------------------------
+
+	cd $CACHE_DIR
+	if [ ! -d shadowsocks-libev ]; then
+		git clone https://github.com/shadowsocks/shadowsocks-libev.git
+		cd shadowsocks-libev
+		git submodule update --init --recursive
+	fi
+
+	if [ ! -f /usr/local/bin/ss-redir ]; then
+		hit_once
+		cd shadowsocks-libev
+		./autogen.sh && ./configure && make
+		make install
+	fi
+}
+
 
 maintain()
 {
