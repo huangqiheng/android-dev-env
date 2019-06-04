@@ -508,6 +508,20 @@ check_apt()
 	done
 }
 
+select_apt()
+{
+	empty_exit "$1" 'select_apt need at least two parameter'
+	empty_exit "$2" 'select_apt need at least two parameter'
+
+	for package in "$@"; do
+		if apt search --names-only "^$package$" 2>/dev/null >/dev/null; then
+			check_apt "$package"
+			return 0
+		fi
+	done
+	return 1
+}
+
 __is_docker_firstRun=true
 
 init_docker()
