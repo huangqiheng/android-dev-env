@@ -17,6 +17,7 @@ export_hotspot_config()
 	export NET_IFACE="${NET_IFACE:-$net_iface}"
 	export GATEWAY="${GATEWAY:-$gateway}"
 	export SUBNET="${GATEWAY%.*}.0/24"
+	log_y "Config: AP=$AP_IFACE WAN=$NET_IFACE GATE=$GATEWAY NET=$SUBNET"
 }
 
 on_internet_ready()
@@ -91,7 +92,7 @@ main ()
 	sleep 1
 
 	#--------------------------------------------------- access point ---
-	log_y 'starting hostapd'
+	log_y "starting hostapd: $SSID @ $AP_IFACE"
 
 	check_apt hostapd iproute2
 
@@ -122,7 +123,7 @@ EOF
 	PIDS2KILL="$PIDS2KILL $!"
 
 	#--------------------------------------------------------- dhcp -----
-	log_y 'starting dnsmasq dhcp'
+	log_y "starting dnsmasq dhcp: $SUBNET"
 
 	systemctl stop systemd-resolved
 	systemctl disable systemd-resolved
@@ -145,7 +146,7 @@ EOF
 	PIDS2KILL="$PIDS2KILL $!"
 
 	#------------------------------------------------------ nat mode ----
-	log_y 'enable internet access'
+	log_y "enable internet access: $AP_IFACE -> $NET_IFACE"
 
 	check_apt iptables 
 	iptables-save > /home/hostap-iptables.rules
