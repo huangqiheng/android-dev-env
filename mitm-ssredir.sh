@@ -86,6 +86,7 @@ EOL
 	PIDS2KILL="$PIDS2KILL $!"
 
 	ss-tproxy update-chnroute
+	ss-tproxy update-gfwlist
 	ss-tproxy start
 
 	waitfor_die "$(cat <<-EOL
