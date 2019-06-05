@@ -9,7 +9,7 @@ main ()
 	set_cmdline "$@" 
 
 	auto_login root
-	bashrc loginexec "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then loginexec; fi"
+	handle_rc '/root/.bashrc' loginexec "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then loginexec; fi"
 }
 
 main "$@"; exit $?
