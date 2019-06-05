@@ -5,6 +5,17 @@
 
 main () 
 {
+	#----------------------------------------------- make cmdline
+	make_cmdline mitm-ssredir <<-EOF
+	#!/bin/bash
+
+	export AP_IFACE=${AP_IFACE}
+	export NET_IFACE=${NET_IFACE}
+
+	cd $THIS_DIR
+	sh mitm-hotspot.sh ssredir
+EOF
+
 	#----------------------------------------------- install ss-redir
 
 	if cmd_exists "ss-redir"; then
