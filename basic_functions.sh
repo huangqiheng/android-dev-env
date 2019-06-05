@@ -28,6 +28,32 @@ waitfor_die()
 	wait "$CHILD"
 }
 
+__cmdline_file=''
+__cmdline_name=''
+
+set_cmdline()
+{
+	local num_param=$#
+	if [ $num_param -eq 1 ]; then
+		__cmdline_name="$1"
+		__cmdline_file="/usr/local/bin/$1"
+		return
+	fi
+
+	if [ -z $__cmdline_file ]; then
+		log_r 'set_cmdline(): Please set ini file first.'
+		exit
+	fi
+
+
+	if ! cmd_exists "$__cmdline_name"; then
+		make_cmdline "$__cmdline_name" <<-EOF
+		#!/bin/dash
+EOF
+	fi
+
+	stuffed_line "$__cmdline_file" "$@" 
+}
 
 make_cmdline()
 {
@@ -106,6 +132,17 @@ get_latest_release()  # $1="creationix/nvm"
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |
 	grep '"tag_name":' |
 	sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+stuffed_line()
+{
+	local echo_file="$1"; shift
+	params=$(echo "$@")
+
+	if grep -iq "$params" $echo_file; then
+		return 1
+	fi
+	echo "$params" >> $echo_file
 }
 
 handle_rc()
@@ -585,12 +622,17 @@ log_r()
 
 auto_login()
 {
+	local loginUser=${RUN_USER}
+	if [ ! -z $1 ]; then
+		loginUser="$1"
+	fi
+
 	local serviceDir=/etc/systemd/system/getty@tty1.service.d/
 	mkdir -p "${serviceDir}"
 	cat > ${serviceDir}/override.conf <<EOL
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin ${RUN_USER} --noclear %I \$TERM
+ExecStart=-/sbin/agetty --autologin ${loginUser} --noclear %I \$TERM
 EOL
 }
 
