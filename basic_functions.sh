@@ -812,7 +812,6 @@ repo_update()
 
 	if echo $commit_result | grep -q 'nothing to commit'; then
 		echo "${Green}Nothing to commit.${Color_Off}"
-		exit
 	fi
 
 	log_g ${commit_result}
