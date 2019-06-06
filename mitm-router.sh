@@ -3,7 +3,7 @@
 . $(dirname $(readlink -f $0))/basic_mini.sh
 
 
-export_hotspot_config()
+export_router_config()
 {
 	check_apt lshw
 
@@ -24,7 +24,7 @@ export_hotspot_config()
 	export LAN_IFACE="${LAN_IFACE}"
 	export GATEWAY="${GATEWAY}"
 	export SUBNET="${GATEWAY%.*}.0/24"
-	log_y "Config: LAN=$LAN_IFACE WAN=$WAN_IFACE GATE=$GATEWAY NET=$SUBNET"
+	log_y "Config: WAN=$WAN_IFACE LAN=$LAN_IFACE GATE=$GATEWAY NET=$SUBNET"
 }
 
 on_internet_ready()
@@ -72,69 +72,17 @@ on_internet_ready()
 
 main () 
 {
-	export_hotspot_config
-	exit
-
 	#----------------------------------------------------- conditions ---
 
-	if [ ! -w '/sys' ]; then
-		log_r 'Not running in privileged mode.'
-		exit 1
-	fi
-
-	nocmd_update hostapd
-	check_apt wireless-tools haveged
-
-	local PHY=$(cat /sys/class/net/"$LAN_IFACE"/phy80211/name)
-	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
-		log_r "Wireless card doesn't support AP mode."
-		exit 1
-	fi
-
-	#--------------------------------------------------- release wlan ---
-
-	log_y 'release wifi for hostapd'
-	check_apt rfkill network-manager
-	nmcli radio wifi off
-	rfkill unblock wlan
-	sleep 1
-
-	#--------------------------------------------------- access point ---
-	log_y "starting hostapd: $SSID @ $LAN_IFACE"
-
-	check_apt hostapd iproute2
-
-	cat > /home/hostapd.conf <<-EOF
-	interface=$LAN_IFACE
-	driver=nl80211
-	beacon_int=25
-	ssid=$SSID
-	hw_mode=g
-	channel=6
-	ieee80211n=1
-	ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
-	macaddr_acl=0
-	wmm_enabled=0
-	ignore_broadcast_ssid=0
-	auth_algs=1
-	wpa=2
-	wpa_key_mgmt=WPA-PSK
-	wpa_passphrase=$PASSWORD
-	rsn_pairwise=CCMP
-EOF
-	ip addr flush dev $LAN_IFACE
-	ip link set $LAN_IFACE up
-	ip addr add $GATEWAY/24 dev $LAN_IFACE
-
-	pkill hostapd
-	hostapd /home/hostapd.conf &
-	PIDS2KILL="$PIDS2KILL $!"
+	export_router_config
+	check_privileged
 
 	#--------------------------------------------------------- dhcp -----
 	log_y "starting dnsmasq dhcp: $SUBNET"
 
 	systemctl stop systemd-resolved
 	systemctl disable systemd-resolved
+	check_apt resolvconf
 	check_apt dnsmasq
 
 	cat > /home/dnsmasq.conf <<-EOF
@@ -171,7 +119,7 @@ EOF
 	fun_exists 'on_internet_ready' && on_internet_ready
 
 	#------------------------------------------------------ clean up ----
-	log_y 'access point is ready'
+	log_y 'router is ready'
 
 	waitfor_die "$(cat <<-EOL
 	iptables-restore < /home/hostap-iptables.rules
@@ -184,18 +132,6 @@ EOL
 	return 0
 }
 
-release_host_wifi()
-{
-	check_sudo
-
-	local mac=$(ifconfig "$LAN_IFACE" | awk '/ether/{print $2}')
-	set_ini '/etc/NetworkManager/NetworkManager.conf'
-	set_ini 'keyfile' 'unmanaged-devices' "mac:$mac"
-	set_ini 'device' 'wifi.scan-rand-mac-address' 'no'
-
-	systemctl restart NetworkManager
-	exit 0
-}
 
 tcpdump_exit()
 {
@@ -206,7 +142,6 @@ tcpdump_exit()
 maintain()
 {
 	[ "$1" = 'dump' ] && tcpdump_exit
-	[ "$1" = 'host' ] && release_host_wifi
 	[ "$1" = 'help' ] && show_help_exit
 	[ "$1" = 'ssredir' ] && MITM_PROXY=ssredir
 	[ "$1" = 'mitmproxy' ] && MITM_PROXY=mitmproxy

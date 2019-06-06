@@ -354,6 +354,15 @@ check_sudo()
 	fi
 }
 
+
+check_privileged()
+{
+	if [ ! -w '/sys' ]; then
+		log_r 'Not running in privileged mode.'
+		exit 1
+	fi
+}
+
 this_network_service()
 {
 	check_sudo
@@ -812,6 +821,7 @@ repo_update()
 
 	if echo $commit_result | grep -q 'nothing to commit'; then
 		echo "${Green}Nothing to commit.${Color_Off}"
+		exit
 	fi
 
 	log_g ${commit_result}
