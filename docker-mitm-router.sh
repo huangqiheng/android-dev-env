@@ -30,7 +30,7 @@ main ()
 		docker run -it --net host --privileged \
 		  -e MAC="unchanged" \
 		  -e AP_IFACE="wlan0" \
-		  -e INTERNET_IFACE="eth0" \
+		  -e INTERWAN_IFACE="eth0" \
 		  -e SSID="CYLON-BASESTAR" \
 		  -e PASSWORD="SoSayWeAll" \
 		  -v "$(pwd)/data:/root/data" \

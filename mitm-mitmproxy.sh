@@ -2,7 +2,7 @@
 
 . $(dirname $(readlink -f $0))/basic_mini.sh
 
-SUB_IFACE="${SUB_IFACE:-wlan0}"
+LAN_IFACE="${LAN_IFACE:-wlan0}"
 CAPTURE_FILE="${CAPTURE_FILE:-/home/http-traffic.cap}"
 
 main () 
@@ -28,11 +28,11 @@ main ()
 		--save-stream-file "$CAPTURE_FILE" "$FILTER" &
 	PIDS2KILL="$PIDS2KILL $!"
 
-	iptables -t nat -D PREROUTING -i "$SUB_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
-	iptables -t nat -A PREROUTING -i "$SUB_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
+	iptables -t nat -D PREROUTING -i "$LAN_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
+	iptables -t nat -A PREROUTING -i "$LAN_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337
 
 	waitfor_die "$(cat <<-EOL
-	iptables -t nat -D PREROUTING -i "$SUB_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
+	iptables -t nat -D PREROUTING -i "$LAN_IFACE" -p tcp --dport 80 -j REDIRECT --to-port 1337 > /dev/null 2>&1 || true
 	kill $PIDS2KILL >/dev/null 2>&1
 EOL
 )"
@@ -47,7 +47,7 @@ maintain()
 show_help_exit()
 {
 	cat <<- EOL
-	SUB_IFACE=wlan0 sudo sh $(basename $THIS_SCRIPT)
+	LAN_IFACE=wlan0 sudo sh $(basename $THIS_SCRIPT)
 EOL
 	exit 0
 }

@@ -3,7 +3,7 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
-SUB_IFACE="${SUB_IFACE:-wlan0}"
+LAN_IFACE="${LAN_IFACE:-wlan0}"
 
 main () 
 {
@@ -12,21 +12,21 @@ main ()
 	setup_github_go kelbyludwig/trudy
 	check_apt iptables 
 
-	#iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080 > /dev/null 2>&1 || true
-	#iptables -t nat -A PREROUTING -i $SUB_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080
-	#iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443 > /dev/null 2>&1 || true
-	#iptables -t nat -A PREROUTING -i $SUB_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443
-	iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666 > /dev/null 2>&1 || true
-	iptables -t nat -A PREROUTING -i $SUB_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666
+	#iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080 > /dev/null 2>&1 || true
+	#iptables -t nat -A PREROUTING -i $LAN_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080
+	#iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443 > /dev/null 2>&1 || true
+	#iptables -t nat -A PREROUTING -i $LAN_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443
+	iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666 > /dev/null 2>&1 || true
+	iptables -t nat -A PREROUTING -i $LAN_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666
 
 	cd "$(go env GOPATH)/src/github.com/kelbyludwig/trudy"
 	trudy &
 	PIDS2KILL="$PIDS2KILL $!"
 
 	waitfor_die "$(cat <<-EOL
-	#iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080 > /dev/null 2>&1 || true
-	#iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443 > /dev/null 2>&1 || true
-	iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666 > /dev/null 2>&1 || true
+	#iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp --dport 8888 -m tcp -j REDIRECT --to-ports 8080 > /dev/null 2>&1 || true
+	#iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp --dport 443 -m tcp -j REDIRECT --to-ports 6443 > /dev/null 2>&1 || true
+	iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp -m multiport ! --dports 5223,443 -j REDIRECT --to-ports 6666 > /dev/null 2>&1 || true
 	kill $PIDS2KILL >/dev/null 2>&1
 EOL
 )"

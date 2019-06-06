@@ -12,15 +12,15 @@ install_tproxy()
 {
 	check_apt lshw
 
-	SUB_IFACE=$(get_wifi_ifaces)
-	GATEWAY=$(iface_to_ipaddr $SUB_IFACE)
+	LAN_IFACE=$(get_wifi_ifaces)
+	GATEWAY=$(iface_to_ipaddr $LAN_IFACE)
 	SUBNET="${GATEWAY%.*}.0/24"
 
 	if [ -z "$SUBNET" ]; then
-		log_y "Can't found ap on $SUB_IFACE"
+		log_y "Can't found ap on $LAN_IFACE"
 		exit 1
 	else 
-		log_y "Found ap: $SUB_IFACE $SUBNET"
+		log_y "Found ap: $LAN_IFACE $SUBNET"
 	fi
 
 	#-------------------------------------------------------

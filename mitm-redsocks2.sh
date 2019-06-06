@@ -3,7 +3,7 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
-SUB_IFACE="${SUB_IFACE:-wlan0}"
+LAN_IFACE="${LAN_IFACE:-wlan0}"
 
 set_redsocks()
 {
@@ -36,14 +36,14 @@ main ()
 	set_redsocks ip 192.168.2.92
 	set_redsocks port 8080
 
-	iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
-	iptables -t nat -A PREROUTING -i $SUB_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345
+	iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
+	iptables -t nat -A PREROUTING -i $LAN_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345
 
 	redsocks2 -p /tmp/redsocks2.pid &
 	PIDS2KILL="$PIDS2KILL $(cat /tmp/redsocks2.pid) $!"
 
 	waitfor_die "$(cat <<-EOL
-	iptables -t nat -D PREROUTING -i $SUB_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
+	iptables -t nat -D PREROUTING -i $LAN_IFACE -p tcp -m tcp -j REDIRECT --to-ports 12345 > /dev/null 2>&1 || true
 	kill $PIDS2KILL >/dev/null 2>&1
 EOL
 )"

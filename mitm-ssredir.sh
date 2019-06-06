@@ -29,8 +29,8 @@ main ()
 	make_cmdline mitm-ssredir <<-EOF
 	#!/bin/bash
 
-	export SUB_IFACE=${SUB_IFACE}
-	export NET_IFACE=${NET_IFACE}
+	export LAN_IFACE=${LAN_IFACE}
+	export WAN_IFACE=${WAN_IFACE}
 
 	cd $THIS_DIR
 	sh mitm-hotspot.sh ssredir

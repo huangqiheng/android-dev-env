@@ -4,7 +4,7 @@
 . $THIS_DIR/setup_routines.sh
 
 AP_IFACE="${AP_IFACE:-wlan0}"
-NET_IFACE="${NET_IFACE:-eth0}"
+WAN_IFACE="${WAN_IFACE:-eth0}"
 SSID="${SSID:-DangerousHotspot}"
 PASSWORD="${PASSWORD:-DontConnectMe}"
 
@@ -21,7 +21,7 @@ main ()
 		make_cmdline jellyap <<-EOF
 		#!/bin/dash
 		cd $RUN_DIR/jellyap
-		./jellyap.sh $AP_IFACE $NET_IFACE $SSID $PASSWORD no
+		./jellyap.sh $AP_IFACE $WAN_IFACE $SSID $PASSWORD no
 EOF
 	fi
 
