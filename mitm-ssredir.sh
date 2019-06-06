@@ -3,6 +3,26 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
+make_server_conf()
+{
+	local confile="$1"
+	read -p 'Input Shadowsocks SERVER: ' SSSERVER
+	read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+	cat > "$confile" <<EOL
+{
+	"server":"${SSSERVER}",
+	"password":"${SSPASSWORD}",
+        "mode":"tcp_and_udp",
+        "server_port":16666,
+        "local_address": "0.0.0.0",
+        "local_port":6666,
+        "method":"xchacha20-ietf-poly1305",
+        "timeout":300,
+        "fast_open":false
+}
+EOL
+}
+
 main () 
 {
 	#----------------------------------------------- make cmdline
@@ -36,24 +56,16 @@ EOF
 	mkdir -p /etc/shadowsocks-libev
 	confile=/etc/shadowsocks-libev/ssredir.json
 	if [ ! -f "$confile" ]; then
-		read -p 'Input Shadowsocks SERVER: ' SSSERVER
-		read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
-		cat > "$confile" <<EOL
-{
-	"server":"${SSSERVER}",
-	"password":"${SSPASSWORD}",
-        "mode":"tcp_and_udp",
-        "server_port":16666,
-        "local_address": "0.0.0.0",
-        "local_port":6666,
-        "method":"xchacha20-ietf-poly1305",
-        "timeout":300,
-        "fast_open":false
-}
-EOL
+		make_server_conf $confile
+		inputServer="${SSSERVER}"
+	else
+		inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
+		if [ "X$inputServer" = 'X' ]; then
+			make_server_conf $confile
+			inputServer="${SSSERVER}"
+		fi
 	fi
 
-	inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
 	password=$(cat $confile | jq -c '.password' | tr -d '"')
 	server_port=$(cat $confile | jq -c '.server_port')
 	local_port=$(cat $confile | jq -c '.local_port')
