@@ -77,13 +77,23 @@ main ()
 	export_router_config
 	check_privileged
 
-	#--------------------------------------------------------- dhcp -----
+	#-------------------------------------------------- build subnet ----
 	log_y "starting dnsmasq dhcp: $SUBNET"
+
+
+	if ifconfig | grep -iq "inet $GATEWAY"; then
+		log_y "$GATEWAY has added"
+	fi
+	ip addr add "$GATEWAY/24" dev $LAN_IFACE
 
 	systemctl stop systemd-resolved
 	systemctl disable systemd-resolved
 	check_apt resolvconf
 	check_apt dnsmasq
+
+	cat > /etc/resolv.conf <<-EOF
+	nameserver 8.8.8.8
+EOF
 
 	cat > /home/dnsmasq.conf <<-EOF
 	interface=$LAN_IFACE
