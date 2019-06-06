@@ -127,6 +127,7 @@ EOF
 
 	systemctl stop systemd-resolved
 	systemctl disable systemd-resolved
+	check_apt resolvconf
 	check_apt dnsmasq
 
 	cat > /home/dnsmasq.conf <<-EOF
