@@ -15,7 +15,7 @@ export_hotspot_config()
 	fi
 
 	if [ -z $WAN_IFACE ]; then
-		def_net_iface=$(route | grep '^default' | grep -o '[^ ]*$')
+		def_net_iface=$(route | grep '^default' | grep -o '[^ ]*$' | head -1)
 	fi
 
 	if [ -z $GATEWAY ]; then
