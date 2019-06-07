@@ -76,7 +76,7 @@ sshhost_parse()
 
 get_wifi_ifaces()
 {
-	lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g'
+	lshw -quiet -c network | grep -i 'Wireless interface' -A 12 | grep -i 'configuration' -B 12 | grep 'logical name:' | cut -d: -f2 | sed -e 's/ //g'
 }
 
 iface_to_mac()

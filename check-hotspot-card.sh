@@ -5,7 +5,9 @@
 
 main () 
 {
-	check_hotspot_card
+	ifaces=$(get_wifi_ifaces)
+	echo $ifaces
+	check_hotspot_card $ifaces
 }
 
 check_hotspot_card()
@@ -21,12 +23,12 @@ check_hotspot_card()
 		fi
 	done
 
-	log_r "Wireless card doesn't support AP mode."
+	log_y "AP mode iface: $support_list"
+	log_y "Not support: $unsupport_list"
 }
 
 maintain()
 {
-	check_update
 	[ "$1" = 'help' ] && show_help_exit
 }
 
