@@ -34,6 +34,8 @@ on_internet_ready()
 	cd $THIS_DIR
 
 	if [ "X$MITM_PROXY" = 'Xssredir' ]; then
+		export SSSERVR_CONF='/etc/shadowsocks-libev/ssredir.json'
+		check_ssserver_conf $SSSERVR_CONF
 		sh mitm-ssredir.sh &
 		PIDS2KILL="$PIDS2KILL $!"
 		return 0

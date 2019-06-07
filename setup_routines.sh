@@ -1,5 +1,47 @@
 #!/bin/sh
 
+check_ssserver_conf()
+{
+	check_apt jq
+	local confile="$1"
+	mkdir -p $(dirname $confile)
+
+	if [ ! -f "$confile" ]; then
+		make_ssserver_conf $confile
+		return 0
+	fi
+
+	inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
+	if [ "X$inputServer" = 'X' ]; then
+		make_ssserver_conf $confile
+	fi
+
+	inputPassword=$(cat $confile | jq -c '.password' | tr -d '"')
+	if [ "X$inputPassword" = 'X' ]; then
+		make_ssserver_conf $confile
+	fi
+}
+
+make_ssserver_conf()
+{
+	local confile="$1"
+	read -p 'Input Shadowsocks SERVER: ' SSSERVER
+	read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+	cat > "$confile" <<EOL
+{
+	"server":"${SSSERVER}",
+	"password":"${SSPASSWORD}",
+        "mode":"tcp_and_udp",
+        "server_port":16666,
+        "local_address": "0.0.0.0",
+        "local_port":6666,
+        "method":"xchacha20-ietf-poly1305",
+        "timeout":300,
+        "fast_open":false
+}
+EOL
+}
+
 
 install_chinadns()
 {

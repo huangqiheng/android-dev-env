@@ -3,25 +3,7 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
-make_server_conf()
-{
-	local confile="$1"
-	read -p 'Input Shadowsocks SERVER: ' SSSERVER
-	read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
-	cat > "$confile" <<EOL
-{
-	"server":"${SSSERVER}",
-	"password":"${SSPASSWORD}",
-        "mode":"tcp_and_udp",
-        "server_port":16666,
-        "local_address": "0.0.0.0",
-        "local_port":6666,
-        "method":"xchacha20-ietf-poly1305",
-        "timeout":300,
-        "fast_open":false
-}
-EOL
-}
+SSSERVR_CONF="${SSSERVR_CONF:-/etc/shadowsocks-libev/ssredir.json}"
 
 main () 
 {
@@ -54,14 +36,14 @@ EOF
 	check_apt jq
 
 	mkdir -p /etc/shadowsocks-libev
-	confile=/etc/shadowsocks-libev/ssredir.json
+	confile="$SSSERVR_CONF"
 	if [ ! -f "$confile" ]; then
-		make_server_conf $confile
+		make_ssserver_conf $confile
 		inputServer="${SSSERVER}"
 	else
 		inputServer=$(cat $confile | jq -c '.server' | tr -d '"')
 		if [ "X$inputServer" = 'X' ]; then
-			make_server_conf $confile
+			make_ssserver_conf $confile
 			inputServer="${SSSERVER}"
 		fi
 	fi
