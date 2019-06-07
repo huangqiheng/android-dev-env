@@ -5,6 +5,9 @@
 
 main () 
 {
+	# get extra package
+	check_apt linux-firmware
+
 	# Realtek rtl8812au
 	check_apt rtl8812au-dkms
 	
