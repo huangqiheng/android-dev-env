@@ -80,21 +80,28 @@ main ()
 	#-------------------------------------------------- build subnet ----
 	log_y "starting dnsmasq dhcp: $SUBNET"
 
-
+	#------ set gateway ------
 	if ifconfig | grep -iq "inet $GATEWAY"; then
 		log_y "$GATEWAY has added"
 	fi
 	ip addr add "$GATEWAY/24" dev $LAN_IFACE
 
-	systemctl stop systemd-resolved
-	systemctl disable systemd-resolved
+	#------ rebuild dns ------
+	if systemctl is-active systemd-resolved; then
+		systemctl stop systemd-resolved
+	fi
+	if systemctl is-enabled systemd-resolved; then
+		systemctl disable systemd-resolved
+	fi
 	check_apt resolvconf
-	check_apt dnsmasq
 
 	cat > /etc/resolv.conf <<-EOF
 	nameserver 8.8.8.8
+	nameserver 114.114.114.114
 EOF
 
+	#------ build dhcp ------
+	check_apt dnsmasq
 	cat > /home/dnsmasq.conf <<-EOF
 	interface=$LAN_IFACE
 	except-interface=$WAN_IFACE
@@ -117,12 +124,7 @@ EOF
 	check_apt iptables 
 	iptables-save > /home/hostap-iptables.rules
 
-	iptables -t nat -D POSTROUTING -s ${SUBNET} -o ${WAN_IFACE} -j MASQUERADE > /dev/null 2>&1 || true
-	iptables -t nat -A POSTROUTING -s ${SUBNET} -o ${WAN_IFACE} -j MASQUERADE
-	iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT > /dev/null 2>&1 || true
-	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
-	iptables -D FORWARD -i "$LAN_IFACE" -o "$WAN_IFACE" -j ACCEPT > /dev/null 2>&1 || true
-	iptables -A FORWARD -i "$LAN_IFACE" -o "$WAN_IFACE" -j ACCEPT
+	set_nat_rules $WAN_IFACE $LAN_IFACE $SUBNET
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
@@ -140,6 +142,20 @@ EOF
 EOL
 )"
 	return 0
+}
+
+set_nat_rules()
+{
+	local wannet_iface=$1 # like eth0
+	local subnet_iface=$2 # like wlan0
+	local subnet_range=$3 # like 192.168.234.0/24
+
+	iptables -t nat -D POSTROUTING -s $subnet_range -o $wannet_iface -j MASQUERADE > /dev/null 2>&1 || true
+	iptables -t nat -A POSTROUTING -s $subnet_range -o $wannet_iface -j MASQUERADE
+	iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT > /dev/null 2>&1 || true
+	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
+	iptables -D FORWARD -i "$subnet_iface" -o "$wannet_iface" -j ACCEPT > /dev/null 2>&1 || true
+	iptables -A FORWARD -i "$subnet_iface" -o "$wannet_iface" -j ACCEPT
 }
 
 

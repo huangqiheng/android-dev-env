@@ -5,15 +5,18 @@
 
 main () 
 {
-	check_apt python3-pip
-	pip3 install fierce
+	if ! cmd_exists fierce; then
+		check_update
+		check_apt python3-pip
+		pip3 install fierce
+	fi
 
-	fierce --domain baidu.com --dns-servers 8.8.8.8
+	domain="${1:-baidu.com}"
+	fierce --domain $domain --dns-servers 8.8.8.8
 }
 
 maintain()
 {
-	check_update
 	[ "$1" = 'help' ] && show_help_exit $2
 }
 
