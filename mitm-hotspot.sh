@@ -115,7 +115,7 @@ main ()
 	hw_mode=g
 	channel=6
 	ieee80211n=1
-	ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+	#ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
 	macaddr_acl=0
 	wmm_enabled=0
 	ignore_broadcast_ssid=0
