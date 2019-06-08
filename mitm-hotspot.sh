@@ -60,27 +60,23 @@ main ()
 	nocmd_update hostapd
 	check_apt wireless-tools haveged
 
-	#--------------------------------------------------- release wlan ---
+	#--------------------------------------------------- access point ---
 
 	log_y 'release wifi for hostapd'
-	check_apt rfkill network-manager
+	check_apt rfkill network-manager bridge-utils
 	nmcli radio wifi off
 	rfkill unblock wlan
 	sleep 1
-
-	#--------------------------------------------------- access point ---
-	log_y "starting hostapd: $SSID @ $LAN_IFACE"
-
-
-	check_apt bridge-utils
-
 
 	#------ set gateway ------
 	ip addr flush dev $LAN_IFACE
 	ip link set $LAN_IFACE up
 	ip addr add $GATEWAY/24 dev $LAN_IFACE
 
+
 	#------ setup hotspot ------
+	log_y "starting hostapd: $SSID @ $LAN_IFACE"
+
 	check_apt hostapd iproute2
 	cat > /home/hostapd.conf <<-EOF
 	interface=$LAN_IFACE
