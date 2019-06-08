@@ -34,17 +34,16 @@ __cmdline_name=''
 set_cmdline()
 {
 	local num_param=$#
-	if [ $num_param -eq 1 ]; then
-		__cmdline_name="$1"
-		__cmdline_file="/usr/local/bin/$1"
-		return
-	fi
-
 	if [ -z $__cmdline_file ]; then
-		log_r 'set_cmdline(): Please set ini file first.'
-		exit
+		if [ $num_param -eq 1 ]; then
+			__cmdline_name="$1"
+			__cmdline_file="/usr/local/bin/$1"
+			return
+		else
+			log_r 'set_cmdline(): Please set ini file first.'
+			exit
+		fi
 	fi
-
 
 	if ! cmd_exists "$__cmdline_name"; then
 		make_cmdline "$__cmdline_name" <<-EOF
