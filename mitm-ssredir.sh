@@ -13,6 +13,9 @@ main ()
 
 	export LAN_IFACE=${LAN_IFACE}
 	export WAN_IFACE=${WAN_IFACE}
+	export GATEWAY=${GATEWAY}
+	export SSID=${SSID}
+	export PASSWORD=${PASSWORD}
 
 	cd $THIS_DIR
 	sh mitm-hotspot.sh ssredir

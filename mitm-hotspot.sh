@@ -3,9 +3,8 @@
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $THIS_DIR/setup_routines.sh
 
-SSID="${SSID:-DangerousHotspot}"
-PASSWORD="${PASSWORD:-DontConnectMe}"
-
+export SSID="${SSID:-DangerousHotspot}"
+export PASSWORD="${PASSWORD:-DontConnectMe}"
 
 on_internet_ready()
 {
