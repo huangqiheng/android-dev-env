@@ -3,30 +3,6 @@
 . $(dirname $(readlink -f $0))/basic_mini.sh
 
 
-export_router_config()
-{
-	check_apt lshw
-
-	if [ -z $WAN_IFACE ]; then
-		WAN_IFACE=$(route | grep '^default' | grep -o '[^ ]*$')
-	fi
-
-	if [ -z $LAN_IFACE ]; then
-		LAN_IFACE=$(lshw -quiet -c network | sed -n -e '/Ethernet interface/,+12 p' | sed -n -e '/bus info:/,+5 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g' | grep -v "$WAN_IFACE" | head -1)
-		def_gateway=$(ifconfig | grep -A1 "$LAN_IFACE" | grep "inet " | head -1 | awk -F' ' '{print $2}')
-	fi
-
-	if [ -z $GATEWAY ]; then
-		GATEWAY="${def_gateway:-192.168.234.1}"
-	fi
-
-	export WAN_IFACE="${WAN_IFACE}"
-	export LAN_IFACE="${LAN_IFACE}"
-	export GATEWAY="${GATEWAY}"
-	export SUBNET="${GATEWAY%.*}.0/24"
-	log_y "Config: WAN=$WAN_IFACE LAN=$LAN_IFACE GATE=$GATEWAY NET=$SUBNET"
-}
-
 on_internet_ready()
 {
 	cd $THIS_DIR
@@ -83,24 +59,12 @@ main ()
 	log_y "starting dnsmasq dhcp: $SUBNET"
 
 	#------ set gateway ------
-	if ifconfig | grep -iq "inet $GATEWAY"; then
-		log_y "$GATEWAY has added"
-	fi
+	ip addr flush dev $LAN_IFACE
+	ip link set $LAN_IFACE up
 	ip addr add "$GATEWAY/24" dev $LAN_IFACE
 
 	#------ rebuild dns ------
-	if systemctl is-active systemd-resolved; then
-		systemctl stop systemd-resolved
-	fi
-	if systemctl is-enabled systemd-resolved; then
-		systemctl disable systemd-resolved
-	fi
-	check_apt resolvconf
-
-	cat > /etc/resolv.conf <<-EOF
-	nameserver 8.8.8.8
-	nameserver 114.114.114.114
-EOF
+	setup_resolvconf
 
 	#------ build dhcp ------
 	check_apt dnsmasq

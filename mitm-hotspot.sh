@@ -5,29 +5,6 @@
 SSID="${SSID:-DangerousHotspot}"
 PASSWORD="${PASSWORD:-DontConnectMe}"
 
-export_hotspot_config()
-{
-	check_apt lshw
-
-	if [ -z $LAN_IFACE ]; then
-		def_ap_iface=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g')
-		def_gateway=$(ifconfig | grep -A1 "$ap_iface" | grep "inet " | head -1 | awk -F' ' '{print $2}')
-	fi
-
-	if [ -z $WAN_IFACE ]; then
-		def_net_iface=$(route | grep '^default' | grep -o '[^ ]*$' | head -1)
-	fi
-
-	if [ -z $GATEWAY ]; then
-		def_gateway="${def_gateway:-192.168.234.1}"
-	fi
-
-	export LAN_IFACE="${LAN_IFACE:-$def_ap_iface}"
-	export WAN_IFACE="${WAN_IFACE:-$def_net_iface}"
-	export GATEWAY="${GATEWAY:-$def_gateway}"
-	export SUBNET="${GATEWAY%.*}.0/24"
-	log_y "Config: AP=$LAN_IFACE WAN=$WAN_IFACE GATE=$GATEWAY NET=$SUBNET"
-}
 
 on_internet_ready()
 {
@@ -76,23 +53,13 @@ on_internet_ready()
 
 main () 
 {
-	export_hotspot_config
-
 	#----------------------------------------------------- conditions ---
-
-	if [ ! -w '/sys' ]; then
-		log_r 'Not running in privileged mode.'
-		exit 1
-	fi
+	export_router_config
+	check_privileged
+	check_apmode $LAN_IFACE
 
 	nocmd_update hostapd
 	check_apt wireless-tools haveged
-
-	local PHY=$(cat /sys/class/net/"$LAN_IFACE"/phy80211/name)
-	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
-		log_r "Wireless card doesn't support AP mode."
-		exit 1
-	fi
 
 	#--------------------------------------------------- release wlan ---
 
@@ -105,8 +72,17 @@ main ()
 	#--------------------------------------------------- access point ---
 	log_y "starting hostapd: $SSID @ $LAN_IFACE"
 
-	check_apt hostapd iproute2
 
+	check_apt bridge-utils
+
+
+	#------ set gateway ------
+	ip addr flush dev $LAN_IFACE
+	ip link set $LAN_IFACE up
+	ip addr add $GATEWAY/24 dev $LAN_IFACE
+
+	#------ setup hotspot ------
+	check_apt hostapd iproute2
 	cat > /home/hostapd.conf <<-EOF
 	interface=$LAN_IFACE
 	driver=nl80211
@@ -125,10 +101,6 @@ main ()
 	wpa_passphrase=$PASSWORD
 	rsn_pairwise=CCMP
 EOF
-	ip addr flush dev $LAN_IFACE
-	ip link set $LAN_IFACE up
-	ip addr add $GATEWAY/24 dev $LAN_IFACE
-
 	pkill hostapd
 	hostapd /home/hostapd.conf &
 	PIDS2KILL="$PIDS2KILL $!"
@@ -136,11 +108,11 @@ EOF
 	#--------------------------------------------------------- dhcp -----
 	log_y "starting dnsmasq dhcp: $SUBNET"
 
-	systemctl stop systemd-resolved
-	systemctl disable systemd-resolved
-	check_apt resolvconf
-	check_apt dnsmasq
+	#------ rebuild dns ------
+	setup_resolvconf
 
+	#------ setup dhcp ------
+	check_apt dnsmasq
 	cat > /home/dnsmasq.conf <<-EOF
 	interface=$LAN_IFACE
 	except-interface=$WAN_IFACE
@@ -163,12 +135,7 @@ EOF
 	check_apt iptables 
 	iptables-save > /home/hostap-iptables.rules
 
-	iptables -t nat -D POSTROUTING -s ${SUBNET} -o ${WAN_IFACE} -j MASQUERADE > /dev/null 2>&1 || true
-	iptables -t nat -A POSTROUTING -s ${SUBNET} -o ${WAN_IFACE} -j MASQUERADE
-	iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT > /dev/null 2>&1 || true
-	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
-	iptables -D FORWARD -i "$LAN_IFACE" -o "$WAN_IFACE" -j ACCEPT > /dev/null 2>&1 || true
-	iptables -A FORWARD -i "$LAN_IFACE" -o "$WAN_IFACE" -j ACCEPT
+	set_nat_rules $WAN_IFACE $LAN_IFACE $SUBNET
 	sysctl -w net.ipv4.ip_forward=1
 	sysctl -w net.ipv6.conf.all.forwarding=1
 
