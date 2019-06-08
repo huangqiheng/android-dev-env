@@ -1,5 +1,19 @@
 #!/bin/sh
 
+set_nat_rules()
+{
+	local wannet_iface=$1 # like eth0
+	local subnet_iface=$2 # like wlan0
+	local subnet_range=$3 # like 192.168.234.0/24
+
+	iptables -t nat -D POSTROUTING -s $subnet_range -o $wannet_iface -j MASQUERADE > /dev/null 2>&1 || true
+	iptables -t nat -A POSTROUTING -s $subnet_range -o $wannet_iface -j MASQUERADE
+	iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT > /dev/null 2>&1 || true
+	iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 
+	iptables -D FORWARD -i "$subnet_iface" -o "$wannet_iface" -j ACCEPT > /dev/null 2>&1 || true
+	iptables -A FORWARD -i "$subnet_iface" -o "$wannet_iface" -j ACCEPT
+}
+
 export_router_config()
 {
 	check_apt lshw
