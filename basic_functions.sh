@@ -340,6 +340,15 @@ fun_exists()
 	type "$1" 2>/dev/null | grep -q 'function'
 }
 
+check_apmode()
+{
+	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
+	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
+		log_r "Wireless card doesn't support AP mode."
+		exit 1
+	fi
+}
+
 check_bash()
 {
 	[ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit
@@ -477,6 +486,10 @@ is_devblk()
 	[ $(lsblk -np --output KNAME | grep -c "$1") -gt 0 ]
 }
 
+has_substr()
+{
+	[ "${1%$2*}" != "$1" ]
+}
 
 apt_exists()
 {
