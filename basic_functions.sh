@@ -121,13 +121,13 @@ chownHome()
 	chown -R $RUN_USER:$RUN_USER $UHOME
 }
 
-get_public_ip()
+public_ip()
 {
 	curl -4 icanhazip.com
 }
 
-get_latest_release()  # $1="creationix/nvm"
-{
+# $1="creationix/nvm"
+get_latest_release()  {
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |
 	grep '"tag_name":' |
 	sed -E 's/.*"([^"]+)".*/\1/'
@@ -339,15 +339,6 @@ fun_exists()
 	type "$1" 2>/dev/null | grep -q 'function'
 }
 
-check_apmode()
-{
-	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
-	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
-		log_r "Wireless card doesn't support AP mode."
-		exit 1
-	fi
-}
-
 check_bash()
 {
 	[ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit
@@ -362,8 +353,7 @@ check_sudo()
 	fi
 }
 
-
-check_privileged()
+check_privil()
 {
 	if [ ! -w '/sys' ]; then
 		log_r 'Not running in privileged mode.'

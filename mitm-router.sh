@@ -1,7 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $(dirname $(readlink -f $0))/mitm-funcs.sh
 
 on_internet_ready()
 {
@@ -53,7 +52,7 @@ main ()
 	#----------------------------------------------------- conditions ---
 
 	export_router_config
-	check_privileged
+	check_privil
 
 	#-------------------------------------------------- build subnet ----
 	log_y "starting dnsmasq dhcp: $SUBNET"

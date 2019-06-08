@@ -15,7 +15,7 @@ main ()
 	fi
 
 	mkdir -p /etc/shadowsocks
-	publicIp=$(get_public_ip)
+	publicIp=$(public_ip)
 
 cat > /etc/shadowsocks/ss-config.json <<EOL
 {

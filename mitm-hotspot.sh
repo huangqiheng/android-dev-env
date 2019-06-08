@@ -1,7 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $(dirname $(readlink -f $0))/mitm-funcs.sh
 
 export SSID="${SSID:-DangerousHotspot}"
 export PASSWORD="${PASSWORD:-DontConnectMe}"
@@ -55,7 +54,7 @@ main ()
 {
 	#----------------------------------------------------- conditions ---
 	export_router_config
-	check_privileged
+	check_privil
 	check_apmode $LAN_IFACE
 
 	nocmd_update hostapd

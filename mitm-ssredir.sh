@@ -1,7 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $(dirname $(readlink -f $0))/mitm-funcs.sh
 
 SSSERVR_CONF="${SSSERVR_CONF:-/etc/shadowsocks-libev/ssredir.json}"
 
