@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 url_driver_runfile=http://us.download.nvidia.com/XFree86/Linux-x86_64/384.59/NVIDIA-Linux-x86_64-384.59.run
 url_cuda_runfile=https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run
 url_cuda_patch_runfile=https://developer.nvidia.com/compute/cuda/8.0/Prod2/patches/2/cuda_8.0.61.2_linux-run
@@ -14,7 +14,7 @@ main ()
 	check_apt linux-headers-$(uname -r)
 
 	export GLPATH=/usr/lib
-	cd $THIS_DIR && mkdir -p temp && cd temp
+	cd $ROOT_DIR && mkdir -p temp && cd temp
 
 	if ! apt_exists lubuntu-core; then
 		apt install -y lubuntu-core --no-install-recommend

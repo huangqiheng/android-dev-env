@@ -1,11 +1,11 @@
 #!/bin/dash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $ROOT_DIR/setup_routines.sh
 
 TARGET=atmega32u4
 VER=
-HEX=$THIS_DIR/data/ok60hhkbgeneral.hex
+HEX=$ROOT_DIR/data/ok60hhkbgeneral.hex
 # compile .hex file from https://kbfirmware.com/ use data/ok60hhkbgeneral.json
 
 main () 

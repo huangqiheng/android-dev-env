@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main() 
 {
@@ -9,7 +9,7 @@ main()
 
 	[ -z $1 ] && return 0
 
-	cd $THIS_DIR/temp
+	cd $ROOT_DIR/temp
 
 	ffmpeg -i "$1" -ss 3 -i "$2" -c:v copy -map 0:v:0 -map 1:a:0 -shortest /home/and/Videos/out.mp4
 }

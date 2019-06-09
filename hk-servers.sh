@@ -1,7 +1,7 @@
 #!/bin/dash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $ROOT_DIR/setup_routines.sh
 
 IFCE=enp1s0
 NMSK=255.255.255.0

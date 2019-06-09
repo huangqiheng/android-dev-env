@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
@@ -11,7 +11,7 @@ main ()
 
 build_skynet()
 {
-	cd $THIS_DIR &&  mkdir -p temp && cd temp
+	cd $ROOT_DIR &&  mkdir -p temp && cd temp
 
 	if [ ! -d "skynet" ]; then
 		git clone https://github.com/cloudwu/skynet.git

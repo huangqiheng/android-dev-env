@@ -1,7 +1,7 @@
 #!/bin/dash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $ROOT_DIR/setup_routines.sh
 
 AP_IFACE="${AP_IFACE:-wlan0}"
 WAN_IFACE="${WAN_IFACE:-eth0}"

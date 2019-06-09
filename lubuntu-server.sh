@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
@@ -48,14 +48,14 @@ astrill_vpn()
 		return
 	fi
 
-	cd $THIS_DIR
+	cd $ROOT_DIR
 	mkdir -p temp && cd temp
 
 	if [ ! -f "astrill-setup-linux64.sh" ]; then
 		wget https://astrill4u.com/downloads/astrill-setup-linux64.sh
 	fi
 
-	set_comt $THIS_DIR/temp/astrill-setup-linux64.sh
+	set_comt $ROOT_DIR/temp/astrill-setup-linux64.sh
 	set_comt off '#' 'read x'
 
 	bash astrill-setup-linux64.sh

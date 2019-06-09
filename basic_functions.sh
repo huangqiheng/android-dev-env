@@ -1,16 +1,16 @@
 ORIARGS="$0 $*"
 THIS_SCRIPT=$(readlink -f $0)
-THIS_DIR=$(dirname $THIS_SCRIPT)
-CACHE_DIR=$THIS_DIR/cache
-DATA_DIR=$THIS_DIR/data
-UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"
-RUN_DIR=$UHOME/runCodes
-RUN_USER=$(basename $UHOME)
+export ROOT_DIR=$(dirname $THIS_SCRIPT)
+export CACHE_DIR=$ROOT_DIR/cache
+export DATA_DIR=$ROOT_DIR/data
+export UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"
+export RUN_DIR=$UHOME/runCodes
+export RUN_USER=$(basename $UHOME)
 
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
 
-cd $THIS_DIR
+cd $ROOT_DIR
 
 #-------------------------------------------------------
 #		basic functions
@@ -757,9 +757,9 @@ repo_update()
 	#---------------------------------------------------------------------
 	# pull
 
-	THIS_DIR=`dirname $(readlink -f $0)`
+	ROOT_DIR=`dirname $(readlink -f $0)`
 
-	cd $THIS_DIR
+	cd $ROOT_DIR
 	IFS=; pull_result=$(git pull)
 
 	if echo $pull_result | grep -q 'insufficient permission for adding an object'; then
@@ -817,7 +817,7 @@ repo_update()
 	input_msg=$1
 	input_msg=${input_msg:="update"}
 
-	cd $THIS_DIR
+	cd $ROOT_DIR
 	git add .
 	IFS=; commit_result=$(git commit -m "${input_msg}")
 

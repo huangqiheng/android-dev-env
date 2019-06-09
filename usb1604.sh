@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
-. $THIS_DIR/setup_routines.sh
+. $ROOT_DIR/setup_routines.sh
 
 ## http://bernaerts.dyndns.org/linux/75-debian/53-debian-server-compact-flash
 ## (1) only one root partition formated with ext2

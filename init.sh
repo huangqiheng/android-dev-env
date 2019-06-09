@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main() 
 {
@@ -20,7 +20,7 @@ main()
 			npm install uglify-js -g
 		fi
 
-		cd $THIS_DIR
+		cd $ROOT_DIR
 
 		npm install
 	fi
@@ -74,7 +74,7 @@ kill_exit()
 
 run_exit()
 {
-	cd $THIS_DIR/public
+	cd $ROOT_DIR/public
 
 	if [ -f main.js ]; then
 		node main.js 
@@ -89,12 +89,12 @@ run_exit()
 
 include_config()
 {
-	[ -f $THIS_DIR/config.sh ] &&  . $THIS_DIR/config.sh
+	[ -f $ROOT_DIR/config.sh ] &&  . $ROOT_DIR/config.sh
 }
 
 umount_target_exit()
 {
-	local checkout_dir=$THIS_DIR/public
+	local checkout_dir=$ROOT_DIR/public
 	umount $checkout_dir
 	exit 0
 }
@@ -110,8 +110,8 @@ checkout_target_exit()
 		exit 1
 	fi	
 
-	local source_dir=$THIS_DIR/$codesName
-	local checkout_dir=$THIS_DIR/public
+	local source_dir=$ROOT_DIR/$codesName
+	local checkout_dir=$ROOT_DIR/public
 	mkdir -p $source_dir
 	mkdir -p $checkout_dir 
 
@@ -185,7 +185,7 @@ git_update_exit()
 	local input_msg=$1
 	input_msg=${input_msg:="update"}
 
-	cd $THIS_DIR
+	cd $ROOT_DIR
 	git add .
 	git commit -m "${input_msg}"
 	git push

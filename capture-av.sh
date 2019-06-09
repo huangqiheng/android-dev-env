@@ -1,13 +1,13 @@
 #!/bin/dash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main() 
 {
 	check_update ppa:jonathonf/ffmpeg-3
 	update_ffmpeg 3.3.0
 
-	cd $THIS_DIR &&  mkdir -p temp && cd temp
+	cd $ROOT_DIR &&  mkdir -p temp && cd temp
 
 	if [ "$1" = "alsa" ]; then
 		ffmpeg -s 1024x768 -r 25 -f x11grab -i :0.0+100,200 -f pulse -ac 2 -i default output.mkv

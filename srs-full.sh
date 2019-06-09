@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THIS_DIR=`dirname $(readlink -f $0)`
+ROOT_DIR=`dirname $(readlink -f $0)`
 
 main () 
 {
@@ -11,7 +11,7 @@ main ()
 
 build_srs()
 {
-	cd $THIS_DIR
+	cd $ROOT_DIR
 	mkdir -p temp && cd temp
 
 	if [ ! -d "srs" ]; then
