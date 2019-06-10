@@ -77,7 +77,7 @@ process_export()
 	else
 		local inputFile="$1"
 		if [ -z $inputFile ]; then
-			local this_file=$(basename $THIS_SCRIPT)
+			local this_file=$(basename $BASIC_SCRIPT)
 			inputFile="$UHOME/${this_file%.*}.json"
 		fi
 		if touch "$inputFile" 2>/dev/null; then
@@ -314,7 +314,7 @@ install_service_exit()
 
 show_help_exit()
 {
-	local this_file=$(basename $THIS_SCRIPT)
+	local this_file=$(basename $BASIC_SCRIPT)
 	cat <<- EOL
 	  sh ${this_file} install	; install as systemd service
 	  sh ${this_file} help  	; show this print

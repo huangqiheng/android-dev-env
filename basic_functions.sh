@@ -1,6 +1,7 @@
 ORIARGS="$0 $*"
-THIS_SCRIPT=$(readlink -f $0)
-export ROOT_DIR=$(dirname $THIS_SCRIPT)
+export BASIC_SCRIPT=$(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
+export EXEC_SCRIPT=$(readlink -f $0)
+export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export CACHE_DIR=$ROOT_DIR/cache
 export DATA_DIR=$ROOT_DIR/data
 export UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"

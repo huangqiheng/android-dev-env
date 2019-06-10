@@ -47,7 +47,7 @@ maintain()
 show_help_exit()
 {
 	cat <<- EOL
-	LAN_IFACE=wlan0 sudo sh $(basename $THIS_SCRIPT)
+	LAN_IFACE=wlan0 sudo sh $(basename $BASIC_SCRIPT)
 EOL
 	exit 0
 }

@@ -13,7 +13,7 @@ enable_service()
 	check_sudo
 
 	local this_param="$1"
-	local this_file=$(basename $THIS_SCRIPT)
+	local this_file=$(basename $BASIC_SCRIPT)
 	local this_name=${this_file%.*}
 
 	cat > /lib/systemd/system/${this_name}.service <<- EOL
@@ -24,7 +24,7 @@ enable_service()
 
 	[Service]
 	Type=oneshot
-	ExecStart=/bin/dash ${THIS_SCRIPT}
+	ExecStart=/bin/dash ${BASIC_SCRIPT}
 
 	[Install]
 	WantedBy=final.target
@@ -38,7 +38,7 @@ enable_service()
 {
 	check_sudo
 
-	local this_file=$(basename $THIS_SCRIPT)
+	local this_file=$(basename $BASIC_SCRIPT)
 	local this_name=${this_file%.*}
 
 	systemctl stop ${this_name}

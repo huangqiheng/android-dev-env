@@ -1,5 +1,5 @@
-THIS_SCRIPT=$(readlink -f $0)
-export ROOT_DIR=$(dirname $THIS_SCRIPT)
+BASIC_SCRIPT=$(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
+export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export RUN_USER=$(basename $HOME)
 
 log()         { if [ "$LOGFLAG" != 'off' ]; then echo "$@"; fi }

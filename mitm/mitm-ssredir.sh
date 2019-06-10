@@ -6,20 +6,6 @@ SSSERVR_CONF="${SSSERVR_CONF:-/etc/shadowsocks-libev/ssredir.json}"
 
 main () 
 {
-	#----------------------------------------------- make cmdline
-	make_cmdline mitm-ssredir <<-EOF
-	#!/bin/bash
-
-	export LAN_IFACE=${LAN_IFACE}
-	export WAN_IFACE=${WAN_IFACE}
-	export GATEWAY=${GATEWAY}
-	export SSID=${SSID}
-	export PASSWORD=${PASSWORD}
-
-	cd $ROOT_DIR
-	sh mitm-hotspot.sh ssredir
-EOF
-
 	#----------------------------------------------- install ss-redir
 
 	if cmd_exists "ss-redir"; then
