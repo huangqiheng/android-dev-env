@@ -1,6 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(dirname $(readlink -f $0)))/basic_mini.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 
 check_apmode()
 {
@@ -53,12 +53,8 @@ export_router_config()
 
 setup_resolvconf()
 {
-	if systemctl is-active systemd-resolved; then
-		systemctl stop systemd-resolved
-	fi
-	if systemctl is-enabled systemd-resolved; then
-		systemctl disable systemd-resolved
-	fi
+	systemctl stop systemd-resolved
+	systemctl disable systemd-resolved
 	check_apt resolvconf
 
 	cat > /etc/resolv.conf <<-EOF

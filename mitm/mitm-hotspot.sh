@@ -64,7 +64,11 @@ main ()
 
 	log_y 'release wifi for hostapd'
 	check_apt rfkill network-manager bridge-utils
-	nmcli radio wifi off
+
+	conn_state=$(nmcli device show wlxbcec23f76ef9 | grep STATE | awk '{print $2}')
+	if [ "$conn_state" = '100' ]; then
+		nmcli device disconnect $LAN_IFACE
+	fi
 	rfkill unblock wlan
 	sleep 1
 
@@ -154,10 +158,12 @@ release_host_wifi()
 {
 	check_sudo
 
-	local mac=$(ifconfig "$LAN_IFACE" | awk '/ether/{print $2}')
-	set_ini '/etc/NetworkManager/NetworkManager.conf'
-	set_ini 'keyfile' 'unmanaged-devices' "mac:$mac"
-	set_ini 'device' 'wifi.scan-rand-mac-address' 'no'
+	nmcli device set "$LAN_IFACE" managed no
+	
+	#local mac=$(ifconfig "$LAN_IFACE" | awk '/ether/{print $2}')
+	#set_ini '/etc/NetworkManager/NetworkManager.conf'
+	#set_ini 'keyfile' 'unmanaged-devices' "mac:$mac"
+	#set_ini 'device' 'wifi.scan-rand-mac-address' 'no'
 
 	systemctl restart NetworkManager
 	exit 0
