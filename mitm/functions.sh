@@ -57,6 +57,7 @@ setup_resolvconf()
 	systemctl disable systemd-resolved
 	check_apt resolvconf
 
+	rm -f /etc/resolv.conf
 	cat > /etc/resolv.conf <<-EOF
 	nameserver 8.8.8.8
 	nameserver 114.114.114.114
