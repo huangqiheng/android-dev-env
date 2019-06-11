@@ -4,7 +4,7 @@
 
 force_bridge_mitm()
 {
-	check_apt bridge-utils network-manager rfkill
+	ensure_apt bridge-utils network-manager rfkill
 
 	if [ $# -lt 2 ]; then
 		log_r 'at lease two parameters'

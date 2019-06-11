@@ -1,4 +1,4 @@
-BASIC_SCRIPT=$(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
+export BASIC_SCRIPT=$(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export RUN_USER=$(basename $HOME)
 
@@ -11,7 +11,8 @@ fun_exists()  { type "$1" 2>/dev/null | grep -q 'function'; }
 apt_exists()  { [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -gt 0 ]; }
 check_sudo()  { [ $(whoami) != 'root' ] && log_r "Must be run as root" && exit 1; }
 check_bash()  { [ -z "$BASH_VERSION" ] && log_y "Change to: bash $0" && setsid bash $0 $@ && exit; }
-check_apt()   { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi done; }
+check_apt()   { for p in "$@";do if apt_exists $p;then log_g "$p installed"; else apt install -y $p;fi done; }
+ensure_apt()  { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi done; }
 select_apt()  { for p in $@;do if apt search -n "^$p$" >/dev/null 2>&1;then check_apt $p;return 0;fi done }
 check_npm_g() { for p in "$@";do [ ! -d $(npm ls -g|head -1)/node_modules/$p ] &&  npm i -g "$p";done; }
 empty_exit()  { [ -z $1 ] && log_r "ERROR. the $2 is invalid." && exit 1; }
