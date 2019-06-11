@@ -2,6 +2,37 @@
 
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 
+force_bridge_mitm()
+{
+	check_apt bridge-utils network-manager rfkill
+
+	if [ $# -lt 2 ]; then
+		log_r 'at lease two parameters'
+		return 1
+	fi
+
+	if brctl show 'brmitm' >/dev/null 2>&1; then
+		brctl delbr 'brmitm'
+	fi
+
+	local check_on=
+
+	brctl addbr 'brmitm'
+	for iface in $@; do
+		if iw dev "$iface" info >/dev/null 2>&1; then
+			if [ -z $check_on ]; then
+				rfkill unblock wifi
+				nmcli radio wifi on
+				check_on=true
+			fi
+			iw dev "$iface" set 4addr on
+		fi
+		brctl addif 'brmitm' "$iface"
+	done
+	return 0
+}
+
+
 check_apmode()
 {
 	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
