@@ -8,7 +8,7 @@ force_bridge_mitm()
 
 	if [ $# -lt 2 ]; then
 		log_r 'at lease two parameters'
-		return 1
+		exit 1
 	fi
 
 	if brctl show 'brmitm' >/dev/null 2>&1; then
