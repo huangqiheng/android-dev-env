@@ -120,6 +120,7 @@ check_ssserver_conf()
 make_ssserver_conf()
 {
 	local confile="$1"
+	local inputport="${2:-6666}"
 	read -p 'Input Shadowsocks SERVER: ' SSSERVER
 	read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
 	cat > "$confile" <<EOL
@@ -129,7 +130,7 @@ make_ssserver_conf()
         "mode":"tcp_and_udp",
         "server_port":16666,
         "local_address": "0.0.0.0",
-        "local_port":6666,
+        "local_port":${inputport},
         "method":"xchacha20-ietf-poly1305",
         "timeout":300,
         "fast_open":false
