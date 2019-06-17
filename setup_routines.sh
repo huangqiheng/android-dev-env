@@ -7,6 +7,8 @@ build_hostapd()
 		return
 	fi
 
+	check_apt pkg-config
+
 	cd $CACHE_DIR
 
 	git clone https://github.com/tgraf/libnl-1.1-stable.git
@@ -15,6 +17,7 @@ build_hostapd()
 	make
 	make install
 
+	cd $CACHE_DIR
 	git clone http://w1.fi/hostap.git
 	cd hostap/hostapd
 	cp defconfig .config

@@ -4,7 +4,8 @@
 
 export SSID="${SSID:-DangerousHotspot}"
 export PASSWORD="${PASSWORD:-DontConnectMe}"
-export HWMODE="${HWMODE:-g}"
+export HWMODE="${HWMODE:-g}"  	# a
+export CHANNEL="${CHANNEL:-6}" 	# 36
 
 main () 
 {
@@ -37,15 +38,19 @@ main ()
 	#------ setup hotspot ------
 	log_y "starting hostapd: $SSID @ $LAN_IFACE"
 
-	check_apt hostapd iproute2
+	build_hostapd
+	check_apt iproute2
 	cat > /home/hostapd.conf <<-EOF
 	interface=$LAN_IFACE
 	driver=nl80211
-	beacon_int=25
+
 	ssid=$SSID
 	hw_mode=$HWMODE
-	channel=0
-	ieee80211n=1
+	channel=$CHANNEL
+	#ieee80211n=1
+	#ieee80211d=1
+	#ieee80211ac=1
+	country_code=US
 	#ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
 	macaddr_acl=0
 	wmm_enabled=0
@@ -125,6 +130,7 @@ on_internet_ready()
 		export SSID=${SSID}
 		export PASSWORD=${PASSWORD}
 		export HWMODE=${HWMODE}
+		export CHANNEL=${CHANNEL}
 
 		cd $(dirname $EXEC_SCRIPT)
 		sh $(basename $EXEC_SCRIPT) ssredir
