@@ -4,6 +4,7 @@
 
 export SSID="${SSID:-DangerousHotspot}"
 export PASSWORD="${PASSWORD:-DontConnectMe}"
+export HWMODE="${HWMODE:-g}"
 
 main () 
 {
@@ -42,8 +43,8 @@ main ()
 	driver=nl80211
 	beacon_int=25
 	ssid=$SSID
-	hw_mode=g
-	channel=6
+	hw_mode=$HWMODE
+	channel=0
 	ieee80211n=1
 	#ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
 	macaddr_acl=0
@@ -111,7 +112,7 @@ EOL
 
 on_internet_ready()
 {
-	cd $ROOT_DIR
+	cd $EXEC_DIR
 
 	if [ "X$MITM_PROXY" = 'Xssredir' ]; then
 		#----------------------------------------------- make cmdline
@@ -123,6 +124,7 @@ on_internet_ready()
 		export GATEWAY=${GATEWAY}
 		export SSID=${SSID}
 		export PASSWORD=${PASSWORD}
+		export HWMODE=${HWMODE}
 
 		cd $(dirname $EXEC_SCRIPT)
 		sh $(basename $EXEC_SCRIPT) ssredir
