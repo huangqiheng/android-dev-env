@@ -7,6 +7,7 @@ SSSERVR_CONF="${SSSERVR_CONF:-/etc/shadowsocks-libev/ssredir.json}"
 main () 
 {
 	#----------------------------------------------- install ss-redir
+	check_apt haveged rng-tools
 
 	if cmd_exists "ss-redir"; then
 		log_y 'ss-redir is ready'
@@ -15,7 +16,7 @@ main ()
 
 		if dpkg --compare-versions "$ssver" gt 3.1.2; then
 			check_apt make
-			check_apt haveged rng-tools shadowsocks-libev
+			check_apt shadowsocks-libev
 		else
 			ssrdir_source
 		fi
