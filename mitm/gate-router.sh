@@ -4,7 +4,7 @@
 
 on_internet_ready()
 {
-	cd $ROOT_DIR
+	cd $EXEC_DIR
 
 	if [ "X$MITM_PROXY" = 'Xssredir' ]; then
 		#----------------------------------------------- make cmdline
