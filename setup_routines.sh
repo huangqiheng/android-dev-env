@@ -1,5 +1,27 @@
 #!/bin/sh
 
+build_hostapd()
+{
+	if cmd_exists hostapd; then
+		log_g 'hostapd has been installed.'
+		return
+	fi
+
+	cd $CACHE_DIR
+
+	git clone https://github.com/tgraf/libnl-1.1-stable.git
+	cd libnl-1.1-stable
+	./configure
+	make
+	make install
+
+	git clone http://w1.fi/hostap.git
+	cd hostap/hostapd
+	cp defconfig .config
+	make
+	make install
+}
+
 install_ssredir()
 {
 	check_apt haveged rng-tools shadowsocks-libev
