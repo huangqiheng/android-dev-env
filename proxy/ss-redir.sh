@@ -1,17 +1,20 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
-main () 
+SSCONF=/etc/ss-libev/ss-server.config
+SSPORT=16666
+
+main() 
 {
-	ssver=$(dpkg-query --show --showformat '${Version}' shadowsocks-libev)
+	ssredir_from_source
+	server_config
+	service_config
+}
 
-	if dpkg --compare-versions "$ssver" gt 3.1.2; then
-		install_ssredir
-		exit 0
-	fi
-
+ssredir_from_source() 
+{
 	#---------------------------------------------
 
 	cd $CACHE_DIR
@@ -74,61 +77,71 @@ main ()
 		make install
 	fi
 
-	log_y 'ready: ss-local ss-tunnel ss-server ss-manager ss-redir'
-
-	server_config
+	log_y 'SS Ready: ss-local ss-tunnel ss-server ss-manager ss-redir'
 }
 
-
-repo_install()
-{
-	if lsb_release -d | grep -iq 'Ubuntu 16.04'; then
-		apt install software-properties-common -y
-		add-apt-repository ppa:max-c-lv/shadowsocks-libev -y
-		apt update -y
-		apt install -y shadowsocks-libev
-
-		server_config
-		exit 0
-	fi
-}
-
-
-__hit_once_flag=false
 
 hit_once()
 {
-	if [ "$__hit_once_flag" = 'true' ]; then
-		return
+	if [ "X$__HITONCE_FLAG" = 'X' ]; then
+		__HITONCE_FLAG=true
+		apt install -y --no-install-recommends \
+		  build-essential autoconf automake \
+		  libtool libpcre3-dev asciidoc xmlto \
+		  gettext libev-dev libudns-dev libc-ares-dev
 	fi
-	__hit_once_flag=true
-
-	apt install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libudns-dev automake libc-ares-dev
-
-	#apt install libmbedtls-dev libsodium-dev 
 }
 
+service_config()
+{
+	cat > /lib/systemd/system/ssserver.service <<-EOL
+	[Unit]
+	Description=Service For Shadowsocks server
+	After=network.target
+
+	[Service]
+	Type=simple
+	CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+	AmbientCapabilities=CAP_NET_BIND_SERVICE
+	ExecStart=/usr/local/bin/ss-server -c ${SSCONF}
+
+	[Install]
+	WantedBy=multi-user.target
+EOL
+	systemctl enable ssserver
+	systemctl start ssserver
+	systemctl status ssserver
+
+	log_y 'To stop service: systemctl stop ssserver'
+}
 
 server_config()
 {
-	local host='serverip'
-	local port='6666'
-	local pass='password'
+	check_apt jq
 
+	mkdir -p $(dirname "$SSCONF")
 
-	mkdir -p /etc/ss-libev
-	cat > /etc/ss-libev/ss-server.config <<EOL
+	if [ ! -f "$SSCONF" ]; then
+		read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+	else
+		SSPASSWORD=$(cat "$SSCONF" | jq -c '.password' | tr -d '"')
+		if [ "X$SSPASSWORD" = 'X' ]; then
+			read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+		fi
+	fi
+
+	cat > "$SSCONF" <<EOL
 {
-        "server":"${host}",
-        "mode":"tcp_and_udp",
-        "server_port": "${port}",
-        "password":"${pass}",
-        "method":"xchacha20-ietf-poly1305",
-        "timeout":300,
-        "fast_open":false
+        "server": "0.0.0.0",
+        "mode": "tcp_and_udp",
+        "server_port": ${SSPORT},
+        "password": "${SSPASSWORD}",
+        "method": "xchacha20-ietf-poly1305",
+        "timeout": 300,
+        "fast_open": false
 }
 EOL
-
+	cat "$SSCONF"
 	log_y 'Please edit: /etc/ss-libev/ss-server.config'
 }
 
