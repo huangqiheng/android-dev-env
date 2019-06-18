@@ -323,6 +323,18 @@ nocmd_exit()
 	fi
 }
 
+ufw_active()
+{
+	if ! cmd_exists ufw; then
+		return 1
+	fi
+
+	if ufw status | grep 'inactive'; then
+		return 1
+	fi
+	return 0
+}
+
 empty_exit()
 {
 	if [ "X$1" = 'X' ]; then

@@ -116,6 +116,10 @@ EOL
 	systemctl start ssserver
 	systemctl status ssserver
 
+	if ufw_active; then
+		ufw allow ${SSPORT}
+	fi
+
 	log_y 'To stop service: systemctl stop ssserver'
 }
 
