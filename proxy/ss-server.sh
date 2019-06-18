@@ -8,6 +8,10 @@ SSPORT=16666
 
 main() 
 {
+	if [ "X$1" != 'X' ]; then
+		SSPASSWORD="$1"
+	fi
+
 	ssredir_from_source
 	server_config
 	service_config
@@ -121,12 +125,14 @@ server_config()
 
 	mkdir -p $(dirname "$SSCONF")
 
-	if [ ! -f "$SSCONF" ]; then
-		read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
-	else
-		SSPASSWORD=$(cat "$SSCONF" | jq -c '.password' | tr -d '"')
-		if [ "X$SSPASSWORD" = 'X' ]; then
+	if [ -z $SSPASSWORD ]; then
+		if [ ! -f "$SSCONF" ]; then
 			read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+		else
+			SSPASSWORD=$(cat "$SSCONF" | jq -c '.password' | tr -d '"')
+			if [ "X$SSPASSWORD" = 'X' ]; then
+				read -p 'Input Shadowsocks PASSWORD: ' SSPASSWORD
+			fi
 		fi
 	fi
 
