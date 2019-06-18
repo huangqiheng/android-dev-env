@@ -18,6 +18,16 @@ cd $ROOT_DIR
 #		basic functions
 #-------------------------------------------------------
 
+daily_exec() 
+{
+	check_sudo
+	set_cmdline dailyexec
+	set_cmdline "$@" 
+
+	handle_rc '/etc/crontab' dailyexec "44 4 * * * /usr/local/bin/dailyexec"
+}
+
+
 waitfor_die()
 {
 	sleep infinity &
