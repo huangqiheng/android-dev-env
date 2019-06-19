@@ -5,6 +5,7 @@
 
 main () 
 {
+	nocmd_udpate xinit
 	login_root_exec startx
 
 	check_update universe
@@ -12,11 +13,10 @@ main ()
 
 	# install astrill
 	install_astrill
+	ratpoisonrc "exec /usr/local/Astrill/astrill"
+
 	setup_socat 3213 3128
 	setup_polipo 7070 8213
-
-	# install tor
-	setup_tor '127.0.0.1:7070'
 
 	# others, for test
 	ratpoisonrc_done

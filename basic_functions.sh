@@ -176,6 +176,11 @@ ratpoisonrc_done()
 ratpoisonrc()
 {
 	echo_file=$UHOME/.ratpoisonrc
+
+	if [ ! -f $echo_file ]; then
+		touch $echo_file
+	fi
+
 	if grep -iq "$1" $echo_file; then
 		return 1
 	fi
