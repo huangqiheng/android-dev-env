@@ -7,7 +7,8 @@ main ()
 {
 	if ! cmd_exists x11docker; then
 		check_sudo
-		curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker | bash -s -- --update
+		check_apt curl
+		curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker | /bin/bash -s -- --update
 	fi
 
 	show_help_exit
