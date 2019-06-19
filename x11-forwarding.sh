@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/dash
 
 . $(dirname $(readlink -f $0))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
@@ -12,6 +12,21 @@ Host *
   ForwardX11 yes
 EOL
 }
+
+x11_forward_server()
+{
+	log_g 'setting ssh server'
+	check_update_once
+	check_apt xauth
+
+	set_conf /etc/ssh/sshd_config
+	set_conf X11Forwarding yes ' '
+	set_conf X11DisplayOffset 10 ' '
+	set_conf X11UseLocalhost no ' '
+
+	cat /var/run/sshd.pid | xargs kill -1
+}
+
 
 main () 
 {

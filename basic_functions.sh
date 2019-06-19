@@ -1,3 +1,5 @@
+#!/bin/dash
+
 ORIARGS="$0 $*"
 export BASIC_SCRIPT=$(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
@@ -430,7 +432,7 @@ nocmd_udpate()
 {
 	for cmd in "$@"; do
 		if ! cmd_exists $cmd; then
-			check_update
+			check_update_once
 			return 0
 		fi
 	done
@@ -788,7 +790,6 @@ init_colors()
 	On_IWhite='\033[0;107m'   # White
 }; init_colors
 
-
 repo_update()
 {
 	GIT_PUSH_DEFAULT=simple
@@ -870,5 +871,3 @@ repo_update()
 	git config --global credential.helper 'cache --timeout 21600'
 	git push
 }
-
-

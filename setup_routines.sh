@@ -1,5 +1,27 @@
-#!/bin/sh
+#!/bin/dash
 
+x11_forward_server()
+{
+	log_g 'setting ssh server'
+	check_apt xauth
+
+	set_conf /etc/ssh/sshd_config
+	set_conf X11Forwarding yes ' '
+	set_conf X11DisplayOffset 10 ' '
+	set_conf X11UseLocalhost no ' '
+
+	cat /var/run/sshd.pid | xargs kill -1
+}
+
+x11_forward_client()
+{
+	log_g 'setting ssh client'
+	cat > $UHOME/.ssh/config <<EOL
+Host *
+  ForwardAgent yes
+  ForwardX11 yes
+EOL
+}
 
 setup_polipo()
 {
@@ -116,33 +138,9 @@ install_terminals()
 	XTerm*faceNameDoublesize:WenQuanYi Zen Hei Mono:pixelsize=13
 	XTerm*selectToClipboard:true
 	XTerm*inputMethod:fcitx
-EOL 
+EOL
 	chownUser ${UHOME}/.Xresources
 	xinitrc "xrdb -merge ${UHOME}/.Xresources"
-}
-
-x11_forward_server()
-{
-	log_g 'setting ssh server'
-	check_update_once
-	check_apt xauth
-
-	set_conf /etc/ssh/sshd_config
-	set_conf X11Forwarding yes ' '
-	set_conf X11DisplayOffset 10 ' '
-	set_conf X11UseLocalhost no ' '
-
-	cat /var/run/sshd.pid | xargs kill -1
-}
-
-x11_forward_client()
-{
-	log_g 'setting ssh client'
-	cat > $UHOME/.ssh/config <<EOL
-Host *
-  ForwardAgent yes
-  ForwardX11 yes
-EOL
 }
 
 install_wps()
@@ -198,7 +196,7 @@ cloudinit_remove()
 
 install_astrill()
 {
-	if cmd_exists /usr/local/Astrill/astrill; then
+	if cmd_exists astrill; then
 		log_g "astrill has been installed."
 		return
 	fi
@@ -210,10 +208,12 @@ install_astrill()
 	apt --fix-broken install
 	check_apt gtk2-engines-pixbuf gtk2-engines-murrine 
 	check_apt gnome-themes-standard
+	apt autoremove
 	
 	if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
 		dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"
 		ratpoisonrc "bind C-a exec /usr/local/Astrill/astrill"
+		ln -sf /usr/local/Astrill/astrill /usr/local/bin/astrill
 		return 0
 	else
 		log_y 'FIXME: download astrill-setup-linux64.deb please'
@@ -340,8 +340,12 @@ version_compare()
 
 ffmpeg_version()
 {
-	! cmd_exists ffmpeg && return 1
-	IFS=' -'; set -- $(ffmpeg -version | grep "ffmpeg version"); echo $3
+	if ! cmd_exists ffmpeg; then
+	       	return 1
+	fi
+
+	IFS=' -'
+	set -- $(ffmpeg -version | grep "ffmpeg version")
+	echo $3
 	[ ! -z $3 ]
 }
-
