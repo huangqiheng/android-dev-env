@@ -1,5 +1,36 @@
 #!/bin/sh
 
+
+setup_polipo()
+{
+	socksport=$1
+	webport=$2
+	check_apt polipo
+
+	set_conf '/etc/polipo/config'
+	set_conf socksParentProxy "127.0.0.1:${socksport}"
+	set_conf socksProxyType socks5
+	set_conf proxyAddress '::0'
+	set_conf proxyPort "$webport"
+
+	service polipo restart
+}
+
+
+setup_tor()
+{
+	socksproxy=$1
+	check_apt tor
+
+	set_conf /etc/tor/torrc
+	set_conf Socks5Proxy "$socksproxy" ' '
+	set_conf SOCKSPort '0.0.0.0:9050' ' '
+	set_conf /etc/tor/torsocks.conf
+	set_conf TorAddress '0.0.0.0'
+	systemctl restart tor
+}
+
+
 build_hostapd()
 {
 	if cmd_exists hostapd; then

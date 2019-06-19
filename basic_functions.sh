@@ -655,6 +655,16 @@ log_r()
     echo "${Red}$*${Color_Off}"
 }
 
+login_root_exec()
+{
+	check_sudo
+	set_cmdline loginexec
+	set_cmdline "$@" 
+
+	auto_login root
+	handle_rc '/root/.bashrc' loginexec "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then loginexec; fi"
+}
+
 auto_login()
 {
 	local loginUser=${RUN_USER}
