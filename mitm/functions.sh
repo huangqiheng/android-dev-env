@@ -34,16 +34,6 @@ force_bridge_mitm()
 }
 
 
-check_apmode()
-{
-	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
-	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
-		log_r "Wireless card doesn't support AP mode."
-		exit 1
-	fi
-}
-
-
 set_nat_rules()
 {
 	local wannet_iface=$1 # like eth0

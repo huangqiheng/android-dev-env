@@ -20,6 +20,22 @@ cd $ROOT_DIR
 #		basic functions
 #-------------------------------------------------------
 
+
+is_apmode()
+{
+	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
+	$(iw phy "$PHY" info | grep -qE "^\s+\* AP$")
+}
+
+check_apmode()
+{
+	local PHY=$(cat /sys/class/net/${1}/phy80211/name)
+	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
+		log_r "Wireless card doesn't support AP mode."
+		exit 1
+	fi
+}
+
 daily_exec() 
 {
 	check_sudo
