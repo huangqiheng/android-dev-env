@@ -9,12 +9,13 @@ PASSWORD=password
 
 main () 
 {
-
 	create_image $astrill_image <<-EOL
 	FROM ubuntu:18.04
-	RUN apt-get update && apt-get install -y openssl \\
-	    useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
-	    usermod -aG sudo $USERNAME
+	RUN buildDeps='openssl' \\
+	    && apt update && apt install -y $buildDeps \\
+	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
+	    && usermod -aG sudo $USERNAME \\
+	    && apt purge -y --auto-remove $buildDeps
 	USER $USERNAME
 	ENV HOME /home/$USERNAME
 	CMD /usr/local/Astrill/astrill
