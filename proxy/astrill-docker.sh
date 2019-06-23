@@ -3,9 +3,27 @@
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
+astrill_image='astrill-ubuntu'
+USERNAME=$RUN_USER
+PASSWORD=password
+
 main () 
 {
-	check_image 'rastasheep/ubuntu-sshd'
+
+	create_image $astrill_image <<-EOL
+	FROM ubuntu:18.04
+	RUN apt-get update && apt-get install -y openssl \\
+	    useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
+	    usermod -aG sudo $USERNAME
+	USER $USERNAME
+	ENV HOME /home/$USERNAME
+	CMD /usr/local/Astrill/astrill
+EOL
+
+	docker run -it --rm \
+		-e DISPLAY=$DISPLAY \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		$astrill_image
 
 }
 

@@ -656,6 +656,26 @@ check_image()
 	done
 }
 
+create_image()
+{
+	init_docker
+	local imgName="$1"
+	local inputScript="$(cat /dev/stdin)"
+
+	cd $CACHE_DIR
+	if [ -d "$imgName" ]; then
+		log_y "image \"$imgName\" had been build: $CACHE_DIR/$imgName"
+		return 1
+	fi
+
+	mkdir -p $imgName
+	cd $imgName
+
+	echo "$inputScript" > 'Dockerfile'
+	docker build -t "$imgName" .
+
+}
+
 
 log() 
 {
