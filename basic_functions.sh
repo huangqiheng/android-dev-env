@@ -617,38 +617,27 @@ select_apt()
 	return 1
 }
 
-__is_docker_firstRun=true
-
-init_docker()
+check_docker()
 {
 	if cmd_exists docker; then
-		if "$__is_docker_firstRun" = 'true'; then
-			log_g 'docker is ready.'
-			__is_docker_firstRun=false
-		fi
+		log_g 'docker is ready.'
 		return 
 	fi
-
-	check_sudo
-
-	cd $CACHE_DIR
-	if [ ! -f get-docker.sh ]; then
-		curl -fsSL get.docker.com -o get-docker.sh
-	fi
-
-	sh get-docker.sh --mirror Aliyun
-
+	sh -c "$(curl -fsSL get.docker.com|sed "/shouldWarn=0/i exit 0")" --mirror Aliyun
 	usermod -aG docker "$RUN_USER"
 	check_service docker
 }
 
+image_exists()
+{
+	check_docker
+	docker images --all | grep -q "$1"
+}
 
 check_image()
 {
-	init_docker
-
 	for imageName in "$@"; do
-		if docker images --all | grep -q "$imageName"; then
+		if image_exists "$imageName"; then
 			log_g "image is ready ($imageName)"
 		else
 			docker pull "$imageName"
@@ -656,24 +645,25 @@ check_image()
 	done
 }
 
-create_image()
-{
-	init_docker
-	local imgName="$1"
-	local inputScript="$(cat /dev/stdin)"
-
-	cd $CACHE_DIR
-	if [ -d "$imgName" ]; then
-		log_y "image \"$imgName\" had been build: $CACHE_DIR/$imgName"
-		return 1
+build_image()
+{ 
+	if image_exists "$1"; then
+		log_g "image is exists ($1)"
+		return
 	fi
+	dockfile=$CACHE_DIR/$1.docker
+	cat >&1 > $dockfile
+	docker build -f $dockfile -t $1 $DATA_DIR
+}
 
-	mkdir -p $imgName
-	cd $imgName
+cont_running() 
+{
+	[ $(docker inspect -f '{{.State.Running}}' "$1") = 'true' ]
+}
 
-	echo "$inputScript" > 'Dockerfile'
-	docker build -t "$imgName" .
-
+check_cont()
+{
+	! cont_running "$1" && docker start -ai "$1"
 }
 
 

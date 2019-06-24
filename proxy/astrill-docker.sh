@@ -9,37 +9,48 @@ PASSWORD=password
 
 main () 
 {
-	create_image $astrill_image <<-EOL
+	build_image $astrill_image <<-EOL
 	FROM ubuntu:18.04
-	RUN buildDeps='openssl' \\
-	    && apt update && apt install -y $buildDeps \\
+	COPY ./astrill-setup-linux64.deb /root
+	RUN apt-get update \\
+	    && apt-get install -y openssl libssl-dev \\
 	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && usermod -aG sudo $USERNAME \\
-	    && apt purge -y --auto-remove $buildDeps
+	    && apt-get install -y libgtk2.0-0 && apt-get --fix-broken install \\
+	    && apt-get install -y gtk2-engines-pixbuf gtk2-engines-murrine gnome-themes-standard \\
+	    && dpkg -i /root/astrill-setup-linux64.deb \\
+	    && apt-get autoremove
 	USER $USERNAME
 	ENV HOME /home/$USERNAME
 	CMD /usr/local/Astrill/astrill
 EOL
 
-	docker run -it --rm \
-		-e DISPLAY=$DISPLAY \
-		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		$astrill_image
+	if [ "X$1" = 'X' ]; then
+		docker run -it --rm \
+			-e DISPLAY=$DISPLAY \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			$astrill_image
+	else
+		docker run -it \
+			-e DISPLAY=$DISPLAY \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			--name "$1" \
+			$astrill_image
+	fi
 
-}
-
-inside_docker_exit()
-{
-	nocmd_udpate astrill
-	x11_forward_server
-	install_astrill
-	astrill
-	exit 0
 }
 
 maintain()
 {
-	[ "$1" = 'inside' ] && inside_docker_exit
+	[ "$1" = 'help' ] && show_help_exit
+}
+
+show_help_exit()
+{
+	cat << EOL
+
+EOL
+	exit 0
 }
 
 maintain "$@"; main "$@"; exit $?
