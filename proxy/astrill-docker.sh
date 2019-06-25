@@ -16,6 +16,7 @@ main ()
 	    && apt-get install -y openssl libssl-dev \\
 	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && usermod -aG sudo $USERNAME \\
+	    && apt-get install -y shadowsocks-libev \\
 	    && apt-get install -y libgtk2.0-0 && apt-get --fix-broken install \\
 	    && apt-get install -y gtk2-engines-pixbuf gtk2-engines-murrine gnome-themes-standard \\
 	    && apt-get install -y canberra-gtk-module \\
