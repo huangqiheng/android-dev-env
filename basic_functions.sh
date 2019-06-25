@@ -108,6 +108,17 @@ get_wifi_ifaces()
 	lshw -quiet -c network | grep -i 'Wireless interface' -A 12 | grep -i 'configuration' -B 12 | grep 'logical name:' | cut -d: -f2 | sed -e 's/ //g'
 }
 
+iface_to_driver()
+{
+	lshw -quiet -c network 2>/dev/null \
+		| grep -i 'wireless interface' -A 12 \
+		| grep -i 'configuration' -B 12 \
+	       	| grep "$1" -A 12 \
+		| grep -i 'configuration' -B 12 \
+		| grep -P 'driver=(\w+)' -o \
+		| cut -d= -f2
+}
+
 iface_to_mac()
 {
 	ifconfig "$1" | awk '/ether/{print $2}'
