@@ -20,6 +20,18 @@ cd $ROOT_DIR
 #		basic functions
 #-------------------------------------------------------
 
+is_range()
+{
+	[ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	if [ "$1" -lt "$2" ] || [ "$1" -gt "$3" ]; then
+		return 2
+	fi
+	return 0
+}
 
 is_apmode()
 {
