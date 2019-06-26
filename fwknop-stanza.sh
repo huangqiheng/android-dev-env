@@ -29,44 +29,44 @@ main ()
 	KEY_BASE64=$(get_conf KEY_BASE64 ' ')
 	HMAC_KEY_BASE64=$(get_conf HMAC_KEY_BASE64 ' ')
 
-	cat > /tmp/fwknop-remote-shell.sh << EEOL
-#!/bin/bash
+	cat > /tmp/fwknop-remote-shell.sh <<-EEOL
+	#!/bin/bash
 
-apt install -y fwknop-server iptables-persistent
+	apt install -y fwknop-server iptables-persistent
 
-cat > /etc/fwknop/access.conf <<EOL
-SOURCE                  ANY
-REQUIRE_SOURCE_ADDRESS  Y
-KEY_BASE64              ${KEY_BASE64}
-HMAC_KEY_BASE64         ${HMAC_KEY_BASE64}
-EOL
+	cat > /etc/fwknop/access.conf <<EOL
+	SOURCE                  ANY
+	REQUIRE_SOURCE_ADDRESS  Y
+	KEY_BASE64              ${KEY_BASE64}
+	HMAC_KEY_BASE64         ${HMAC_KEY_BASE64}
+	EOL
 
-iface=\$(ifconfig | grep -B1 ${targetIp} | grep -o "^\w*")
-conf="/etc/fwknop/fwknopd.conf"
-if grep -qe "^PCAP_INTF" \$conf; then
-	sed -ri "s|^PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
-else
-	sed -ri "s|^[#; ]*PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
-fi
+	iface=\$(ifconfig | grep -B1 ${targetIp} | grep -o "^\w*")
+	conf="/etc/fwknop/fwknopd.conf"
+	if grep -qe "^PCAP_INTF" \$conf; then
+		sed -ri "s|^PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
+	else
+		sed -ri "s|^[#; ]*PCAP_INTF(\s*).*;$|PCAP_INTF\1\${iface};|1" \$conf
+	fi
 
-cat > /etc/systemd/system/fwknopd.service <<EOL
-[Unit]
-Description=Firewall Knock Operator Daemon
-After=network-online.target
+	cat > /etc/systemd/system/fwknopd.service <<EOL
+	[Unit]
+	Description=Firewall Knock Operator Daemon
+	After=network-online.target
 
-[Service]
-Type=forking
-ExecStart=/usr/sbin/fwknopd
-ExecReload=/bin/kill -HUP \\\$MAINPID
+	[Service]
+	Type=forking
+	ExecStart=/usr/sbin/fwknopd
+	ExecReload=/bin/kill -HUP \\\$MAINPID
 
-[Install]
-WantedBy=multi-user.target
-EOL
+	[Install]
+	WantedBy=multi-user.target
+	EOL
 
-systemctl enable fwknopd
-systemctl start fwknopd
+	systemctl enable fwknopd
+	systemctl start fwknopd
 
-rm -- "\$0"
+	rm -- "\$0"
 EEOL
 
 	check_apt sshpass
