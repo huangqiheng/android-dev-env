@@ -13,17 +13,18 @@ main ()
 	FROM ubuntu:18.04
 	COPY ./astrill-setup-linux64.deb /root
 	RUN apt-get update \\
-	    && apt-get install -y openssl libssl-dev \\
-	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
-	    && usermod -aG sudo $USERNAME \\
+	    && apt-get install -y openssl libssl-dev  psmisc \\
+	    # && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
+	    # && usermod -aG sudo $USERNAME \\
 	    && apt-get install -y shadowsocks-libev \\
-	    && apt-get install -y libgtk2.0-0 && apt-get --fix-broken install \\
-	    && apt-get install -y gtk2-engines-pixbuf gtk2-engines-murrine gnome-themes-standard \\
-	    && apt-get install -y canberra-gtk-module \\
+	    && apt-get install -y libgtk2.0-0 \\
+	    && apt-get install -y gtk2-engines gtk2-engines-pixbuf gtk2-engines-murrine \\
+	    && apt-get install -y libcanberra-gtk-module \\
+	    && apt-get install -y gnome-themes-standard \\
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && apt-get autoremove
-	USER $USERNAME
-	ENV HOME /home/$USERNAME
+	# USER $USERNAME
+	# ENV HOME /home/$USERNAME
 	CMD /usr/local/Astrill/astrill
 EOL
 

@@ -5,7 +5,7 @@
 
 TARGET=atmega32u4
 VER=
-HEX=$ROOT_DIR/data/amj40l1.hex
+HEX=${1:-$ROOT_DIR/data/amj40l1.hex}
 # compile .hex file from https://kbfirmware.com/ use data/ok60hhkbgeneral.json
 
 main () 
