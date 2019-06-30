@@ -11,12 +11,13 @@ main ()
 {
 	build_image $astrill_image <<-EOL
 	FROM ubuntu:18.04
+	#FROM bluebeargaming/ubuntu-server
 	COPY ./astrill-setup-linux64.deb /root
 	RUN apt-get update \\
 	    && apt-get install -y openssl libssl-dev  psmisc \\
 	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && usermod -aG sudo $USERNAME \\
-	    && apt-get install -y shadowsocks-libev \\
+	    && apt-get install -y rng-tools shadowsocks-libev \\
 	    && apt-get install -y libgtk2.0-0 \\
 	    && apt-get install -y gtk2-engines gtk2-engines-pixbuf gtk2-engines-murrine \\
 	    && apt-get install -y libcanberra-gtk-module \\
