@@ -35,5 +35,5 @@ check_docker(){ cmd_exists docker && return; sh -c "$(curl -fsSL get.docker.com)
 image_exists(){ check_docker; docker images --all | grep -q "$1"; }
 check_image() { check_docker; for p in "$@"; do if ! image_exists "$p";then docker pull "$p";fi done; }
 build_image() { image_exists $1 && return;f=$CACHE_DIR/$1.docker;cat >&1 > $f;docker build -f $f -t $1 $DATA_DIR; }
-cont_running(){ [ $(docker inspect -f '{{.State.Running}}' "$1") = 'true' ]; }
+cont_running(){ [ $(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null) = 'true' ]; }
 check_cont()  { ! cont_running "$1" && docker start -ai "$1"; }
