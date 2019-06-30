@@ -681,7 +681,7 @@ build_image()
 
 cont_running() 
 {
-	[ $(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null) = 'true' ]
+	[ "$(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null)" = 'true' ]
 }
 
 cont_id()
