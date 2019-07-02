@@ -10,8 +10,7 @@ PASSWORD=password
 main () 
 {
 	build_image $astrill_image <<-EOL
-	FROM ubuntu:18.04
-	#FROM bluebeargaming/ubuntu-server
+	FROM ubuntu
 	COPY ./astrill-setup-linux64.deb /root
 	RUN apt-get update \\
 	    && apt-get install -y openssl libssl-dev  psmisc \\
@@ -61,6 +60,7 @@ EOL
 
 	docker run -it --rm --privileged \
 		-e DISPLAY=$DISPLAY \
+		-p "3213:3213" \
 		-p "$bindport:8388" \
 		-p "$bindport:8388/udp" \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
