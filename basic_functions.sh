@@ -189,6 +189,7 @@ get_latest_release()  {
 stuffed_line()
 {
 	local echo_file="$1"; shift
+	mkdir -p $(dirname "$echo_file")
 	params=$(echo "$@")
 
 	if grep -iq "$params" $echo_file; then

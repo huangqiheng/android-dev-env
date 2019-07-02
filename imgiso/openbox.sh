@@ -22,14 +22,14 @@ install_wallpaper()
 {
 	check_apt feh
 	feh --bg-scale $DATA_DIR/images/forest.jpg
-	handle_rc "$UHOME/.config/openbox/autostart" sh ~/.fehbg &
+	stuffed_line "$UHOME/.config/openbox/autostart" bash ~/.fehbg &
 }
 
 install_docker()
 {
 	check_apt xcompmgr cairo-dock
-	handle_rc "$UHOME/.config/openbox/autostart" xcompmgr &
-	handle_rc "$UHOME/.config/openbox/autostart" cairo-dock &
+	stuffed_line "$UHOME/.config/openbox/autostart" xcompmgr &
+	stuffed_line "$UHOME/.config/openbox/autostart" cairo-dock &
 }
 
 main () 
