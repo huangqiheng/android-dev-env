@@ -10,17 +10,16 @@ PASSWORD=password
 main () 
 {
 	build_image $astrill_image <<-EOL
-	FROM ubuntu
+	FROM ubuntu:18.04
 	COPY ./astrill-setup-linux64.deb /root
 	RUN apt-get update \\
-	    && apt-get install -y openssl libssl-dev  psmisc \\
-	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
-	    && usermod -aG sudo $USERNAME \\
+	    && apt-get install -y vim net-tools psmisc iproute2 nscd dnsutils \\
+	    && apt-get install -y openssl libssl-dev \\
 	    && apt-get install -y rng-tools shadowsocks-libev \\
-	    && apt-get install -y libgtk2.0-0 \\
+	    && apt-get install -y libgtk2.0-0 libcanberra-gtk-module \\
 	    && apt-get install -y gtk2-engines gtk2-engines-pixbuf gtk2-engines-murrine \\
-	    && apt-get install -y libcanberra-gtk-module \\
 	    && apt-get install -y gnome-themes-standard \\
+	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && ln -sf /usr/local/Astrill/astrill /usr/local/bin/astrill \\
 	    && apt-get autoremove
