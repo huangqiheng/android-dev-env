@@ -3,6 +3,14 @@
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
+main () 
+{
+	install_openbox
+	install_wallpaper
+	install_docker
+	auto_login_startx
+}
+
 install_openbox() 
 {
 	check_apt xinit openbox obconf
@@ -21,7 +29,7 @@ EOL
 install_wallpaper()
 {
 	check_apt feh
-	feh --bg-scale $DATA_DIR/images/forest.jpg
+	feh --bg-fill $DATA_DIR/images/cyberpunk.jpg
 	stuffed_line "$UHOME/.config/openbox/autostart" bash ~/.fehbg &
 }
 
@@ -30,14 +38,6 @@ install_docker()
 	check_apt xcompmgr cairo-dock
 	stuffed_line "$UHOME/.config/openbox/autostart" xcompmgr &
 	stuffed_line "$UHOME/.config/openbox/autostart" cairo-dock &
-}
-
-main () 
-{
-	install_openbox
-	install_wallpaper
-	install_docker
-	auto_login_startx
 }
 
 maintain()
