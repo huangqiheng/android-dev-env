@@ -18,15 +18,26 @@ install_openbox()
 EOL
 }
 
+install_wallpaper()
+{
+	check_apt feh
+	feh --bg-scale $DATA_DIR/images/forest.jpg
+	handle_rc "$UHOME/.config/openbox/autostart" sh ~/.fehbg &
+}
+
+install_docker()
+{
+	check_apt xcompmgr cairo-dock
+	handle_rc "$UHOME/.config/openbox/autostart" xcompmgr &
+	handle_rc "$UHOME/.config/openbox/autostart" cairo-dock &
+}
+
 main () 
 {
 	install_openbox
-
-	auto_login
-	auto_startx
-
-	check_apt  xcompmgr cairo-dock
-
+	install_wallpaper
+	install_docker
+	auto_login_startx
 }
 
 maintain()

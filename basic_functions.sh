@@ -200,6 +200,7 @@ stuffed_line()
 handle_rc()
 {
 	local echo_file="$1"; shift
+	mkdir -p $(dirname "$echo_file")
 	if grep -iq "$1" $echo_file; then
 		return 1
 	fi
@@ -726,6 +727,12 @@ login_root_exec()
 	handle_rc '/root/.bashrc' loginexec "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then loginexec; fi"
 }
 
+auto_login_startx()
+{
+	auto_login $1
+	auto_startx
+}
+
 auto_login()
 {
 	local loginUser=${RUN_USER}
@@ -740,11 +747,13 @@ auto_login()
 ExecStart=
 ExecStart=-/sbin/agetty --autologin ${loginUser} --noclear %I \$TERM
 EOL
+	return 0
 }
 
 auto_startx()
 {
 	bashrc startx "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then startx $1; fi"
+	return 0
 }
 
 full_sources()
