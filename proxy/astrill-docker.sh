@@ -62,7 +62,9 @@ EOL
 		-p "$bindport:8388" \
 		-p "$bindport:8388/udp" \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
 		-v /tmp/shadowsocks.conf:/etc/shadowsocks-libev/config.json \
+		--hostname $(hostname) \
 		--name "$contname" $astrill_image
 }
 
