@@ -51,21 +51,28 @@ EOL
 		exit 1
 	fi	
 
+	local contid=$(cont_id $contname)
+
+	if [ -z $contid ]; then
+		docker run -it --privileged \
+			-e DISPLAY=$DISPLAY \
+			-p "$bindport:8388" \
+			-p "$bindport:8388/udp" \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
+			-v /tmp/shadowsocks.conf:/etc/shadowsocks-libev/config.json \
+			--hostname $(hostname) \
+			--name "$contname" $astrill_image
+		exit 0
+	fi
+
 	if cont_running $contname; then
 		echo 'container is running'
-		docker stop "$(cont_id $contname)"
-		sleep 1
+		docker exec -it --user root "$contid" /bin/bash
+		exit 0
 	fi	
 
-	docker run -it --rm --privileged \
-		-e DISPLAY=$DISPLAY \
-		-p "$bindport:8388" \
-		-p "$bindport:8388/udp" \
-		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
-		-v /tmp/shadowsocks.conf:/etc/shadowsocks-libev/config.json \
-		--hostname $(hostname) \
-		--name "$contname" $astrill_image
+	docker start -ai "$contid"
 }
 
 maintain()
