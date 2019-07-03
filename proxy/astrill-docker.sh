@@ -59,7 +59,6 @@ EOL
 
 	docker run -it --rm --privileged \
 		-e DISPLAY=$DISPLAY \
-		-p "3213:3213" \
 		-p "$bindport:8388" \
 		-p "$bindport:8388/udp" \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
