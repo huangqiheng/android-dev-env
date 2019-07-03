@@ -29,13 +29,13 @@ EOL
 install_wallpaper()
 {
 	check_apt feh
-	feh --bg-fill $DATA_DIR/images/cyberpunk.jpg
+	feh --bg-fill "$DATA_DIR/images/cyberpunk.jpg"
 	stuffed_line "$UHOME/.config/openbox/autostart" bash ~/.fehbg &
 }
 
 install_docker()
 {
-	check_apt xcompmgr cairo-dock
+	check_apt xcompmgr cairo-dock python
 	stuffed_line "$UHOME/.config/openbox/autostart" xcompmgr &
 	stuffed_line "$UHOME/.config/openbox/autostart" cairo-dock &
 }
