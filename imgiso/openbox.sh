@@ -9,6 +9,7 @@ main ()
 	install_wallpaper
 	install_docker
 	auto_login_startx
+	chownHome
 }
 
 install_openbox() 
