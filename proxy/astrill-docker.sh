@@ -32,13 +32,17 @@ main ()
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && apt-get autoremove
 
-	RUN echo '#!/bin/dash' > /usr/local/bin/ss-astrill \\
-	    && echo 'ss-tunnel -c /etc/shadowsocks-libev/sstunnel.json -L 8.8.8.8:53 &' >> /usr/local/bin/ss-astrill \\
+	RUN apt-get install -y e2fsprogs \\
+	    && echo 'nameserver 127.0.0.1' > /etc/resolv.conf \\
+	    && chattr +i /etc/resolv.conf \\
+	    && echo '#!/bin/dash' > /usr/local/bin/ss-astrill \\
+	    && echo 'ss-tunnel -c /etc/sstunnel.json -L 8.8.8.8:53 &' >> /usr/local/bin/ss-astrill \\
 	    && echo 'dnsforwarder -D -f /etc/dnsforwarder.conf &' >> /usr/local/bin/ss-astrill \\
-	    && echo 'ss-server -c /etc/shadowsocks-libev/ssserver.json &' >> /usr/local/bin/ss-astrill \\
+	    && echo 'ss-server -c /etc/ssserver.json &' >> /usr/local/bin/ss-astrill \\
 	    && echo '/usr/local/Astrill/astrill' >> /usr/local/bin/ss-astrill \\
 	    && chmod a+x /usr/local/bin/ss-astrill \\
 	    && chown $USERNAME:$USERNAME /home/$USERNAME -R
+
 	USER $USERNAME
 	ENV HOME /home/$USERNAME
 	CMD ss-astrill
@@ -102,8 +106,8 @@ EOL
 			-v /tmp/.X11-unix:/tmp/.X11-unix \
 			-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
 			-v /tmp/dnsforwarder.conf:/etc/dnsforwarder.conf \
-			-v /tmp/ssserver.json:/etc/shadowsocks-libev/ssserver.json \
-			-v /tmp/sstunnel.json:/etc/shadowsocks-libev/sstunnel.json \
+			-v /tmp/ssserver.json:/etc/ssserver.json \
+			-v /tmp/sstunnel.json:/etc/sstunnel.json \
 			--hostname $(hostname) \
 			--name "$contname" $astrill_image
 		exit 0
