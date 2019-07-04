@@ -3,26 +3,19 @@
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
-astrill_image='astrill-ubuntu'
+openweb_image='openweb-sserver'
 USERNAME=$RUN_USER
 PASSWORD=password
 
 main () 
 {
-	build_image $astrill_image <<-EOL
+	build_image $openweb_image <<-EOL
 	FROM ubuntu:18.04
 	COPY ./astrill-setup-linux64.deb /root
 	COPY ./cloudflared-stable-linux-amd64.deb /root
 
 	RUN apt-get update \\
-	    && apt-get install -y libcap2-bin git gcc make automake libcurl4-gnutls-dev \\
-	    && cd /root && git clone https://github.com/holmium/dnsforwarder.git \\
-	    && cd dnsforwarder && ./configure && make && make install \\
-	    && mkdir -p "/home/$USERNAME/.dnsforwarder" \\
-	    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/dnsforwarder \\
-	    && apt-get autoremove
-
-	RUN apt-get install -y openssl libssl-dev \\
+	    && apt-get install -y openssl libssl-dev \\
 	    && apt-get install -y rng-tools shadowsocks-libev \\
 	    && service shadowsocks-libev stop \\
 	    && apt-get install -y vim net-tools psmisc iproute2 nscd dnsutils \\
@@ -33,51 +26,20 @@ main ()
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && apt-get autoremove
 
-	RUN apt-get install -y e2fsprogs \\
-	    && dpkg -i cloudflared-stable-linux-amd64.deb \\
-	    && touch /usr/local/bin/ss-astrill \\
-	    && chmod a+x /usr/local/bin/ss-astrill \\
+	RUN apt-get install -y libcap2-bin git gcc make automake libcurl4-gnutls-dev \\
+	    && cd /root && git clone https://github.com/holmium/dnsforwarder.git \\
+	    && cd dnsforwarder && ./configure && make && make install \\
+	    && mkdir -p "/home/$USERNAME/.dnsforwarder" \\
+	    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/dnsforwarder \\
+	    && apt-get autoremove
+
+	RUN apt-get install -y inotify-tools \\
+	    && dpkg -i /root/cloudflared-stable-linux-amd64.deb \\
 	    && chown $USERNAME:$USERNAME /home/$USERNAME -R
 
 	USER $USERNAME
 	ENV HOME /home/$USERNAME
-	CMD ss-astrill
-EOL
-
-	cat > /tmp/ss-astrill <<-EOL
-	#!/bin/dash
-	echo 'nameserver 127.0.0.1' > /etc/resolv.conf
-	chattr +i /etc/resolv.conf
-	cloudflared proxy-dns &
-	dnsforwarder -D -f /etc/dnsforwarder.conf &
-	ss-server -c /etc/ssserver.json &
-	/usr/local/Astrill/astrill
-EOL
-
-	cat > /tmp/dnsforwarder.conf <<-EOL
-	LogOn false
-	LogFileThresholdLength 5120000
-	LogFileFolder /var/log
-	UDPLocal 0.0.0.0:53
-	UDPGroup 127.0.0.1:65353 * on
-	BlockNegativeResponse true
-	UseCache true
-	MemoryCache false
-	CacheSize 30720000
-	IgnoreTTL true
-	ReloadCache true
-	OverwriteCache true
-EOL
-
-	cat > /tmp/ssserver.json <<-EOL
-{
-	"server":"0.0.0.0",
-	"server_port":8388,
-	"mode":"tcp_and_udp",
-	"password":"bdzones",
-	"timeout":600,
-	"method":"aes-256-cfb"  	
-}
+	CMD ["sh", "/home/$USERNAME/ss-astrill.sh"]
 EOL
 
 	local bindport="${1:-8388}"
@@ -91,6 +53,10 @@ EOL
 	local contid=$(cont_id $contname)
 
 	if [ -z $contid ]; then
+		gen_entrypoint /tmp/ss-astrill.sh
+		gen_dnsforwarder_conf /tmp/dnsforwarder.conf
+		gen_sserver_conf /tmp/ssserver.json
+
 		docker run -it --privileged \
 			-e DISPLAY=$DISPLAY \
 			-p "$bindport:8388" \
@@ -99,10 +65,9 @@ EOL
 			-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
 			-v /tmp/dnsforwarder.conf:/etc/dnsforwarder.conf \
 			-v /tmp/ssserver.json:/etc/ssserver.json \
-			-v /tmp/sstunnel.json:/etc/sstunnel.json \
-			-v /tmp/ss-astrill:/usr/local/bin/ss-astrill \
+			-v /tmp/ss-astrill.sh:/home/$USERNAME/ss-astrill.sh \
 			--hostname $(hostname) \
-			--name "$contname" $astrill_image
+			--name "$contname" $openweb_image
 		exit 0
 	fi
 
@@ -113,6 +78,56 @@ EOL
 	fi	
 
 	docker start -ai "$contid"
+}
+
+gen_sserver_conf()
+{
+	cat > "$1" <<-EOL
+{
+	"server":"0.0.0.0",
+	"server_port":8388,
+	"mode":"tcp_and_udp",
+	"password":"bdzones",
+	"timeout":600,
+	"method":"aes-256-cfb"  	
+}
+EOL
+}
+
+gen_dnsforwarder_conf()
+{
+	cat > "$1"  <<-EOL
+	LogOn false
+	LogFileThresholdLength 5120000
+	LogFileFolder /var/log
+	UDPLocal 0.0.0.0:53
+	UDPGroup 127.0.0.1:65353 * on
+	BlockNegativeResponse true
+	UseCache true
+	MemoryCache false
+	CacheSize 30720000
+	IgnoreTTL true
+	ReloadCache true
+	OverwriteCache true
+EOL
+}
+
+gen_entrypoint()
+{
+	cat > "$1" <<-EOL
+	#!/bin/dash
+	
+	cloudflared proxy-dns --port 65353 &
+
+	while inotifywait -e close_write /etc/resolv.conf; do 
+		echo 'nameserver 127.0.0.1' > /etc/resolv.conf
+	done &
+	dnsforwarder -D -f /etc/dnsforwarder.conf &
+
+	ss-server -c /etc/ssserver.json &
+
+	/usr/local/Astrill/astrill
+EOL
 }
 
 maintain()
