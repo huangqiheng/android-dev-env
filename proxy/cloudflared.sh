@@ -14,7 +14,8 @@ main ()
 		fi
 	fi
 
-	check_update
+	check_sudo
+	nocmd_update cloudflared
 
 	local fileName="cloudflared-stable-linux-$(dpkg --print-architecture).deb"
 	local url="https://bin.equinox.io/c/VdrWdbjqyF/${fileName}"
@@ -27,6 +28,10 @@ main ()
 	fi
 
 	dpkg -i "$fileName"
+
+	if ! pidof cloudflared; then
+		cloudflared proxy-dns
+	fi
 }
 
 maintain()
