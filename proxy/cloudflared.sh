@@ -7,15 +7,19 @@
 
 main () 
 {
-	if cmd_exists cloudflared; then
-		log_y 'cloudflared is ready'
-		exit 0
+	if [ "X$1" != 'Xf' ]; then
+		if cmd_exists cloudflared; then
+			log_y 'cloudflared is ready'
+			exit 0
+		fi
 	fi
 
 	check_update
 
-	loca fileName="cloudflared-stable-linux-$(dpkg --print-architecture).deb"
+	local fileName="cloudflared-stable-linux-$(dpkg --print-architecture).deb"
 	local url="https://bin.equinox.io/c/VdrWdbjqyF/${fileName}"
+
+	echo URL=$url
 
 	cd $CACHE_DIR
 	if [ ! -f "$fileName" ]; then
