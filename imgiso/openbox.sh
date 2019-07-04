@@ -15,6 +15,7 @@ main ()
 install_openbox() 
 {
 	check_apt xinit openbox obconf
+	check_apt x11-xserver-utils
 
 	cat > /usr/share/xsessions/openbox.desktop <<-EOL
 	[Desktop Entry]
