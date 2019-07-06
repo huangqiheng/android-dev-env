@@ -134,6 +134,11 @@ listen_service_exit()
 	exit 0
 }
 
+connect_exit()
+{
+	otunnel connect ${SERVER_IP}:${LISTEN_PORT} -d -s ${THE_SECRET} -t 'r:127.0.0.1:22::50022'
+}
+
 connect_service_exit()
 {
 	set_conf /lib/systemd/system/otunnel-connect.service
