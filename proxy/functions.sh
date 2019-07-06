@@ -2,7 +2,7 @@
 
 set_entrypoint()
 {
-	local random_file="/tmp/openweb_entry-$(head -c 8 /dev/urandom | xxd -ps).sh"
+	local random_file="$CACHE_DIR/openweb_entry-$(head -c 8 /dev/urandom | xxd -ps).sh"
 	cat >&1 > $random_file
 	export DOCKER_ENTRY="$random_file"
 }
