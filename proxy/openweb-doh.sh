@@ -24,6 +24,7 @@ main ()
 	    && apt-get install -y gnome-themes-standard \\
 	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
+	    && dpkg -i /root/cloudflared-stable-linux-amd64.deb \\
 	    && apt-get autoremove
 
 	RUN apt-get install -y libcap2-bin git gcc make automake libcurl4-gnutls-dev \\
@@ -31,11 +32,8 @@ main ()
 	    && cd dnsforwarder && ./configure && make && make install \\
 	    && mkdir -p "/home/$USERNAME/.dnsforwarder" \\
 	    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/dnsforwarder \\
+	    && chown $USERNAME:$USERNAME /home/$USERNAME -R \\
 	    && apt-get autoremove
-
-	RUN apt-get install -y inotify-tools \\
-	    && dpkg -i /root/cloudflared-stable-linux-amd64.deb \\
-	    && chown $USERNAME:$USERNAME /home/$USERNAME -R
 
 	USER $USERNAME
 	ENV HOME /home/$USERNAME
@@ -87,13 +85,8 @@ gen_entrypoint()
 	#!/bin/dash
 	
 	cloudflared proxy-dns --port 65353 &
-
-	while inotifywait -e close_write /etc/resolv.conf; do 
-		echo 'nameserver 127.0.0.1' > /etc/resolv.conf
-	done &
 	dnsforwarder -D -f /etc/dnsforwarder.conf &
-
-	ss-server -c /etc/ssserver.json &
+	ss-server -d 127.0.0.1 -c /etc/ssserver.json &
 
 	/usr/local/Astrill/astrill
 EOL

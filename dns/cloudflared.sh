@@ -10,6 +10,7 @@ main ()
 	if [ "X$1" != 'Xf' ]; then
 		if cmd_exists cloudflared; then
 			log_y 'cloudflared is ready'
+			run
 			exit 0
 		fi
 	fi
@@ -29,7 +30,13 @@ main ()
 
 	dpkg -i "$fileName"
 
+	run
+}
+
+run()
+{
 	if ! pidof cloudflared; then
+		echo "nameserver 127.0.0.1" > /etc/resolv.conf
 		cloudflared proxy-dns
 	fi
 }

@@ -656,7 +656,7 @@ check_docker()
 image_exists()
 {
 	check_docker
-	docker images --all | grep -q "$1"
+	docker images --all | grep -Eq "^$1\s+"
 }
 
 check_image()
@@ -672,6 +672,7 @@ check_image()
 
 build_image()
 { 
+	export DOCKER_IMAGE="$1"
 	if image_exists "$1"; then
 		log_g "image is exists ($1)"
 		return

@@ -124,7 +124,6 @@ otunnel_from_source_exit()
 
 listen_service_exit()
 {
-	install_otunnel
 	THE_SECRET=$(echo "$(date)OTUNNEL-SECRET" | md5sum | awk '{print $1}')
 	set_conf /lib/systemd/system/otunnel-listen.service
 	set_conf ExecStart "/usr/local/bin/otunnel listen :${LISTEN_PORT} -d -s ${THE_SECRET}"
@@ -137,8 +136,6 @@ listen_service_exit()
 
 connect_service_exit()
 {
-	install_otunnel
-
 	set_conf /lib/systemd/system/otunnel-connect.service
 	set_conf ExecStart "/usr/local/bin/otunnel connect ${SERVER_IP}:${LISTEN_PORT} -d -s ${THE_SECRET} -t \"r:127.0.0.1:22::50022\""
 
