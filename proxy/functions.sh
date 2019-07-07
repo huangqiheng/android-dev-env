@@ -9,6 +9,7 @@ set_entrypoint()
 
 run_openweb()
 {
+	check_apt x11-xserver-utils
 	local openweb_image="$DOCKER_IMAGE"
 	local entryfile=${DOCKER_ENTRY:-/dev/null}
 
@@ -23,12 +24,15 @@ run_openweb()
 	
 	xhost +local:root >/dev/null
 
+	local wanip=$(wlan_ip)
+	echo $wanip
+
 	if [ -z $contid ]; then
 		docker run -it --privileged \
 			-e DISPLAY=$DISPLAY \
 			-v /tmp/.X11-unix:/tmp/.X11-unix \
-			-p "$bindport:8388" \
-			-p "$bindport:8388/udp" \
+			-p "$wanip:$bindport:8388" \
+			-p "$wanip:$bindport:8388/udp" \
 			-v "$entryfile:/root/entrypoint.sh" \
 			--name "$contname" $openweb_image
 		exit 0

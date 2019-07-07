@@ -159,6 +159,12 @@ iface_to_ipaddr()
 	ifconfig | grep -A1 "$1" | grep "inet " | head -1 | awk -F' ' '{print $2}'
 }
 
+wlan_ip()
+{
+	local wan_iface=$(route | grep '^default' | grep -o '[^ ]*$')
+	ifconfig | grep -A1 "$wan_iface" | grep "inet " | head -1 | awk -F' ' '{print $2}'
+}
+
 runUser()
 {
 	runuser -l $RUN_USER -c "$1"
