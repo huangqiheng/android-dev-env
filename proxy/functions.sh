@@ -25,7 +25,7 @@ run_openweb()
 	xhost +local:root >/dev/null
 
 	local wanip=$(wlan_ip)
-	echo $wanip
+	echo "internet ip addr: \"$wanip\""
 
 	if [ -z $contid ]; then
 		docker run -it --privileged \

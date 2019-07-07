@@ -59,7 +59,7 @@ EOL
 	dnsforwarder -f /root/dnsforwarder.conf &
 
 	cloudflared proxy-dns --port 65353 &
-	ss-server -c /root/ssserver.json &
+	ss-server -d 127.0.0.1 -c /root/ssserver.json &
 
 	/usr/local/Astrill/astrill
 EEOL
