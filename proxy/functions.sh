@@ -18,7 +18,7 @@ start_openweb()
 	
 	xhost +local:root >/dev/null
 
-	echo "internet ip addr: $(wlan_ip)"
+	#echo "internet ip addr: $(wlan_ip)"
 
 	if [ -z $contid ]; then
 		echo "$entrycode" > $entryfile

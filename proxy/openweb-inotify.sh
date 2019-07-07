@@ -22,7 +22,7 @@ EOL
 	LogOn false
 	LogFileThresholdLength 5120000
 	LogFileFolder /var/log
-	UDPLocal 0.0.0.0:53
+	UDPLocal 127.0.0.1:53
 	UDPGroup 127.0.0.1:65353 * on
 	BlockNegativeResponse true
 	UseCache true
@@ -56,7 +56,8 @@ EOL
     	mkdir -p "/root/.dnsforwarder"
 	dnsforwarder -f /root/dnsforwarder.conf &
 	
-	while inotifywait -e close_write /etc/resolv.conf; do 
+	echo 'nameserver 127.0.0.1' > /etc/resolv.conf
+	while inotifywait -e close_write,delete /etc/resolv.conf; do 
 		echo 'nameserver 127.0.0.1' > /etc/resolv.conf
 	done &
 
