@@ -15,7 +15,7 @@ main ()
 	CMD ["sh", "/root/entrypoint.sh"]
 EOL
 
-	set_entrypoint <<-EEOL
+	start_openweb "$1" "$(cat <<-EEOL
 	#!/bin/dash
 
 	cat > /root/dnsforwarder.conf  <<-EOL
@@ -38,7 +38,7 @@ EOL
 	tcp_read_time_out 15000
 	tcp_connect_time_out 8000
 	[ProxyList]
-	socks5 127.0.0.1 6666
+	socks5 127.0.0.1 3213
 EOL
 	cat > /root/ssserver.json <<-EOL
 {
@@ -50,21 +50,21 @@ EOL
 	"method":"aes-256-cfb"  	
 }
 EOL
+
+	proxychains cloudflared proxy-dns --port 65353 &
+
+    	mkdir -p "/root/.dnsforwarder"
+	dnsforwarder -f /root/dnsforwarder.conf &
 	
 	while inotifywait -e close_write /etc/resolv.conf; do 
 		echo 'nameserver 127.0.0.1' > /etc/resolv.conf
 	done &
 
-    	mkdir -p "/root/.dnsforwarder"
-	dnsforwarder -f /root/dnsforwarder.conf &
-
-	cloudflared proxy-dns --port 65353 &
-	ss-server -d 127.0.0.1 -c /root/ssserver.json &
-
+	proxychains ss-server -d 127.0.0.1 -c /root/ssserver.json &
 	/usr/local/Astrill/astrill
 EEOL
+)"
 
-	run_openweb "$1"
 }
 
 maintain()

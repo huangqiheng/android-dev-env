@@ -1,17 +1,11 @@
 #!/bin/bash
 
-set_entrypoint()
-{
-	local random_file="$CACHE_DIR/openweb_entry-$(head -c 8 /dev/urandom | xxd -ps).sh"
-	cat >&1 > $random_file
-	export DOCKER_ENTRY="$random_file"
-}
-
-run_openweb()
+start_openweb()
 {
 	check_apt x11-xserver-utils
 	local openweb_image="$DOCKER_IMAGE"
-	local entryfile=${DOCKER_ENTRY:-/dev/null}
+	local entrycode="$2"
+	local entryfile="$CACHE_DIR/openweb_entry-$(head -c 8 /dev/urandom | xxd -ps).sh"
 
 	local bindport="${1:-8388}"
 	local contname="ss-astrill-$bindport"
@@ -24,15 +18,15 @@ run_openweb()
 	
 	xhost +local:root >/dev/null
 
-	local wanip=$(wlan_ip)
-	echo "internet ip addr: \"$wanip\""
+	echo "internet ip addr: $(wlan_ip)"
 
 	if [ -z $contid ]; then
+		echo "$entrycode" > $entryfile
 		docker run -it --privileged \
 			-e DISPLAY=$DISPLAY \
 			-v /tmp/.X11-unix:/tmp/.X11-unix \
-			-p "$wanip:$bindport:8388" \
-			-p "$wanip:$bindport:8388/udp" \
+			-p "$bindport:8388" \
+			-p "$bindport:8388/udp" \
 			-v "$entryfile:/root/entrypoint.sh" \
 			--name "$contname" $openweb_image
 		exit 0
