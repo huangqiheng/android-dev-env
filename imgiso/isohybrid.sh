@@ -1,6 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
 main () 
@@ -12,11 +12,6 @@ main ()
 
 	if ! ls -l "$2" | grep '^b'; then
 		log_r 'please input device path'
-		exit 1
-	fi
-
-	if ! mount | grep "$2"; then
-		log_r 'please umount some device'
 		exit 1
 	fi
 
