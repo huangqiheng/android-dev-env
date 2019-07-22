@@ -37,7 +37,7 @@ install_wallpaper()
 
 install_docker()
 {
-	check_apt xcompmgr cairo-dock python
+	check_apt xcompmgr cairo-dock libcanberra-gtk-module python
 	stuffed_line "$UHOME/.config/openbox/autostart" xcompmgr &
 	stuffed_line "$UHOME/.config/openbox/autostart" cairo-dock &
 }
