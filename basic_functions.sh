@@ -173,6 +173,7 @@ EOF
 make_cmdline()
 {
 	local inputScript="$(cat /dev/stdin)"
+	rm -f "/usr/local/bin/$1"
 	echo "$inputScript" > "/usr/local/bin/$1"
 	chmod a+x "/usr/local/bin/$1"
 	log_y "Extracts script \"$1\" to /usr/local/bin, for easy run."
@@ -276,6 +277,16 @@ stuffed_line()
 		return 1
 	fi
 	echo "$params" >> $echo_file
+}
+
+handle_rc_h()
+{
+	local echo_file="$1"; shift
+	mkdir -p $(dirname "$echo_file")
+	if grep -iq "$1" $echo_file; then
+		return 1
+	fi
+	echo -e "$2\n$(cat "$echo_file")" > "$echo_file"
 }
 
 handle_rc()
