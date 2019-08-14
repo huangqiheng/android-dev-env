@@ -7,6 +7,7 @@
 main () 
 {
 	check_apt openjdk-8-jdk
+	check_apt unzip
 
 	cd $CACHE_DIR
 
@@ -39,6 +40,8 @@ main ()
 	cd $CACHE_DIR/xmind/XMind_amd64
 	./XMind
 EOF
+
+	chownUser $ROOT_DIR
 
 	log_y 'just try xmind to run'
 	log_y "Help -> License 
