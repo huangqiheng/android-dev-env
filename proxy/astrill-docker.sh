@@ -50,8 +50,8 @@ EOL
 
 	cat > /tmp/sstunnel.json <<-EOL
 {
-        "server":"173.242.116.99",
-        "password":"5dont6share7pass8",
+        "server":"173.0.0.99",
+        "password":"xxxxxx",
         "server_port":16666,
         "mode":"tcp_and_udp",
 	"local_address": "127.0.0.1",
