@@ -3,7 +3,7 @@
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
-openweb_image='openweb-sserver'
+openweb_image='openweb-sserver-doh'
 USERNAME=$RUN_USER
 PASSWORD=password
 
