@@ -741,6 +741,7 @@ check_docker()
 		log_g 'docker is ready.'
 		return 
 	fi
+	check_apt curl
 	sh -c "$(curl -fsSL get.docker.com|sed "/shouldWarn=0/i exit 0")" --mirror Aliyun
 	usermod -aG docker "$RUN_USER"
 	check_service docker

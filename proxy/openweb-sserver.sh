@@ -2,8 +2,10 @@
 
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
+. $ROOT_DIR/proxy/functions.sh
 
 openweb_image='openweb-sserver'
+bindport="${1:-8388}"
 
 main () 
 {
@@ -28,71 +30,13 @@ main ()
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && apt-get autoremove
 
-	CMD ["sh", "/root/ss-astrill.sh"]
+	CMD ["sh", "/root/entrypoint.sh"]
 EOL
 
-	local bindport="${1:-8388}"
-	local contname="ss-astrill-$bindport"
-
-	if ! is_range $bindport 1024 49151; then
-		log_r "port range invalid" 
-		exit 1
-	fi	
-
-	local contid=$(cont_id $contname)
-
-	gen_entrypoint /tmp/ss-astrill.sh
-	gen_sstunnel_conf /tmp/sstunnel.json
-	gen_sserver_conf /tmp/ssserver.json
-
-	if [ -z $contid ]; then
-		docker run -it --privileged \
-			-e DISPLAY=$DISPLAY \
-			-v /tmp/.X11-unix:/tmp/.X11-unix \
-			-v $HOME/.Xauthority:/root/.Xauthority \
-			-p "$bindport:8388" \
-			-p "$bindport:8388/udp" \
-			-v /tmp/sstunnel.json:/etc/sstunnel.json \
-			-v /tmp/ssserver.json:/etc/ssserver.json \
-			-v /tmp/ss-astrill.sh:/root/ss-astrill.sh \
-			--hostname $(hostname) \
-			--name "$contname" $openweb_image
-		exit 0
-	fi
-
-	if cont_running $contname; then
-		echo 'container is running'
-		docker exec -it --user root "$contid" /bin/bash
-		exit 0
-	fi	
-
-	docker start -ai "$contid"
-}
-
-gen_entrypoint()
-{
-	if [ -d "$1" ]; then
-		rmdir "$1"
-	fi
-
-	cat > "$1" <<-EOL
+	start_openweb "$bindport" "$(cat <<-EEOL
 	#!/bin/dash
-	
-    	ss-tunnel -c /etc/sstunnel.json -L 8.8.8.8:53 &
-	ss-server -d 127.0.0.1:65353 -c /etc/ssserver.json &
 
-	/usr/local/Astrill/astrill
-EOL
-}
-
-
-gen_sserver_conf()
-{
-	if [ -d "$1" ]; then
-		rmdir "$1"
-	fi
-
-	cat > "$1" <<-EOL
+	cat > /root/ssserver.json <<-EOL
 {
 	"server":"0.0.0.0",
 	"server_port":8388,
@@ -102,15 +46,8 @@ gen_sserver_conf()
 	"method":"aes-256-cfb"  	
 }
 EOL
-}
 
-gen_sstunnel_conf()
-{
-	if [ -d "$1" ]; then
-		rmdir "$1"
-	fi
-
-	cat > "$1"  <<-EOL
+	cat > /root/sstunnel.json <<-EOL
 {
         "server":"${SSSERVER}",
         "password":"${SSPASSWD}",
@@ -123,11 +60,39 @@ gen_sstunnel_conf()
         "fast_open":false
 }
 EOL
+
+    	ss-tunnel -c /root/sstunnel.json -L 8.8.8.8:53 &
+	ss-server -d 127.0.0.1:65353 -c /root/ssserver.json &
+	/usr/local/Astrill/astrill
+
+EEOL
+)"
+
+}
+
+ss_client_exit()
+{
+	check_apt shadowsocks-libev
+
+	cat > /etc/shadowsocks-libev/sslocal.json <<-EOL
+{
+	"server":"127.0.0.1",
+	"server_port":8388,
+	"local_port":7070,
+	"mode":"tcp_and_udp",
+	"password":"bdzones",
+	"method":"aes-256-cfb",
+	"timeout":600
+}
+EOL
+
+	ss-local -c /etc/shadowsocks-libev/sslocal.json
 }
 
 maintain()
 {
 	[ "$1" = 'help' ] && show_help_exit
+	[ "$1" = 'client' ] && ss_client_exit
 }
 
 show_help_exit()
