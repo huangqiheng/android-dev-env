@@ -7,6 +7,15 @@
 openweb_image='openweb-sserver'
 bindport="${1:-8388}"
 
+
+new_xfb()
+{
+	check_apt xvfb
+	Xvfb :10 -screen 0 1920x1080x24 -fbdir /var/tmp &
+	DISPLAY=:10
+}
+
+
 main () 
 {
 	build_image $openweb_image <<-EOL
@@ -61,8 +70,8 @@ EOL
 }
 EOL
 
-    	ss-tunnel -c /root/sstunnel.json -L 8.8.8.8:53 &
-	ss-server -d 127.0.0.1:65353 -c /root/ssserver.json &
+    	ss-tunnel -v -c /root/sstunnel.json -L 8.8.8.8:53 &
+	ss-server -v -d 127.0.0.1:65353 -c /root/ssserver.json &
 	/usr/local/Astrill/astrill
 
 EEOL

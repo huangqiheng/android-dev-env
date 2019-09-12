@@ -1,5 +1,14 @@
 #!/bin/bash
 
+new_xfb()
+{
+	XNEW_DIR=/var/tmp
+	XNEW_DISPLAY=:10
+
+	check_apt xvfb
+	Xvfb $XNEW_DISPLAY -screen 0 1920x1080x24 -fbdir $XNEW_DIR &
+}
+
 start_openweb()
 {
 	check_apt x11-xserver-utils
@@ -20,11 +29,15 @@ start_openweb()
 
 	#echo "internet ip addr: $(wlan_ip)"
 
+	#new_xfb
+	HOST_DISPLAY="${XNEW_DISPLAY:-$DISPLAY}"
+	HOST_X11DIR="${XNEW_DIR:-/tmp/.X11-unix}"
+
 	if [ -z $contid ]; then
 		echo "$entrycode" > $entryfile
 		docker run -it --privileged \
-			-e DISPLAY=$DISPLAY \
-			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-e DISPLAY=$HOST_DISPLAY \
+			-v $HOST_X11DIR:/tmp/.X11-unix \
 			-p "$bindport:8388" \
 			-p "$bindport:8388/udp" \
 			-v "$entryfile:/root/entrypoint.sh" \
@@ -72,4 +85,5 @@ check_openweb_image()
 	    && apt-get autoremove
 EOL
 }
+
 
