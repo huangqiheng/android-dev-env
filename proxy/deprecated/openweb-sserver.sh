@@ -3,7 +3,9 @@
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
-openweb_image='openweb-sserver-root'
+openweb_image='openweb-sserver-user'
+USERNAME=$RUN_USER
+PASSWORD=password
 
 main () 
 {
@@ -20,20 +22,24 @@ main ()
 	    && apt-get install -y libgtk2.0-0 libcanberra-gtk-module \\
 	    && apt-get install -y gtk2-engines gtk2-engines-pixbuf gtk2-engines-murrine \\
 	    && apt-get install -y gnome-themes-standard \\
+	    && useradd -m -p \$(openssl passwd -1 $PASSWORD) -s /bin/bash $USERNAME \\
 	    && dpkg -i /root/astrill-setup-linux64.deb \\
 	    && apt-get autoremove
 
 	RUN apt-get install -y libcap2-bin git gcc make automake libcurl4-gnutls-dev \\
 	    && cd /root && git clone https://github.com/holmium/dnsforwarder.git \\
 	    && cd dnsforwarder && ./configure && make && make install \\
-	    && mkdir -p "/root/.dnsforwarder" \\
+	    && mkdir -p "/home/$USERNAME/.dnsforwarder" \\
 	    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/dnsforwarder \\
 	    && apt-get autoremove
 
 	RUN apt-get install -y inotify-tools \\
-	    && dpkg -i /root/cloudflared-stable-linux-amd64.deb
+	    && dpkg -i /root/cloudflared-stable-linux-amd64.deb \\
+	    && chown $USERNAME:$USERNAME /home/$USERNAME -R
 
-	CMD ["sh", "/root/ss-astrill.sh"]
+	USER $USERNAME
+	ENV HOME /home/$USERNAME
+	CMD ["sh", "/home/$USERNAME/ss-astrill.sh"]
 EOL
 
 	local bindport="${1:-8388}"
@@ -51,15 +57,16 @@ EOL
 	gen_sserver_conf /tmp/ssserver.json
 
 	if [ -z $contid ]; then
+
 		docker run -it --privileged \
 			-e DISPLAY=$DISPLAY \
-			-v /tmp/.X11-unix:/tmp/.X11-unix \
-			-v $HOME/.Xauthority:/root/.Xauthority \
 			-p "$bindport:8388" \
 			-p "$bindport:8388/udp" \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v $HOME/.Xauthority:/home/$USERNAME/.Xauthority \
 			-v /tmp/dnsforwarder.conf:/etc/dnsforwarder.conf \
 			-v /tmp/ssserver.json:/etc/ssserver.json \
-			-v /tmp/ss-astrill.sh:/root/ss-astrill.sh \
+			-v /tmp/ss-astrill.sh:/home/$USERNAME/ss-astrill.sh \
 			--hostname $(hostname) \
 			--name "$contname" $openweb_image
 		exit 0

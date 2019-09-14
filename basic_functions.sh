@@ -11,6 +11,8 @@ export UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"
 export RUN_DIR=$UHOME/runCodes
 export RUN_USER=$(basename $UHOME)
 
+[ -f $ROOT_DIR/config.sh ] &&  . $ROOT_DIR/config.sh
+
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
 
@@ -739,6 +741,7 @@ check_docker()
 		log_g 'docker is ready.'
 		return 
 	fi
+	check_apt curl
 	sh -c "$(curl -fsSL get.docker.com|sed "/shouldWarn=0/i exit 0")" --mirror Aliyun
 	usermod -aG docker "$RUN_USER"
 	check_service docker

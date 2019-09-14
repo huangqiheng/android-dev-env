@@ -1,12 +1,12 @@
 #!/bin/bash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
 main () 
 {
 	check_apt_sources
-	[ "$1" = 'check' ] || check_update f
+	nocmd_udpate ratpoison
 
 	install_ratpoison 	# system
 	install_pinyin_fcitx 	# input
@@ -20,6 +20,8 @@ main ()
 	install_browser
 	install_virtualbox
 	install_utils
+
+	chownHome
 }
 
 install_pinyin_fcitx()
@@ -61,6 +63,9 @@ install_utils()
 	check_apt xclip
 	check_apt shutter
 	check_apt keynav
+	check_apt feh xpdf 
+
+	ratpoisonrc "exec keynav &"
 }
 
 install_wallpaper()
@@ -74,7 +79,7 @@ install_wallpaper()
 
 	cat > $HOME/.config/nitrogen/bg-saved.cfg <<-EOL
 	[xin_0]
-	file=/home/and/install-scripts/data/images/skylake.jpg
+	file=${DATA_DIR}/images/skylake.jpg
 	mode=5
 	bgcolor=#000000
 EOL
@@ -105,6 +110,7 @@ install_ratpoison()
 {
 	check_apt xinit ratpoison 
 
+	if [ -d /usr/share/xsessions ]; then
 	cat > /usr/share/xsessions/ratpoison.desktop <<-EOL
 	[Desktop Entry]
 	Encoding=UTF-8
@@ -114,6 +120,7 @@ install_ratpoison()
 	Icon=
 	Type=Application
 EOL
+	fi
 	
 	ratpoisonrc "exec rpws init 6 -k"
 	ratpoisonrc "bind M-1 exec rpws 1"
@@ -144,13 +151,15 @@ install_xscreensaver()
 {
 	check_apt xscreensaver
 	check_apt xscreensaver-data
-	check_apt xscreensaver-data-extra
 	check_apt xscreensaver-gl
-	check_apt xscreensaver-gl-extra
+
+	set_conf $HOME/.xscreensaver
+	set_conf mode one ':'
+	set_conf selected 142 ':'
+
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
 }
-
 
 main "$@"; exit $?
 
