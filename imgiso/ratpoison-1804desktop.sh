@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
 
 main () 
@@ -26,6 +26,7 @@ install_pinyin_fcitx()
 	check_apt dbus-x11
 	check_apt fonts-wqy-zenhei fonts-wqy-microhei
 	check_apt fcitx-frontend-all fcitx-config-gtk2 fcitx-sunpinyin
+	check_apt fcitx-libs-dev
 
 	check_apt zenity
 	im-config -n fcitx
