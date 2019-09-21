@@ -1,6 +1,32 @@
 #!/bin/bash
 
+. $(dirname $(dirname $(dirname $(readlink -f $0))))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
+
+install_libreoffice()
+{
+	if cmd_exists libreoffice; then
+		log_g 'libreoffice has been installed.'
+		return
+	fi
+
+	check_apt libreoffice
+
+	ratpoisonrc "bind C-e exec $(which libreoffice)"
+}
+
+install_whatsapp()
+{
+	if cmd_exists whatsdesk; then
+		log_g 'whatsdesk has been installed.'
+		return
+	fi
+
+	check_apt snapd
+	snap install whatsdesk
+
+	ratpoisonrc "bind C-w exec $(which whatsdesk)"
+}
 
 install_telegram()
 {
@@ -20,10 +46,7 @@ install_skype()
 		return
 	fi
 
-	cd $CACHE_DIR
-	if [ ! -f skypeforlinux-64.deb ]; then
-		wget https://go.skype.com/skypeforlinux-64.deb
-	fi
+	cacheit	'https://go.skype.com/skypeforlinux-64.deb'
 	apt install ./skypeforlinux-64.deb
 
 	ratpoisonrc "bind C-s exec $(which skypeforlinux)"

@@ -96,6 +96,21 @@ ssh_remote_run()
 	SSHREMOTE_script="${SSHREMOTE_script}\n${script}\n"
 }
 
+cacheit()
+{
+	CacheitName=$(basename "$1")
+	cd $CACHE_DIR
+
+	if [ ! -f "$CacheitName" ]; then
+		wget "$1"
+	fi
+
+	if [ ! -f "$CacheitName" ]; then
+		log_r "cacheit Error: $1"
+		exit 1
+	fi
+}
+
 is_range()
 {
 	[ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null
