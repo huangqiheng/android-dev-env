@@ -208,7 +208,7 @@ install_astrill()
 	apt --fix-broken install
 	check_apt gtk2-engines-pixbuf gtk2-engines-murrine 
 	check_apt gnome-themes-standard
-	apt autoremove
+	apt --yes autoremove
 	
 	if [ -f "$DATA_DIR/astrill-setup-linux64.deb" ]; then
 		dpkg -i "$DATA_DIR/astrill-setup-linux64.deb"

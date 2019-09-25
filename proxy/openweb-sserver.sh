@@ -8,14 +8,6 @@ openweb_image='openweb-sserver'
 bindport="${1:-8388}"
 
 
-new_xfb()
-{
-	check_apt xvfb
-	Xvfb :10 -screen 0 1920x1080x24 -fbdir /var/tmp &
-	DISPLAY=:10
-}
-
-
 main () 
 {
 	build_image $openweb_image <<-EOL
