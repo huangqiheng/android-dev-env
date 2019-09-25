@@ -990,7 +990,6 @@ repo_update()
 	#---------------------------------------------------------------------
 	# config
 
-
 	user=$(git config --global --get user.name)
 	if [ -z $user ]; then
 		[ -z $GIT_USER_NAME ] && read -p 'Input your name: ' GIT_USER_NAME
@@ -1026,13 +1025,22 @@ repo_update()
 	fi
 
 	#---------------------------------------------------------------------
-	# push
+	# add 
+
+	cd $ROOT_DIR
+	IFS=; add_result=$(git add .)
+
+	if echo $add_result | grep -q 'insufficient permission'; then
+		echo "${Green}Permission error.${Color_Off}"
+		chownUser $ROOT_DIR
+		git add .
+	fi
+
+	#---------------------------------------------------------------------
+	# commit
 
 	input_msg=$1
 	input_msg=${input_msg:="update"}
-
-	cd $ROOT_DIR
-	git add .
 	IFS=; commit_result=$(git commit -m "${input_msg}")
 
 	if echo $commit_result | grep -q 'nothing to commit'; then
@@ -1041,6 +1049,9 @@ repo_update()
 	fi
 
 	log_g ${commit_result}
+
+	#---------------------------------------------------------------------
+	# push
 
 	git config --global credential.helper 'cache --timeout 21600'
 	git push
