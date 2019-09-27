@@ -32,6 +32,10 @@ unrar:
   7z l file.7z				// list file
   7z x file.7z			   	// unzip file
 
+xz-utils
+  unxz file.xz
+  xz --decompress file.xz
+
 EOL
 	echo "${Color_Off}"
 	exit 0
