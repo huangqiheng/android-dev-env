@@ -56,6 +56,7 @@ fi
 
 if ! can_be_sta_and_ap ${1}; then
 	echo "ERROR: Your adapter can not be a station (i.e. be connected) and an AP at the same time" >&2
+	get_adapter_info "$1" 
 	exit 1
 fi
 
