@@ -46,8 +46,9 @@ main ()
 
 	#------------------------------------------------ install ss-tproxy
 
-	check_apt ipset iproute2 perl curl
-	install_chinadns
+	check_apt ipset iproute2 perl curl gawk
+	install_chinadns_ng
+	#install_chinadns
 
 	if ! cmd_exists 'ss-tproxy'; then
 		cd $CACHE_DIR
@@ -86,7 +87,8 @@ main ()
 	waitfor_die "$(cat <<-EOL
 	kill $PIDS2KILL >/dev/null 2>&1
 	ss-tproxy stop
-	ss-tproxy flush-iptables
+	ss-tproxy flush-portrule
+	ss-tproxy flush-dnscache
 EOL
 )"
 	return 0

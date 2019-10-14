@@ -48,12 +48,36 @@ set_nat_rules()
 	iptables -A FORWARD -i "$subnet_iface" -o "$wannet_iface" -j ACCEPT
 }
 
+export_hotspot_config()
+{
+	check_apt lshw
+
+	if [ -z $WAN_IFACE ]; then
+		WAN_IFACE=$(route | grep '^default' |  head -1 | grep -o '[^ ]*$')
+	fi
+
+	if [ -z $LAN_IFACE ]; then
+		LAN_IFACE=$(lshw -quiet -c network | sed -n -e '/Wireless interface/,+12 p' | sed -n -e '/bus info:/,+5 p' | sed -n -e '/logical name:/p' | cut -d: -f2 | sed -e 's/ //g' | grep -v "$WAN_IFACE" | head -1)
+		def_gateway=$(ifconfig | grep -A1 "$LAN_IFACE" | grep "inet " | head -1 | awk -F' ' '{print $2}')
+	fi
+
+	if [ -z $GATEWAY ]; then
+		GATEWAY="${def_gateway:-192.168.234.1}"
+	fi
+
+	export WAN_IFACE="${WAN_IFACE}"
+	export LAN_IFACE="${LAN_IFACE}"
+	export GATEWAY="${GATEWAY}"
+	export SUBNET="${GATEWAY%.*}.0/24"
+	log_y "Config: WAN=$WAN_IFACE LAN=$LAN_IFACE GATE=$GATEWAY NET=$SUBNET"
+}
+
 export_router_config()
 {
 	check_apt lshw
 
 	if [ -z $WAN_IFACE ]; then
-		WAN_IFACE=$(route | grep '^default' | grep -o '[^ ]*$')
+		WAN_IFACE=$(route | grep '^default' |  head -1 | grep -o '[^ ]*$')
 	fi
 
 	if [ -z $LAN_IFACE ]; then
@@ -69,7 +93,7 @@ export_router_config()
 	export LAN_IFACE="${LAN_IFACE}"
 	export GATEWAY="${GATEWAY}"
 	export SUBNET="${GATEWAY%.*}.0/24"
-	log_y "Config: WAN=$WAN_IFACE LAN=$LAN_IFACE GATE=$GATEWAY NET=$SUBNET"
+	log_y "Config: WAN_IFACE=$WAN_IFACE LAN_IFACE=$LAN_IFACE GATEWAY=$GATEWAY NET=$SUBNET"
 }
 
 
@@ -129,6 +153,23 @@ make_ssserver_conf()
 EOL
 }
 
+install_chinadns_ng()
+{
+	if  cmd_exists 'chinadns_ng'; then
+		log_y 'chinadns_ng is ready'
+		return
+	fi
+
+	check_apt build-essential
+
+	local chinadns=chinadns-ng
+	cd $CACHE_DIR
+	if [ ! -d ${chinadns} ]; then
+		git clone https://github.com/zfl9/chinadns-ng
+	fi
+	cd ${chinadns}
+	make && make install
+}
 
 install_chinadns()
 {

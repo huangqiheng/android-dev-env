@@ -10,7 +10,7 @@ export CHANNEL="${CHANNEL:-6}" 	# 36
 main () 
 {
 	#----------------------------------------------------- conditions ---
-	export_router_config
+	export_hotspot_config
 	check_privil
 	check_apmode $LAN_IFACE
 
@@ -22,7 +22,7 @@ main ()
 	log_y 'release wifi for hostapd'
 	check_apt rfkill network-manager
 
-	conn_state=$(nmcli device show $LAN_IFACE | grep STATE | awk '{print $2}')
+	conn_state=$(nmcli device show $LAN_IFACE | head -10 | grep STATE | awk '{print $2}')
 	if [ "$conn_state" = '100' ]; then
 		nmcli device disconnect $LAN_IFACE
 	fi
@@ -30,6 +30,7 @@ main ()
 	sleep 1
 
 	#------ set gateway ------
+	log_y 'start set gateway'
 	ip addr flush dev $LAN_IFACE
 	ip link set $LAN_IFACE up
 	ip addr add $GATEWAY/24 dev $LAN_IFACE
