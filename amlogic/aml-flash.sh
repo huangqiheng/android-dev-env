@@ -16,50 +16,24 @@ main ()
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1b8e", ATTR{idProduct}=="c003", MODE:="0666", SYMLINK+="worldcup"
 EOL
 
-	make_cmdline 'aml-flash-m8' <<-EOF
+	IFS=
+	cmd_str=$(cat <<- EOL
 	#!/bin/dash
-	soc=m8
+	exec_name=\$(basename \$0)
+	soc=\${exec_name##*.}
 	current=\$(pwd)
 	cd ${CACHE_DIR}/aml-linux-usb-burn
 	if [ -f \$1 ]; then
 		./aml-flash --debug --img=\$1 --soc=\$soc --wipe --reset=n --parts=all
 	fi
 	./aml-flash --debug --img=\$current/\$1 --soc=\$soc --wipe --reset=n --parts=all
-EOF
+EOL
+)
 
-	make_cmdline 'aml-flash-gxl' <<-EOF
-	#!/bin/dash
-	soc=gxl
-	current=\$(pwd)
-	cd ${CACHE_DIR}/aml-linux-usb-burn
-	if [ -f \$1 ]; then
-		./aml-flash --debug --img=\$1 --soc=\$soc --wipe --reset=n --parts=all
-	fi
-	./aml-flash --debug --img=\$current/\$1 --soc=\$soc --wipe --reset=n --parts=all
-EOF
-
-	make_cmdline 'aml-flash-axg' <<-EOF
-	#!/bin/dash
-	soc=axg
-	current=\$(pwd)
-	cd ${CACHE_DIR}/aml-linux-usb-burn
-	if [ -f \$1 ]; then
-		./aml-flash --debug --img=\$1 --soc=\$soc --wipe --reset=n --parts=all
-	fi
-	./aml-flash --debug --img=\$current/\$1 --soc=\$soc --wipe --reset=n --parts=all
-EOF
-
-	make_cmdline 'aml-flash-txlx' <<-EOF
-	#!/bin/dash
-	soc=txlx
-	current=\$(pwd)
-	cd ${CACHE_DIR}/aml-linux-usb-burn
-	if [ -f \$1 ]; then
-		./aml-flash --debug --img=\$1 --soc=\$soc --wipe --reset=n --parts=all
-	fi
-	./aml-flash --debug --img=\$current/\$1 --soc=\$soc --wipe --reset=n --parts=all
-EOF
-
+	echo $cmd_str | make_cmdline 'aml-flash-m8' --
+	echo $cmd_str | make_cmdline 'aml-flash-gxl' --
+	echo $cmd_str | make_cmdline 'aml-flash-axg' --
+	echo $cmd_str | make_cmdline 'aml-flash-txlx' --
 }
 
 main "$@"; exit $?
