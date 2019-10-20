@@ -11,6 +11,7 @@ main ()
 	fi
 
 	check_sudo
+	cd $CACHE_DIR
 	git clone https://github.com/google/adb-sync
 	cd adb-sync
 	cp adb-sync /usr/local/bin/
