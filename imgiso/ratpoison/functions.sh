@@ -90,6 +90,18 @@ install_virtualbox()
 	ratpoisonrc "bind C-v exec virtualbox"
 }
 
+install_utils_mini()
+{
+	check_apt proxychains
+	check_apt shadowsocks-libev
+	check_apt xclip
+	check_apt keynav
+	check_apt feh 
+	check_apt xpdf 
+
+	ratpoisonrc "exec keynav &"
+}
+
 install_utils()
 {
 	check_apt proxychains
