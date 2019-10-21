@@ -6,7 +6,7 @@ main ()
 {
 	check_apt device-tree-compiler
 
-	make_cmdline dtb-extract <<-EOF
+	make_cmdline dts-extract <<-EOF
 	#!/bin/bash
 	[ "X\$1" = 'X' ] && echo 'Need dtb file' && exit 1
 	[ \${1##*.} != "dtb" ] && echo 'Need .dtb file' && exit 2
