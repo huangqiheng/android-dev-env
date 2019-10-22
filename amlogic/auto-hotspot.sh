@@ -5,6 +5,13 @@
 root_dir=/media/${RUN_USER}/ROOTFS
 shadow_file=${root_dir}/etc/shadow
 
+apssid="${APSSID:-ArmbianHotspot}"
+appass="${APPASS:-DontConnectMe}"
+appass="${1:-$appass}"
+
+rootpass="${ROOTPASS:-armbianrootpass}"
+rootpass="${2:-$rootpass}"
+
 main () 
 {
 	if [ ! -d $root_dir ]; then
@@ -12,12 +19,17 @@ main ()
 		exit 1
 	fi
 
-	if [ "X$ARMROOTPASS" = 'X' ]; then
-		log_y 'Please set ARMROOTPASS in config.sh'
-		exit 2
+	if [ ! "X$1" = 'X' ]; then
+		rootpass="$1"
 	fi
 
-	encpass=$(echo "$ARMROOTPASS" | mkpasswd --method=SHA-512 --stdin)
+	auto_login_root "$rootpass"
+	entry_code
+}
+
+auto_login_root()
+{
+	encpass=$(echo "$1" | mkpasswd --method=SHA-512 --stdin)
 	sed -i 's,^\(root:\)[^:]*\(:.*\)$,\1'"$encpass"'\2,' $shadow_file
 
 	rm -f ${root_dir}/root/.not_logged_in_yet
@@ -27,7 +39,10 @@ main ()
 	ExecStart=
 	ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM
 EOL
+}
 
+entry_code()
+{
 	handle_rc "${root_dir}/root/.bashrc" 'entry_point.sh' "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then sh /root/entry_point.sh; fi"
 
 	cat > "${root_dir}/root/entry_point.sh" <<-EOL
@@ -37,6 +52,7 @@ EOL
 		iwconfig
 	don
 EOL
+
 }
 
 main "$@"; exit $?
