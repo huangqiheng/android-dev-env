@@ -189,6 +189,8 @@ install_xscreensaver()
 	set_conf $HOME/.xscreensaver
 	set_conf mode one ':'
 	set_conf selected 142 ':'
+	set_conf lock True ':'
+	set_conf lockTimeout '0:05:00' ':'
 
 	ratpoisonrc "exec xscreensaver -nosplash"
 	ratpoisonrc "bind C-l exec xscreensaver-command -lock"
