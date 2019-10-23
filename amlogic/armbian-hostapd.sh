@@ -2,20 +2,25 @@
 
 . $(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
 
-IFAC="${IFAC:-'wlan0'}"
-SSID="${SSID:-'JustOnlyHotspot'}"
-PASS="${PASS:-'DontConnectMe'}"
-GATE="${GATE:-'192.168.123.1'}"
+IFAC="${IFAC:-wlan0}"
+SSID="${SSID:-JustOnlyHotspot}"
+PASS="${PASS:-DontConnectMe}"
+GATE="${GATE:-192.168.123.1}"
 
 main () 
 {
 	SUBNET="${GATE%.*}.0/24"
-	HWMODE="${HWMODE:-'g'}"
-	CHANNEL="${CHANNEL:-'6'}"
+	HWMODE="${HWMODE:-g}"
+	CHANNEL="${CHANNEL:-8}"
 
 	#----------------------------------------------------- conditions ---
 	check_privil
-	check_apmode $IFAC
+
+	local PHY=$(cat /sys/class/net/${IFAC}/phy80211/name)
+	if ! iw phy "$PHY" info | grep -qE "^\s+\* AP$"; then
+		log_r "Wireless card doesn't support AP mode."
+		exit 1
+	fi
 
 	nmcli device set "$IFAC" managed no
 	systemctl restart NetworkManager
@@ -59,14 +64,13 @@ main ()
 	wpa_passphrase=$PASS
 	rsn_pairwise=CCMP
 EOF
-	killall hostapd
+	killall hostapd > /dev/null 2>&1
 	hostapd /tmp/hostapd.conf &
 	PIDS2KILL="$PIDS2KILL $!"
 
 	#--------------------------------------------------------- dns -----
-	log_y "starting dnsmasq dhcp: $SUBNET"
+	log_y "setting dns server"
 
-	#------ rebuild dns ------
 	systemctl stop systemd-resolved
 	systemctl disable systemd-resolved
 	cat > /etc/resolv.conf <<-EOF
@@ -75,6 +79,7 @@ EOF
 EOF
 
 	#--------------------------------------------------------- dhcp -----
+	log_y "starting dhcp: $SUBNET"
 
 	if ! cmd_exists dhcpserver; then
 		local srczip=
@@ -96,9 +101,9 @@ EOF
 		cp ./dhcpserver /usr/local/bin
 	fi
 
-	killall dhcpserver
+	killall dhcpserver > /dev/null 2>&1
 
-	./dhcpserver                                    \
+	dhcpserver                                      \
 	    -o ROUTER,$GATE				\
 	    -o SUBNET_MASK,255.255.255.0                \
 	    -o IP_ADDRESS_LEASE_TIME,3600	        \
@@ -110,7 +115,7 @@ EOF
 	    -a ${GATE%.*}.100,${GATE%.*}.200            \
 	    -p 30		                        \
 	    -d $IFAC					\
-	    $GATE
+	    $GATE &
 
 	PIDS2KILL="$PIDS2KILL $!"
 
@@ -154,7 +159,7 @@ EOL
 
 on_ap_ready()
 {
-
+	log_y 'AP running'
 }
 
 main "$@"; exit $?
