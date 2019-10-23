@@ -8,25 +8,27 @@ apssid="${APSSID:-ArmbianHotspot}"
 appass="${APPASS:-DontConnectMe}"; appass="${1:-$appass}"
 rootpass="${ROOTPASS:-armbianrootpass}"; rootpass="${2:-$rootpass}"
 
+# $1, wifi pass
+# $2，linux os root`s pass
 main () 
 {
 	check_sdcard
 	auto_login_root "$rootpass"
-	entry_code
-}
 
-entry_code()
-{
-	handle_rc "${root_dir}/root/.bashrc" 'entry_point.sh' "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then sh /root/entry_point.sh; fi"
-
-	cat > "${root_dir}/root/entry_point.sh" <<-EOL
+	entry_code  <<-EOL
 	#!/bin/dash
 	while true; do
 		ifconfig -a
 		iwconfig
-	don
+	done
 EOL
 
+}
+
+entry_code()
+{
+	echo "$(cat /dev/stdin)" > "${root_dir}/root/entry_point.sh"
+	handle_rc "${root_dir}/root/.bashrc" 'entry_point.sh' "if [ \"\$(tty)\" = \"/dev/tty1\" ]; then sh /root/entry_point.sh; fi"
 }
 
 check_sdcard()
