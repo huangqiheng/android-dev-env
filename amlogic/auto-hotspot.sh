@@ -85,7 +85,7 @@ auto_login_root()
 	encpass=$(echo "$1" | mkpasswd --method=SHA-512 --stdin)
 	shadow_file=${root_dir}/etc/shadow
 
-	sed -i 's,^\(root:\)[^:]*\(:.*\)$,\1'"$encpass"'\2,' $shadow_file
+	sed -i 's,^\(root:\)[^:]*\(:.*\)$,\1'"$encpass"':::::::,' $shadow_file
 
 	rm -f ${root_dir}/root/.not_logged_in_yet
 
