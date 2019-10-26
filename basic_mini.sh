@@ -2,6 +2,10 @@ export BASIC_SCRIPT=$(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; 
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export RUN_USER=$(basename $HOME)
 
+[ -f $ROOT_DIR/config.sh ] &&  . $ROOT_DIR/config.sh
+[ -f $EXEC_DIR/config.sh ] &&  . $EXEC_DIR/config.sh
+[ -f $EXEC_DIR/functions.sh ] &&  . $EXEC_DIR/functions.sh
+
 log()         { if [ "$LOGFLAG" != 'off' ]; then echo "$@"; fi }
 log_r()       { log "\033[0;31m$*\033[0m"; }
 log_g()       { log "\033[0;32m$*\033[0m"; }

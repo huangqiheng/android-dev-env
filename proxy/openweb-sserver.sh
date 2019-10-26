@@ -2,7 +2,6 @@
 
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
 . $ROOT_DIR/setup_routines.sh
-. $ROOT_DIR/proxy/functions.sh
 
 openweb_image='openweb-sserver'
 bindport="${1:-8388}"

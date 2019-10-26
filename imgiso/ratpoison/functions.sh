@@ -1,8 +1,5 @@
 #!/bin/bash
 
-. $(dirname $(dirname $(dirname $(readlink -f $0))))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
-
 install_libreoffice()
 {
 	if cmd_exists libreoffice; then

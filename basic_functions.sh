@@ -12,6 +12,8 @@ export RUN_DIR=$UHOME/runCodes
 export RUN_USER=$(basename $UHOME)
 
 [ -f $ROOT_DIR/config.sh ] &&  . $ROOT_DIR/config.sh
+[ -f $EXEC_DIR/config.sh ] &&  . $EXEC_DIR/config.sh
+[ -f $EXEC_DIR/functions.sh ] &&  . $EXEC_DIR/functions.sh
 
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR

@@ -1,6 +1,7 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/functions.sh
+. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
+. $ROOT_DIR/setup_routines.sh
 
 SSSERVR_CONF="${SSSERVR_CONF:-/etc/shadowsocks-libev/ssserver.json}"
 SSPORT=7777
