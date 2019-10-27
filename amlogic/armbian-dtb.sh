@@ -33,6 +33,16 @@ main()
 
 	echo "\n------------ extlinux.conf -----"
 	cat $extconf |  grep -v -E '^\s*#'
+
+	if [ $(whoami) != 'root' ]; then
+		return
+	fi
+
+	check_cmdline 'armbian-dtb' <<-EOF
+	#!/bin/dash
+	cd $EXEC_DIR
+	sh $(basename $EXEC_SCRIPT) "\$1"
+EOF
 }
 
 

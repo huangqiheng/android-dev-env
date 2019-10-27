@@ -11,7 +11,7 @@ main ()
 
 	cpanm Term::ReadKey
 
-	snumcheck -t 192.168.1.20
+	snmpcheck -t 192.168.1.20
 }
 
 maintain()

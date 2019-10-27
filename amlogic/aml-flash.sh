@@ -20,7 +20,7 @@ EOL
 	cmd_str=$(cat <<- EOL
 	#!/bin/dash
 	exec_name=\$(basename \$0)
-	soc=\${exec_name##*.}
+	soc=\${exec_name##*-}
 	current=\$(pwd)
 	cd ${CACHE_DIR}/aml-linux-usb-burn
 	if [ -f \$1 ]; then

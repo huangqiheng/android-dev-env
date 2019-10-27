@@ -189,6 +189,14 @@ EOF
 	stuffed_line "$__cmdline_file" "$@" 
 }
 
+check_cmdline()
+{
+	if cmd_exists "$1"; then
+		return
+	fi
+	cat /dev/stdin | make_cmdline "$1"
+}
+
 make_cmdline()
 {
 	local inputScript="$(cat /dev/stdin)"
