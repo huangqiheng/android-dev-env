@@ -7,19 +7,29 @@ main()
 	check_update
 	check_apt curl daemon
 
-	if [ "$1" = "start" ]; then
+	if [ "$1" = "stress" ]; then
 		for i in $(seq 1 100); do
 			curl --include \
 			     --no-buffer \
 			     --header "Connection: Upgrade" \
 			     --header "Upgrade: websocket" \
-			     --header "Host: example.com:80" \
-			     --header "Origin: http://example.com:80" \
+			     --header "Host: ${WSHOST:-example.com:80}" \
+			     --header "Origin: ${WSORIGIN:-http://example.com:80}" \
 			     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
 			     --header "Sec-WebSocket-Version: 13" \
-			     http://192.168.2.202:8082/ >/dev/null 2>&1 &
+			     "${WSURL:-http://192.168.2.202:8082/}" >/dev/null 2>&1 &
 			echo "new pid $!"
 		done
+	elif [ "$1" = "start" ]; then
+		curl --include \
+		     --no-buffer \
+		     --header "Connection: Upgrade" \
+		     --header "Upgrade: websocket" \
+		     --header "Host: ${WSHOST:-example.com:80}" \
+		     --header "Origin: ${WSORIGIN:-http://example.com:80}" \
+		     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+		     --header "Sec-WebSocket-Version: 13" \
+		     "${WSURL:-http://192.168.2.202:8082/}"
 	else
 		kill -9 $(pidof curl)
 	fi
