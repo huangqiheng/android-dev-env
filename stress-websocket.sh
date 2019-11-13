@@ -1,6 +1,6 @@
 #!/bin/dash
 
-ROOT_DIR=`dirname $(readlink -f $0)`
+. $(dirname $(readlink -f $0))/basic_functions.sh
 
 main() 
 {
@@ -22,13 +22,22 @@ main()
 		done
 	elif [ "$1" = "start" ]; then
 		curl --include \
+		     --verbose  \
 		     --no-buffer \
+		     --http2 \
+		     --header "Accept-Encoding: gzip, deflate, br" \
+		     --header "Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7" \
+		     --header "Cache-Control: no-cache" \
 		     --header "Connection: Upgrade" \
 		     --header "Upgrade: websocket" \
 		     --header "Host: ${WSHOST:-example.com:80}" \
 		     --header "Origin: ${WSORIGIN:-http://example.com:80}" \
-		     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+		     --header "Pragma: no-cache" \
+		     --header "Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits" \
+		     --header "Sec-WebSocket-Key: xvM4uYf9BBa6HnCMWa8sCA==" \
+		     --header "Sec-WebSocket-Protocol: mqttv3.1" \
 		     --header "Sec-WebSocket-Version: 13" \
+		     --header "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/78.0.3904.70 Chrome/78.0.3904.70 Safari/537.36" \
 		     "${WSURL:-http://192.168.2.202:8082/}"
 	else
 		kill -9 $(pidof curl)
