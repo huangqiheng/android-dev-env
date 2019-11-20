@@ -1,7 +1,6 @@
 #!/bin/dash
 
-#. $(dirname $(readlink -f $0))/basic_functions.sh
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 . $ROOT_DIR/setup_routines.sh
 
 main () 

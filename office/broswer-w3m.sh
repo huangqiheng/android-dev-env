@@ -4,7 +4,9 @@
 
 main () 
 {
-	check_sudo
+	nocmd_update w3m
+	check_apt w3m w3m-img
+
 }
 
 main "$@"; exit $?

@@ -4,7 +4,9 @@
 
 main () 
 {
-	check_sudo
+	nocmd_update lynx
+	check_apt lynx
+
 }
 
 main "$@"; exit $?

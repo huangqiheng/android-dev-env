@@ -24,7 +24,7 @@ apt_exists()  { [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok 
 check_apt()   { for p in "$@";do if apt_exists $p;then log_g "$p installed"; else apt install -y $p;fi done; }
 ensure_apt()  { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi done; }
 select_apt()  { for p in $@;do if apt search -n "^$p$" >/dev/null 2>&1;then check_apt $p;return 0;fi done }
-check_npm_g() { for p in "$@";do [ ! -d $(npm ls -g|head -1)/node_modules/$p ] &&  npm i -g "$p";done; }
+check_npm_g() { r=$(npm root -g); for p in "$@";do if [ -d $r/$p ];then log_g "$p exists";else npm i -g "$p";fi done; }
 check_update(){ check_sudo; apt update -y; }
 nocmd_update(){ for cmd in "$@"; do if ! cmd_exists $cmd; then check_update;return 0;fi done; }
 check_repo()  { add-apt-repository -y $1; check_update; }
@@ -41,3 +41,8 @@ check_image() { check_docker; for p in "$@"; do if ! image_exists "$p";then dock
 build_image() { image_exists $1 && return;f=$CACHE_DIR/$1.docker;cat >&1 > $f;docker build -f $f -t $1 $DATA_DIR; }
 cont_running(){ [ $(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null) = 'true' ]; }
 check_cont()  { ! cont_running "$1" && docker start -ai "$1"; }
+
+git_get()   { git config --global --get "$1"; }
+git_set()   { git config --global --add "$1" "$2"; }
+read_exit() { read -p "$1 : " JUST_READ; [ -z "$JUST_READ" ] &&  echo "Input is empty, EXIT" && exit 1; }
+git_read()  { read_exit "$2"; git_set "$1" "$JUST_READ"; }

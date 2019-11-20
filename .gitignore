@@ -6,4 +6,5 @@ debug.sh
 temp/
 .ssh
 cache/
+unpacked/
 \'

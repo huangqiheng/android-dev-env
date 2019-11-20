@@ -18,7 +18,7 @@ export RUN_USER=$(basename $UHOME)
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
 
-cd $ROOT_DIR
+cd $EXEC_DIR
 
 #-------------------------------------------------------
 #		basic functions
@@ -691,6 +691,11 @@ check_npm_g()
 		check_apt npm
 	fi
 
+	if [ -f "$NODE_PATH/$1/package.json" ]; then
+		log_g "$1 module is exists"
+		return
+	fi
+
 	if npm list -g "$1" >/dev/null; then
 		log_g "$1 has been installed"
 	else 
@@ -973,6 +978,37 @@ init_colors()
 	On_ICyan='\033[0;106m'    # Cyan
 	On_IWhite='\033[0;107m'   # White
 }; init_colors
+
+
+git_get()
+{
+	git config --global --get "$1"
+}
+
+git_set()
+{
+	git config --global --add "$1" "$2"
+}
+
+read_exit()
+{
+	read -p "$1 : " JUST_READ
+	[ -z "$JUST_READ" ] &&  echo "Input is empty, EXIT" && exit 1;
+}
+
+git_read()
+{
+	read_exit "$2" 
+	git_set "$1" "$JUST_READ"
+}
+
+check_git()
+{
+	[ "X$2" != 'X' ] && git_set "$1" "$2" && return
+	[ "X$(git_get $1)" != 'X' ] && return
+	git_read "$1" "Please input git config of \"$1\": " 
+}
+
 
 repo_update()
 {

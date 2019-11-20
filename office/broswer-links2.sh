@@ -4,7 +4,9 @@
 
 main () 
 {
-	check_sudo
+	nocmd_update links2
+	check_apt links2
+
 }
 
 main "$@"; exit $?
