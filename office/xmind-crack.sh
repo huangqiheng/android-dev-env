@@ -1,6 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 # https://www.jianshu.com/p/9d93b1754549
 
@@ -24,7 +24,7 @@ main ()
 
 	cd XMind_amd64
 
-	if [ -f XMindCrack.jar ]; then
+	if [ ! -f XMindCrack.jar ]; then
 		cp "$DATA_DIR/XMind_amd64.tar" ./
 		tar xvf XMind_amd64.tar
 	fi
