@@ -8,8 +8,10 @@ main ()
 	check_docker
 
 	cd $CACHE_DIR
-	mkdir -p .telegram-cli
-	chownUser $CACHE_DIR
+	if [ ! -d .telegram-cli ]; then
+		mkdir -p .telegram-cli
+		chownUser $CACHE_DIR
+	fi
 
 	docker run -it --rm -v $CACHE_DIR/.telegram-cli:/home/user/.telegram-cli frankwolf/telegram-cli
 }
