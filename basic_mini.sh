@@ -1,10 +1,9 @@
-export BASIC_SCRIPT=$(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
+export LIBSH='basic_mini.sh'
+export BASIC_SCRIPT=$(f=$LIBSH; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
+export EXEC_SCRIPT=$(readlink -f $0)
+export EXEC_DIR=$(dirname $EXEC_SCRIPT)
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export RUN_USER=$(basename $HOME)
-
-[ -f $ROOT_DIR/config.sh ] &&  . $ROOT_DIR/config.sh
-[ -f $EXEC_DIR/config.sh ] &&  . $EXEC_DIR/config.sh
-[ -f $EXEC_DIR/functions.sh ] &&  . $EXEC_DIR/functions.sh
 
 log()         { if [ "$LOGFLAG" != 'off' ]; then echo "$@"; fi }
 log_r()       { log "\033[0;31m$*\033[0m"; }
@@ -24,7 +23,11 @@ apt_exists()  { [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok 
 check_apt()   { for p in "$@";do if apt_exists $p;then log_g "$p installed"; else apt install -y $p;fi done; }
 ensure_apt()  { for p in "$@";do if ! apt_exists $p;then apt install -y $p;fi done; }
 select_apt()  { for p in $@;do if apt search -n "^$p$" >/dev/null 2>&1;then check_apt $p;return 0;fi done }
+
 check_npm_g() { r=$(npm root -g); for p in "$@";do if [ -d $r/$p ];then log_g "$p exists";else npm i -g "$p";fi done; }
+node_init() { nocmd_update nodejs;ensure_apt nodejs; for p in "$@"; do check_npm_g $p; done; }
+node_exec() { if [ -f $1 ];then c=$(cat $1);else c=$($1); fi; shift; echo "$c" | NODE_PATH=$(npm root -g) node - $@; }
+
 check_update(){ check_sudo; apt update -y; }
 nocmd_update(){ for cmd in "$@"; do if ! cmd_exists $cmd; then check_update;return 0;fi done; }
 check_repo()  { add-apt-repository -y $1; check_update; }
@@ -33,6 +36,7 @@ empty_exit()  { [ -z $1 ] && log_r "ERROR. the $2 is invalid." && exit 1; }
 set_ini()     { if [ $# -eq 1 ];then _crud="$1";check_apt crudini;return;fi;crudini --set $_crud $@; }
 waitfor_die() { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
 has_substr()  { [ "${1%$2*}" != "$1" ]; }
+enum_lines() { P=$1; IFS=$(printf '\n+'); set -- $2; while [ "$1" != '' ]; do $P $1; shift; done; }
 public_ip()   { curl -4 icanhazip.com; }
 
 check_docker(){ cmd_exists docker && return; sh -c "$(curl -fsSL get.docker.com)" --mirror Aliyun; }
@@ -46,3 +50,6 @@ git_get()   { git config --global --get "$1"; }
 git_set()   { git config --global --add "$1" "$2"; }
 read_exit() { read -p "$1 : " JUST_READ; [ -z "$JUST_READ" ] &&  echo "Input is empty, EXIT" && exit 1; }
 git_read()  { read_exit "$2"; git_set "$1" "$JUST_READ"; }
+
+while true; do [ -f config.sh ] && . ./config.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR
+while true; do [ -f functions.sh ] && . ./functions.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR

@@ -15,6 +15,7 @@ export RUN_USER=$(basename $UHOME)
 [ -f $EXEC_DIR/config.sh ] &&  . $EXEC_DIR/config.sh
 [ -f $EXEC_DIR/functions.sh ] &&  . $EXEC_DIR/functions.sh
 
+
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
 
@@ -23,6 +24,19 @@ cd $EXEC_DIR
 #-------------------------------------------------------
 #		basic functions
 #-------------------------------------------------------
+
+enum_lines()
+{
+	PROC=$1
+	LIST=$2
+
+	IFS=$(printf '\n+')
+        set -- $LIST; while [ "$1" != '' ]; do
+		$PROC $1
+		shift
+        done
+}
+
 
 # -- ssh_remote_exec 'apt|repo' (apt apt2 apt3 apt4'|repo1 repo2 repo3)
 # -- ssh_remote_exec '^##BEGIN-BLOCK' '^##END-BLOCK' ['/path/to/self/script']
@@ -687,21 +701,40 @@ ufw_actived()
 
 check_npm_g()
 {
-	if ! cmd_exists npm; then
-		check_apt npm
-	fi
+	NODE_PATH=${NODE_PATH:-$(npm root -g)}
 
-	if [ -f "$NODE_PATH/$1/package.json" ]; then
-		log_g "$1 module is exists"
-		return
-	fi
-
-	if npm list -g "$1" >/dev/null; then
-		log_g "$1 has been installed"
-	else 
-		npm install -g "$1"
-	fi
+	for package in "$@"; do
+		if [ -d $NODE_PATH/$package ]; then
+			log_g "$package module is exists"
+		else 
+			npm install -g "$package"
+		fi
+	done
 }
+
+node_init()
+{
+	nocmd_update nodejs
+	ensure_apt nodejs npm
+
+	for package in "$@"; do
+		check_npm_g $package
+	done
+}
+
+node_exec()
+{
+	if [ -f "$1" ]; then
+		node_code="$(cat $1)"
+	else
+		node_code="$($1)"
+	fi
+
+	shift
+	export NODE_PATH=${NODE_PATH:-$(npm root -g)}
+	echo "$node_code" | node - $@
+}
+
 
 check_service()
 {
@@ -1102,3 +1135,18 @@ repo_update()
 	git config --global credential.helper 'cache --timeout 21600'
 	git push
 }
+
+load_config_lib()
+{
+	s=basic_functions.sh
+	c=config.sh
+	f=functions.sh
+	d=$(pwd)
+	while true; do
+		[ -f $c ] &&  . ./$c
+		[ -f $f ] &&  . ./$f
+		[ -f $s ] && break
+		cd ..
+	done
+	cd $d
+}; load_config_lib
