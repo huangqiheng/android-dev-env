@@ -78,6 +78,24 @@ build_hostapd()
 	make install
 }
 
+run_sslocal()
+{
+	local inputScript="$(cat /dev/stdin)"
+
+	if ! cmd_exists ss-local; then
+		check_sudo
+		check_apt shadowsocks-libev
+
+		if pgrep -x "ss-server" >/dev/null; then
+			systemctl stop shadowsocks-libev.service
+			systemctl disable shadowsocks-libev.service
+		fi
+	fi
+
+	echo "$inputScript" > /tmp/sslocal.json
+        ss-local -v -c /tmp/sslocal.json
+}
+
 install_ssredir()
 {
 	check_apt haveged rng-tools shadowsocks-libev
