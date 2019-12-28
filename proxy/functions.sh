@@ -24,7 +24,7 @@ start_openweb()
 	fi	
 	local contname="ss-astrill-$bindport"
 	local contid=$(cont_id $contname)
-	
+
 	xhost +local:root >/dev/null
 
 	#echo "internet ip addr: $(wlan_ip)"
@@ -53,7 +53,6 @@ start_openweb()
 
 	docker start -ai "$contid"
 }
-
 
 check_openweb_image()
 {
