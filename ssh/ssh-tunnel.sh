@@ -36,11 +36,13 @@ show_help_exit()
 {
 	cat << EOL
 Usage:
-  sh ssh-tunnel.sh <remote_port> <local_port> <ssh_user> <ssh_host>
-This will open <remote_port> on <ssh_host> mapping to <local_port> by SSH,
-then you can access your <local_port> through <ssh_host>:<remote_port>
-Please edit \`/etc/ssh/sshd_config\` on <ssh_host> and set \`GatewayPorts yes\`
-Put this to crontab and run every minute to keep the tunnel active
+	sh ssh-tunnel.sh <remote_port> <local_port> <ssh_user> <ssh_host>
+
+	This will open <remote_port> on <ssh_host> mapping to <local_port> by SSH,
+	then you can access your <local_port> through <ssh_host>:<remote_port>
+
+	Please edit \`/etc/ssh/sshd_config\` on <ssh_host> and set \`GatewayPorts yes\`
+	Put this to crontab and run every minute to keep the tunnel active
 EOL
 	exit 0
 }
