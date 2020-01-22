@@ -20,6 +20,7 @@ main ()
 	# for work
 	install_skype
 	install_telegram
+	install_riot
 	install_whatsapp
 	install_libreoffice
 	install_virtualbox

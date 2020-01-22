@@ -1,5 +1,43 @@
 #!/bin/dash
 
+select_subpath()
+{
+	local BOOT_PATH="$1"
+	mkdir -p "${BOOT_PATH}"
+
+	while true; do
+		if [ ! "X$2" = 'X' ]; then
+			if [ $(echo -n "$2" | wc -m) -gt 3 ]; then
+				FUNC_RESULT="$2"
+				break
+			fi
+		fi
+
+		options=$(ls -1p "${BOOT_PATH}" | grep / | sed 's/.$//')
+
+		if [ "X$options" = 'X' ]; then
+			while true; do
+				read -p "Please enter Dir Name : " user_enter
+
+				if [ $(echo -n "$user_enter" | wc -m) -gt 3 ]; then
+					FUNC_RESULT="$user_enter"
+					break
+				fi
+				log_y 'String length Must > 3'
+			done
+			break
+		fi
+
+		echo "$options" | nl 
+		echo ''
+		read -p "Please select the INDEX : " user_select
+		FUNC_RESULT=$(echo "$options" | sed -n "${user_select}p")
+		break
+	done
+	mkdir -p "${BOOT_PATH}/${FUNC_RESULT}"
+}
+
+
 x11_forward_server()
 {
 	log_g 'setting ssh server'
@@ -212,6 +250,27 @@ cloudinit_remove()
 	rm -rf /var/lib/cloud/
 }
 
+install_riot() 
+{
+	check_apt lsb-release wget apt-transport-https
+	
+	if ! cmd_exists riot-web; then
+		check_sudo
+		wget -O /usr/share/keyrings/riot-im-archive-keyring.gpg https://packages.riot.im/debian/riot-im-archive-keyring.gpg
+		echo "deb [signed-by=/usr/share/keyrings/riot-im-archive-keyring.gpg] https://packages.riot.im/debian/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/riot-im.list
+		apt update -y
+		check_apt riot-web
+	fi
+
+	check_cmdline riot <<-EOF
+	#!/bin/dash
+	riot-web
+EOF
+
+	echo 'Just type cmd: riot'
+}
+
+
 install_astrill()
 {
 	if cmd_exists astrill; then
@@ -224,6 +283,7 @@ install_astrill()
 	# check_apt 
 	check_apt libgtk2.0-0
 	apt --fix-broken install
+	check_apt libcanberra-gtk-module
 	check_apt gtk2-engines-pixbuf gtk2-engines-murrine 
 	check_apt gnome-themes-standard
 	apt --yes autoremove

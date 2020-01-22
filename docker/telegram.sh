@@ -1,14 +1,14 @@
 #!/bin/dash
 
 . $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
 
 main () 
 {
 	check_docker
 
-	cd $CACHE_DIR
-	mkdir -p .TelegramDesktop
+	select_subpath $CACHE_DIR/TelegramDesktop "$1"
+	TelegramHome=$CACHE_DIR/TelegramDesktop/$FUNC_RESULT
+
 	chownUser $CACHE_DIR
 
 	docker run --rm -it --name telegram \
@@ -18,7 +18,7 @@ main ()
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v "/home/$(whoami)/.Xauthority:/home/user/.Xauthority" \
 		-v /etc/localtime:/etc/localtime:ro \
-		-v $CACHE_DIR/.TelegramDesktop:/home/user/.local/share/TelegramDesktop/ \
+		-v $TelegramHome:/home/user/.local/share/TelegramDesktop/ \
 		xorilog/telegram
 }
 
