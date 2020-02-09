@@ -5,6 +5,7 @@ export BASIC_SCRIPT=$(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; d
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export EXEC_SCRIPT=$(readlink -f $0)
 export EXEC_DIR=$(dirname $EXEC_SCRIPT)
+export EXEC_NAME=$(basename ${EXEC_SCRIPT%.*})
 export CACHE_DIR=$ROOT_DIR/cache
 export DATA_DIR=$ROOT_DIR/data
 export UHOME=$HOME; [ "X$SUDO_USER" != 'X' ] && UHOME="/home/$SUDO_USER"
@@ -24,6 +25,21 @@ cd $EXEC_DIR
 #-------------------------------------------------------
 #		basic functions
 #-------------------------------------------------------
+
+
+main_entry()
+{ 
+	for cmd in 'init help'; do 
+		fun_exists $cmd && $cmd $@
+	done
+	main $@
+	exit $? 
+}
+
+rm_space()
+{
+	echo "${1}" | tr -d '[:space:]'
+}
 
 enum_lines()
 {
@@ -209,6 +225,24 @@ check_cmdline()
 		return
 	fi
 	cat /dev/stdin | make_cmdline "$1"
+}
+
+self_cmdline()
+{
+	if [ "X$1" = 'X' ]; then
+		this_file=$(basename $EXEC_SCRIPT)
+		cmdname=${this_file%.*}
+	else
+		cmdname="$1"
+		shift
+	fi
+
+	local params=$(echo "$@")
+	check_cmdline "$cmdname" <<-EOF
+	#!/bin/dash
+	cd $EXEC_DIR
+	sh $EXEC_SCRIPT $params
+EOF
 }
 
 make_cmdline()

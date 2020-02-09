@@ -1,19 +1,18 @@
 #!/bin/dash
 
 . $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
-. $ROOT_DIR/setup_routines.sh
+#. $(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 main () 
 {
 }
 
-maintain()
+init()
 {
 	check_update
-	[ "$1" = 'help' ] && show_help_exit
 }
 
-show_help_exit()
+help()
 {
 	cat << EOL
 
@@ -21,4 +20,5 @@ EOL
 	exit 0
 }
 
-maintain "$@"; main "$@"; exit $?
+
+main_entry $@

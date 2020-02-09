@@ -7,11 +7,12 @@ main ()
 	check_docker
 
 	select_subpath $CACHE_DIR/TelegramDesktop "$1"
-	TelegramHome=$CACHE_DIR/TelegramDesktop/$FUNC_RESULT
+	TelegramHome="$CACHE_DIR/TelegramDesktop/$FUNC_RESULT"
+	TeleName=$(rm_space "telegram-$FUNC_RESULT")
 
 	chownUser $CACHE_DIR
 
-	docker run --rm -it --name telegram \
+	docker run --rm -it --name $TeleName \
 		--hostname=$(hostname) \
 		--device /dev/snd \
 		-e DISPLAY=unix$DISPLAY \
@@ -20,6 +21,8 @@ main ()
 		-v /etc/localtime:/etc/localtime:ro \
 		-v $TelegramHome:/home/user/.local/share/TelegramDesktop/ \
 		xorilog/telegram
+
+	self_cmdline tg
 }
 
 maintain()

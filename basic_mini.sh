@@ -2,6 +2,7 @@ export LIBSH='basic_mini.sh'
 export BASIC_SCRIPT=$(f=$LIBSH; while [ ! -f $f ]; do f="../$f"; done; echo $(readlink -f $f))
 export EXEC_SCRIPT=$(readlink -f $0)
 export EXEC_DIR=$(dirname $EXEC_SCRIPT)
+export EXEC_NAME=$(basename ${EXEC_SCRIPT%.*})
 export ROOT_DIR=$(dirname $BASIC_SCRIPT)
 export RUN_USER=$(basename $HOME)
 
@@ -53,3 +54,6 @@ git_read()  { read_exit "$2"; git_set "$1" "$JUST_READ"; }
 
 while true; do [ -f config.sh ] && . ./config.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR
 while true; do [ -f functions.sh ] && . ./functions.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR
+
+main_entry()  { for cmd in 'init help';do fun_exists $cmd && $cmd $@;done main $@; exit $? }
+
