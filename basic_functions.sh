@@ -29,11 +29,14 @@ cd $EXEC_DIR
 
 main_entry()
 { 
-	for cmd in 'init help'; do 
-		fun_exists $cmd && $cmd $@
+	local reqcmd=$1; 
+	test -z $reqcmd || shift
+	for cmd in init help; do 
+		if [ "$reqcmd" = "$cmd" ]; then
+			fun_exists $cmd && $cmd $@
+		fi	
 	done
-	main $@
-	exit $? 
+	main $@; exit $? 
 }
 
 rm_space()
@@ -1172,15 +1175,16 @@ repo_update()
 
 load_config_lib()
 {
-	s=basic_functions.sh
-	c=config.sh
-	f=functions.sh
-	d=$(pwd)
+	o=;s='config.sh functions.sh'
 	while true; do
-		[ -f $c ] &&  . ./$c
-		[ -f $f ] &&  . ./$f
-		[ -f $s ] && break
+		d=$(pwd)
+		for p in $s;do
+			[ -f $p ] && o="$d/$p $o"
+		done
+		[ -f basic_functions.sh ] && break
 		cd ..
 	done
-	cd $d
+	for p in $o;do . $p; done
 }; load_config_lib
+
+cd $EXEC_DIR

@@ -30,11 +30,26 @@ select_subpath()
 
 		echo "$options" | nl 
 		echo ''
-		read -p "Please select the INDEX : " user_select
+		read -p "Select config INDEX : " user_select
 		FUNC_RESULT=$(echo "$options" | sed -n "${user_select}p")
 		break
 	done
 	mkdir -p "${BOOT_PATH}/${FUNC_RESULT}"
+}
+
+sub_home()
+{
+	select_subpath $CACHE_DIR/$EXEC_NAME "$1"
+	chownUser "$CACHE_DIR/$EXEC_NAME"
+
+	SubHome="$CACHE_DIR/$EXEC_NAME/$FUNC_RESULT"
+	SubName=$(rm_space "$FUNC_RESULT")
+}
+
+docker_home()
+{
+	check_docker
+	sub_home "$1" #return var: SubHome SubName
 }
 
 

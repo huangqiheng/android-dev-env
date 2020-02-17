@@ -52,8 +52,8 @@ git_set()   { git config --global --add "$1" "$2"; }
 read_exit() { read -p "$1 : " JUST_READ; [ -z "$JUST_READ" ] &&  echo "Input is empty, EXIT" && exit 1; }
 git_read()  { read_exit "$2"; git_set "$1" "$JUST_READ"; }
 
-while true; do [ -f config.sh ] && . ./config.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR
-while true; do [ -f functions.sh ] && . ./functions.sh; [ -f $LIBSH ] && break; cd ..; done; cd $EXEC_DIR
+load() {o=;s='config.sh functions.sh';while true; do d=$(pwd);for p in $s;do [ -f $p ] && o="$d/$p $o"; done \
+	[ -f $LIBSH ] && break; cd ..; done for p in $o;do . $p; done; }; load; cd $EXEC_DIR
 
-main_entry()  { for cmd in 'init help';do fun_exists $cmd && $cmd $@;done main $@; exit $? }
+main_entry()  { p=$1; [ "x$p" != 'x' ] && shift; for c in init help;do [ "$p" = "$c" ] && fun_exists $c && $c $@;done main $@; exit $? }
 

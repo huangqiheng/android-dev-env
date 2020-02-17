@@ -1,25 +1,22 @@
 #!/bin/dash
 
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
-main () 
+main() 
 {
 	if ! cmd_exists x11docker; then
 		check_sudo
 		check_apt curl
 		curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker | /bin/bash -s -- --update
 	fi
-
-	show_help_exit
 }
 
-maintain()
+init()
 {
-	[ "$1" = 'help' ] && show_help_exit
+	echo 'x11docker start'
 }
 
-show_help_exit()
+help()
 {
 	cat << EOL
 Xfce4 Terminal 				x11docker x11docker/xfce xfce4-terminal
@@ -48,8 +45,10 @@ LiriOS (based on Fedora) 		x11docker --desktop --gpu lirios/unstable
 KDE Plasma 				x11docker --desktop --gpu x11docker/plasma
 KDE Plasma as nested Wayland compositor x11docker --gpu x11docker/plasma startplasmacompositor
 LXDE with wine and PlayOnLinux 		x11docker --desktop --home --pulseaudio x11docker/lxde-wine
+
+See more: https://hub.docker.com/u/x11docker/
 EOL
 	exit 0
 }
 
-maintain "$@"; main "$@"; exit $?
+main_entry $@
