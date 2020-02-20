@@ -55,5 +55,6 @@ git_read()  { read_exit "$2"; git_set "$1" "$JUST_READ"; }
 load() {o=;s='config.sh functions.sh';while true; do d=$(pwd);for p in $s;do [ -f $p ] && o="$d/$p $o"; done \
 	[ -f $LIBSH ] && break; cd ..; done for p in $o;do . $p; done; }; load; cd $EXEC_DIR
 
-main_entry()  { p=$1; [ "x$p" != 'x' ] && shift; for c in init help;do [ "$p" = "$c" ] && fun_exists $c && $c $@;done main $@; exit $? }
+main_entry() { [ "$1" = init ] && fun_exists init && shift && init $@; \
+	[ "$1" = help ] && fun_exists help && shift && help $@; main $@; exit $?; }
 

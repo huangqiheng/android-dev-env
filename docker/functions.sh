@@ -31,5 +31,5 @@ docker_desktop()
 	    && apt-get clean \
 	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
 EOL
-
+	chownUser "$SubHome"
 }

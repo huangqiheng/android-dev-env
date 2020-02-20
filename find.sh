@@ -1,6 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 main () 
 {
@@ -8,4 +8,4 @@ main ()
 	find . -not -path '*/\.*' -type f -name "*.sh" -print0 | xargs -0 grep -i "$1"
 }
 
-main "$@"; exit $?
+main_entry $@

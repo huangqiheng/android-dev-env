@@ -37,19 +37,14 @@ select_subpath()
 	mkdir -p "${BOOT_PATH}/${FUNC_RESULT}"
 }
 
-sub_home()
+docker_home()
 {
+	check_docker
 	select_subpath $CACHE_DIR/$EXEC_NAME "$1"
 	chownUser "$CACHE_DIR/$EXEC_NAME"
 
 	SubHome="$CACHE_DIR/$EXEC_NAME/$FUNC_RESULT"
 	SubName=$(rm_space "$FUNC_RESULT")
-}
-
-docker_home()
-{
-	check_docker
-	sub_home "$1" #return var: SubHome SubName
 }
 
 

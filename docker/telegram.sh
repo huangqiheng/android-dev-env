@@ -4,6 +4,7 @@
 
 IMG_APPS='telegram-apps'
 IMG_MAIN='telegram-main'
+SOCKS_PORT=2080
 
 main () 
 {
@@ -41,7 +42,7 @@ EOL
 	    echo '"password":"\$SSPASSWORD",' >> entrypoint && \
 	    echo '"mode":"tcp_and_udp",' >> entrypoint && \
 	    echo '"local_address": "127.0.0.1",' >> entrypoint && \
-	    echo '"local_port":1080,' >> entrypoint && \
+	    echo '"local_port":$SOCKS_PORT,' >> entrypoint && \
 	    echo '"method":"xchacha20-ietf-poly1305",' >> entrypoint && \
 	    echo '"timeout":300,' >> entrypoint && \
 	    echo '"fast_open":false}' >> entrypoint && \
@@ -79,6 +80,7 @@ EOL
 		-v $SubHome:/home/user \
 		-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
 		-v /run/udev/data:/run/udev/data \
+		-p $SOCKS_PORT:$SOCKS_PORT \
 		--device /dev/snd \
 		--device /dev/dri \
 		-v /etc/localtime:/etc/localtime:ro \

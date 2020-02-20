@@ -16,7 +16,6 @@ export RUN_USER=$(basename $UHOME)
 [ -f $EXEC_DIR/config.sh ] &&  . $EXEC_DIR/config.sh
 [ -f $EXEC_DIR/functions.sh ] &&  . $EXEC_DIR/functions.sh
 
-
 mkdir -p $CACHE_DIR
 mkdir -p $RUN_DIR
 
@@ -26,16 +25,10 @@ cd $EXEC_DIR
 #		basic functions
 #-------------------------------------------------------
 
-
 main_entry()
 { 
-	local reqcmd=$1; 
-	test -z $reqcmd || shift
-	for cmd in init help; do 
-		if [ "$reqcmd" = "$cmd" ]; then
-			fun_exists $cmd && $cmd $@
-		fi	
-	done
+	[ "$1" = 'init' ] && fun_exists init && shift && init $@
+	[ "$1" = 'help' ] && fun_exists help && shift && help $@
 	main $@; exit $? 
 }
 
@@ -871,9 +864,10 @@ build_image()
 		log_g "image is exists ($1)"
 		return
 	fi
+
 	dockfile=$CACHE_DIR/$1.docker
 	cat >&1 > $dockfile
-	docker build -f $dockfile -t $1 $DATA_DIR
+	docker build -f $dockfile -t "$1" $DATA_DIR
 }
 
 cont_running() 
