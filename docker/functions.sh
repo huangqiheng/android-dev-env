@@ -1,5 +1,17 @@
 #!/bin/dash
 
+gen_entrycode()
+{
+	local begincode="$1"
+	local endcode="$2"
+	local out_file="/tmp/entry-$EXEC_NAME.sh"
+
+	echo '#!/bin/dash' > $out_file
+	echo "$(sed -n '/^\s*'$begincode'/,/^\s*'$endcode'/p' $EXEC_SCRIPT)" >> $out_file
+	chmod a+x $out_file 
+	echo $out_file
+}
+
 IMG_BASE='desktop-base'
 
 docker_desktop()

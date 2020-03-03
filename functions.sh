@@ -10,6 +10,9 @@ select_subpath()
 			if [ $(echo -n "$2" | wc -m) -gt 3 ]; then
 				FUNC_RESULT="$2"
 				break
+			else
+				log_r 'Directory name too short'
+				exit 1
 			fi
 		fi
 

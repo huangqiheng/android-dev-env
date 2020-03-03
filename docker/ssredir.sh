@@ -3,16 +3,11 @@
 . $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 IMG_APPS="$EXEC_NAME-apps"
+SSMODE="${mode:-chnroute}"
 
 docker_entry()
 {
-	local out_file="/tmp/entry-$EXEC_NAME.sh"
-	echo '#!/bin/dash' > $out_file
-	echo "$(sed -n '/^\s*###DOCKER_BEGIN###/,/^\s*###DOCKER_END###/p' $EXEC_SCRIPT)" >> $out_file
-	chmod +x $out_file 
-	echo $out_file
-	return
-
+	gen_entrycode '###DOCKER_BEGIN###' '###DOCKER_END###'; return
 	###DOCKER_BEGIN###
 
 	TRANS_PORT=6666
@@ -65,8 +60,9 @@ EOF
         PIDS2KILL="$PIDS2KILL $!"
 
 	uncomments
-	set_conf mode 'chnroute'
-	#set_conf mode 'global'
+	[ $SSMODE = 'chnroute' ] && set_conf mode 'chnroute'
+	[ $SSMODE = 'gfwlist' ] && set_conf mode 'gfwlist'
+	[ $SSMODE = 'global' ] && set_conf mode 'global'
 	set_conf proxy_svraddr4 "($SSSERVER)"
 	set_conf proxy_svrport "$SSPORT"
 	set_conf proxy_tcpport "$TRANS_PORT"
@@ -132,6 +128,7 @@ EOL
 		-e SSSERVER=$SSSERVER \
 		-e SSPORT=$SSPORT \
 		-e SSPASSWORD=$SSPASSWORD \
+		-e SSMODE=$SSMODE \
 		-v $(docker_entry):/root/entrypoint \
 		-v /etc/localtime:/etc/localtime:ro \
 		--name "$EXEC_NAME-$SubName" $IMG_APPS

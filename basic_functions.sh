@@ -237,7 +237,7 @@ self_cmdline()
 	check_cmdline "$cmdname" <<-EOF
 	#!/bin/dash
 	cd $EXEC_DIR
-	sh $EXEC_SCRIPT $params
+	sh $EXEC_SCRIPT $params \$@
 EOF
 }
 
