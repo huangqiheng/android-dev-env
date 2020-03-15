@@ -1,7 +1,6 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 main () 
 {
@@ -33,16 +32,4 @@ main ()
 EOF
 }
 
-maintain()
-{
-	[ "$1" = 'help' ] && show_help_exit $2
-}
-
-show_help_exit()
-{
-	cat << EOL
-
-EOL
-	exit 0
-}
-maintain "$@"; main "$@"; exit $?
+main_entry $@

@@ -44,7 +44,8 @@ docker_home()
 {
 	check_docker
 	select_subpath $CACHE_DIR/$EXEC_NAME "$1"
-	chownUser "$CACHE_DIR/$EXEC_NAME"
+
+	[ $(whoami) = 'root' ] && chownUser "$CACHE_DIR/$EXEC_NAME"
 
 	SubHome="$CACHE_DIR/$EXEC_NAME/$FUNC_RESULT"
 	SubName=$(rm_space "$FUNC_RESULT")

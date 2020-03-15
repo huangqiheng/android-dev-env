@@ -35,6 +35,7 @@ check_repo()  { add-apt-repository -y $1; check_update; }
 
 empty_exit()  { [ -z $1 ] && log_r "ERROR. the $2 is invalid." && exit 1; }
 set_ini()     { if [ $# -eq 1 ];then _crud="$1";check_apt crudini;return;fi;crudini --set $_crud $@; }
+uncomments()  { sed -ri '/^[[:blank:]]*#/d;s/[[:blank:]]#.*//' $1; }
 waitfor_die() { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
 has_substr()  { [ "${1%$2*}" != "$1" ]; }
 enum_lines() { P=$1; IFS=$(printf '\n+'); set -- $2; while [ "$1" != '' ]; do $P $1; shift; done; }

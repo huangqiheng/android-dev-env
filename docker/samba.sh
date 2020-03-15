@@ -10,8 +10,6 @@ main ()
 	TargetDir="$CACHE_DIR/$EXEC_NAME/$FUNC_RESULT"
 	ContName=$(rm_space "$FUNC_RESULT")
 
-	chownUser $CACHE_DIR
-
 	docker run --rm -it --privileged \
 		--hostname="$(hostname)$ContName" \
 		-v /etc/localtime:/etc/localtime:ro \
@@ -21,6 +19,8 @@ main ()
 		--name "samba-$ContName" dperson/samba -n -p -W \
 		-u "$RUN_USER;badpass" \
 		-s "public;/mount"
+
+	chownUser $CACHE_DIR/$EXEC_NAME
 
 	self_cmdline
 }

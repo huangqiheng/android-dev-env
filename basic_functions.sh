@@ -440,6 +440,10 @@ set_comt()
 	fi
 }
 
+uncomments()
+{ 
+	sed -ri '/^[[:blank:]]*#/d;s/[[:blank:]]#.*//' $1 
+}
 
 __ini_file=''
 
@@ -828,10 +832,13 @@ select_apt()
 	return 1
 }
 
+status_check_docker=
+
 check_docker()
 {
 	if cmd_exists docker; then
-		log_g 'docker is ready.'
+		test $status_check_docker || log_g 'docker is ready.'
+		status_check_docker=true
 		return 
 	fi
 	check_apt curl
