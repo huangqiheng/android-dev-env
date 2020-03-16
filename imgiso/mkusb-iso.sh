@@ -1,7 +1,6 @@
 #!/bin/bash
 
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
 
 main () 
 {
@@ -54,4 +53,4 @@ main ()
 "
 }
 
-main "$@"; exit $?
+main_entry $@

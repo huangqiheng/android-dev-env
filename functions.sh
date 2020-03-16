@@ -132,6 +132,7 @@ build_hostapd()
 
 run_sslocal()
 {
+	local opts="${1:-'-v'}"
 	local inputScript="$(cat /dev/stdin)"
 
 	if ! cmd_exists ss-local; then
@@ -145,7 +146,7 @@ run_sslocal()
 	fi
 
 	echo "$inputScript" > /tmp/sslocal.json
-        ss-local -v -c /tmp/sslocal.json
+        ss-local $opts -c /tmp/sslocal.json
 }
 
 install_ssredir()

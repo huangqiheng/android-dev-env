@@ -1,7 +1,6 @@
 #!/bin/dash
-
 . $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
-#. $(f='basic_mini.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 main () 
 {
@@ -9,16 +8,15 @@ main ()
 
 init()
 {
-	check_update
+	nocmd_update test
 }
 
 help()
 {
 	cat << EOL
-
 EOL
 	exit 0
 }
 
-
+#--------------------------------------------------------#
 main_entry $@
