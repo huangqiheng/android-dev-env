@@ -43,7 +43,11 @@ select_subpath()
 docker_home()
 {
 	check_docker
-	select_subpath $CACHE_DIR/$EXEC_NAME "$1"
+	if [ "$1" = 'auto' ]; then
+		FUNC_RESULT='auto'
+	else
+		select_subpath $CACHE_DIR/$EXEC_NAME "$1"
+	fi
 
 	[ $(whoami) = 'root' ] && chownUser "$CACHE_DIR/$EXEC_NAME"
 

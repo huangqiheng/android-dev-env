@@ -12,7 +12,7 @@ main ()
 	check_sudo
 
 	cd $CACHE_DIR
-	if [ -f ipscan_3.6.2_amd64.deb ]; then
+	if [ ! -f ipscan_3.6.2_amd64.deb ]; then
 		wget https://github.com/angryip/ipscan/releases/download/3.6.2/ipscan_3.6.2_amd64.deb
 	fi
 
