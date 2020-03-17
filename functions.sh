@@ -45,6 +45,7 @@ docker_home()
 	check_docker
 	if [ "$1" = 'auto' ]; then
 		FUNC_RESULT='auto'
+		mkdir -p "$CACHE_DIR/$EXEC_NAME/$FUNC_RESULT"
 	else
 		select_subpath $CACHE_DIR/$EXEC_NAME "$1"
 	fi
