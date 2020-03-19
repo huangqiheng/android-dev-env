@@ -30,6 +30,21 @@ docker_entry()
 }
 EOL
 
+        cat > $HOME/dnsforwarder.conf  <<-EOL
+        LogOn false
+        #LogFileThresholdLength 5120000
+        #LogFileFolder $HOME/log
+        UDPLocal 127.0.0.1:53
+        UDPGroup 127.0.0.1:65353 * on
+        BlockNegativeResponse true
+        UseCache true
+        MemoryCache true
+        CacheSize 30720000
+        IgnoreTTL true
+        ReloadCache true
+        OverwriteCache true
+EOL
+
 	cat > $HOME/sstunnel.json <<-EOL
 {
         "server":"${SSSERVER}",
@@ -37,7 +52,7 @@ EOL
         "server_port":16666,
         "mode":"tcp_and_udp",
 	"local_address": "127.0.0.1",
-	"local_port":53,
+	"local_port":65353,
         "method":"xchacha20-ietf-poly1305",
         "timeout":300,
         "fast_open":false
@@ -47,6 +62,11 @@ EOL
 	if [ ! "X$SSSERVER" = 'X' ]; then
 		gosu user ss-tunnel -v -c $HOME/sstunnel.json -L 8.8.8.8:53 &
 		sleep 1 
+
+		mkdir -p "$HOME/.dnsforwarder"
+		gosu user dnsforwarder -f $HOME/dnsforwarder.conf &
+		sleep 1 
+
 		gosu user ss-server -v -d 127.0.0.1:53 -c $HOME/ssserver.json &
 		sleep 1 
 	fi
@@ -121,14 +141,25 @@ main()
 	FROM $IMG_RATPOISON
 	COPY ./astrill-setup-linux64.deb /root
 
+	RUN apt update -y \
+	    && apt-get install -y git libcap2-bin gcc make automake libcurl4-gnutls-dev \
+	    && cd /root && git clone https://github.com/holmium/dnsforwarder.git \
+	    && cd dnsforwarder && ./configure && make && make install \
+	    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/dnsforwarder \
+	    && apt autoremove -y gcc make automake && apt-get clean \
+	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
+
 	RUN apt update -y && apt install -y --no-install-recommends \
-	    openssl libssl-dev \
-	    rng-tools shadowsocks-libev \
+	    openssl libssl-dev rng-tools shadowsocks-libev \
+	    && service shadowsocks-libev stop \
+	    && apt autoremove -y && apt-get clean \
+	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
+
+	RUN apt update -y && apt install -y --no-install-recommends \
 	    vim net-tools psmisc iproute2 nscd dnsutils \
 	    libgtk2.0-0 libcanberra-gtk-module \
 	    gtk2-engines gtk2-engines-pixbuf gtk2-engines-murrine \
 	    gnome-themes-standard \
-	    && service shadowsocks-libev stop \
 	    && dpkg -i /root/astrill-setup-linux64.deb \
 	    && apt autoremove -y && apt-get clean \
 	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
