@@ -25,6 +25,13 @@ cd $EXEC_DIR
 #		basic functions
 #-------------------------------------------------------
 
+
+is_ip()
+{
+	expr "$1" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null
+}
+
+
 main_entry()
 { 
 	[ "$1" = 'init' ] && fun_exists init && shift && init $@

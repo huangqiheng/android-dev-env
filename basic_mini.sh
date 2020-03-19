@@ -38,8 +38,9 @@ set_ini()     { if [ $# -eq 1 ];then _crud="$1";check_apt crudini;return;fi;crud
 uncomments()  { sed -ri '/^[[:blank:]]*#/d;s/[[:blank:]]#.*//' $1; }
 waitfor_die() { sleep infinity & CLD=$!;[ -n "$1" ] && trap "${1};kill -9 $CLD" 1 2 9 15;wait "$CLD"; }
 has_substr()  { [ "${1%$2*}" != "$1" ]; }
-enum_lines() { P=$1; IFS=$(printf '\n+'); set -- $2; while [ "$1" != '' ]; do $P $1; shift; done; }
+enum_lines()  { P=$1; IFS=$(printf '\n+'); set -- $2; while [ "$1" != '' ]; do $P $1; shift; done; }
 public_ip()   { curl -4 icanhazip.com; }
+is_ip()       { expr "$1" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null; }
 
 check_docker(){ cmd_exists docker && return; sh -c "$(curl -fsSL get.docker.com)" --mirror Aliyun; }
 image_exists(){ check_docker; docker images --all | grep -q "$1"; }
