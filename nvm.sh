@@ -4,18 +4,14 @@
 
 main() 
 {
-}
+	cd $CACHE_DIR
 
-init()
-{
-	nocmd_update test
-}
+	if [ ! -f nvm-install.sh ]; then
+		wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh
+		mv install.sh nvm-install.sh
+	fi
 
-help()
-{
-	cat << EOL
-EOL
-	exit 0
+	bash nvm-install.sh
 }
 
 #---------------------------------------------------------------------------------#

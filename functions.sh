@@ -137,7 +137,7 @@ build_hostapd()
 
 run_sslocal()
 {
-	local opts="${1:-'-v'}"
+	local opts="${1:--v}"
 	local inputScript="$(cat /dev/stdin)"
 
 	if ! cmd_exists ss-local; then
@@ -151,6 +151,9 @@ run_sslocal()
 	fi
 
 	echo "$inputScript" > /tmp/sslocal.json
+	inputServer=$(get_ssserver /tmp/sslocal.json)
+	echo "Connect to $inputServer"
+
         ss-local $opts -c /tmp/sslocal.json
 }
 
@@ -187,7 +190,7 @@ install_ssredir()
 }
 EOL
 	else
-		inputServer=$(grep '"server":' /etc/shadowsocks-libev/bwghost.json | tr '":,' ' ' | awk -F' ' '{print $2}')
+		inputServer=$(get_ssserver /etc/shadowsocks-libev/bwghost.json)
 	fi
 
 	log_y "shadowsocks server: $inputServer"
@@ -195,6 +198,11 @@ EOL
 	systemctl enable shadowsocks-libev-redir@bwghost
 	systemctl daemon-reload
 	systemctl start shadowsocks-libev-redir@bwghost
+}
+
+get_ssserver()
+{
+	grep '"server":' "$1" | tr '":,' ' ' | awk -F' ' '{print $2}'
 }
 
 install_terminals()

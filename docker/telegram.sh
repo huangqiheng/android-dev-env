@@ -4,7 +4,7 @@
 
 IMG_APPS='telegram-apps'
 LOCAL_PORT=2080
-[ $telegram_with_socks = 'true' ] || SSSERVER=''
+[ "$telegram_with_socks" = 'true' ] || SSSERVER=''
 
 docker_entry()
 {

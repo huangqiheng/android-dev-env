@@ -8,6 +8,7 @@ main ()
 {
 	check_apt openjdk-8-jdk
 	check_apt unzip
+	check_apt libcanberra-gtk-module
 
 	cd $CACHE_DIR
 

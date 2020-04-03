@@ -6,11 +6,12 @@ main ()
 {
 	empty_exit "$1" 'string to find'
 
-	if [ "X$2" = 'X' ]; then
-		2=$(pwd)
+	local filedir="$2"
+	if [ "X$filedir" = 'X' ]; then
+		filedir=$(pwd)
 	fi
 
-	cd "$2"
+	cd "$filedir"
 	find . -not -path '*/\.*' -type f -name "*.sh" -print0 | xargs -0 grep -i "$1"
 
 	check_cmdline "findstr" <<-EOF
