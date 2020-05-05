@@ -1,9 +1,9 @@
 #!/bin/dash
 
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
-main () 
+main() 
 {
 	if cmd_exists amap; then
 		echo "amap has been installded"
@@ -12,16 +12,14 @@ main ()
 
 	amapFile="amap-5.4.tar.gz"
 
-	cd $DATA_DIR
+	cd $CACHE_DIR
 
 	if [ ! -f "$amapFile" ]; then
-		wget https://raw.githubusercontent.com/vanhauser-thc/THC-Archive/master/Tools/${$amapFile}
+		wget "https://raw.githubusercontent.com/vanhauser-thc/THC-Archive/master/Tools/${amapFile}"
 	fi
 
 	tar xzvf $amapFile
-	amapDir=$(dirname $amapFile)
-	amapDir=$(dirname $amapDir)
-	cd $amapDir
+	cd 'amap-5.4'
 
 	./configure
 	make 
@@ -30,17 +28,5 @@ main ()
 	amap --help
 }
 
-maintain()
-{
-	check_update
-	[ "$1" = 'help' ] && show_help_exit $2
-}
-
-show_help_exit()
-{
-	cat << EOL
-
-EOL
-	exit 0
-}
-maintain "$@"; main "$@"; exit $?
+#---------------------------------------------------------------------------------#
+main_entry $@

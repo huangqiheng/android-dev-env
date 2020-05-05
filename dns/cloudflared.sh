@@ -1,10 +1,8 @@
 #!/bin/dash
-
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 # https://developers.cloudflare.com/argo-tunnel/downloads/
-
 main () 
 {
 	if [ "X$1" != 'Xf' ]; then
@@ -41,17 +39,5 @@ run()
 	fi
 }
 
-maintain()
-{
-	[ "$1" = 'help' ] && show_help_exit
-}
-
-show_help_exit()
-{
-	cat << EOL
-
-EOL
-	exit 0
-}
-
-maintain "$@"; main "$@"; exit $?
+#---------------------------------------------------------------------------------#
+main_entry $@

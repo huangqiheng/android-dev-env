@@ -31,7 +31,7 @@ main ()
 	fi
 
 	# echo to XMind.ini
-	handle_rc_h './XMind.ini' 'java-8-openjdk-amd64' "-vm\n/usr/lib/jvm/java-8-openjdk-amd64/bin"
+	handle_rc_h './XMind.ini' 'java-8-openjdk-amd64' "\n-vm\n/usr/lib/jvm/java-8-openjdk-amd64/bin"
 
 	# echo to hosts
 	# 127.0.0.1 www.xmind.net

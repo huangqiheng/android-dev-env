@@ -135,6 +135,12 @@ build_hostapd()
 	make install
 }
 
+sslocal_ports()
+{
+	check_apt net-tools
+	netstat -plunt | grep LISTEN |  grep ss-local | awk '{print $4}' | awk -F: '{print $2}'
+}
+
 run_sslocal()
 {
 	local opts="${1:--v}"
