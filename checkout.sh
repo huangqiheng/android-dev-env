@@ -1,6 +1,6 @@
-#!/bin/bash
-
-. $(f='basic_functions.sh';while [ ! -f $f ];do f="../$f";done;readlink -f $f)
+#!/bin/dash
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 CHECKOUT_DIR=unpacked
 PRIVATE_DIR=private
@@ -11,10 +11,20 @@ main()
 
 	if [ "$1" = 'close' ]; then
 		umount_target
-		exit
+		exit 0
 	fi
 
-	checkout_target
+	if ! checkout_target; then
+		exit 1
+	fi
+
+	local checkdir="$ROOT_DIR/$CHECKOUT_DIR"
+	if [ -z "$(ls -A ${checkdir})" ]; then
+		log_y 'target dir is empty'
+		exit 0
+	fi
+
+	self_cmdline
 }
 
 git_ignore()
@@ -49,7 +59,7 @@ checkout_target()
 			options="$options,key=passphrase:passphrase_passwd=$inputpass"
 		else
 			echo "Error exit, password must be set."
-			return
+			return 1
 		fi
 	fi
 
@@ -60,6 +70,8 @@ checkout_target()
 	umount $checkout_dir
 	yes "" | mount -t ecryptfs -o $options $source_dir $checkout_dir
 	chownUser $checkout_dir
+	return 0
 }
 
-main "$@"; exit $?
+#---------------------------------------------------------------------------------#
+main_entry $@

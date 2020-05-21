@@ -10,6 +10,7 @@ log()         { if [ "$LOGFLAG" != 'off' ]; then echo "$@"; fi }
 log_r()       { log "\033[0;31m$*\033[0m"; }
 log_g()       { log "\033[0;32m$*\033[0m"; }
 log_y()       { log "\033[0;33m$*\033[0m"; }
+set_title()   { ORIG=$PS1; TITLE="\e]2;$@\a"; PS1=${ORIG}${TITLE}; }
 
 cmd_exists()  { type "$(which $1)" > /dev/null 2>&1; }
 fun_exists()  { type "$1" 2>/dev/null | grep -q 'function'; }

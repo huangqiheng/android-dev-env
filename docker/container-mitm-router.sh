@@ -1,12 +1,10 @@
 #!/bin/dash
-
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
-
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 ImageName='brannondorsey/mitm-router'
 
-main () 
+main() 
 {
 	if ! cmd_exists docker; then
 		log_y 'Please install docker'
@@ -25,12 +23,13 @@ main ()
 	fi
 
 	local containerId=$(docker ps -aq --filter=ancestor=$ImageName)
+	local wlaniface=$(wlan_iface)
 
 	if [ "X$containerId" = 'X' ]; then
 		docker run -it --net host --privileged \
-		  -e MAC="unchanged" \
 		  -e AP_IFACE="wlan0" \
-		  -e INTERWAN_IFACE="eth0" \
+		  -e INTERWAN_IFACE="$wlaniface" \
+		  -e MAC="unchanged" \
 		  -e SSID="CYLON-BASESTAR" \
 		  -e PASSWORD="SoSayWeAll" \
 		  -v "$(pwd)/data:/root/data" \
@@ -75,7 +74,7 @@ hostapd_issue_exit()
 	exit 0
 }
 
-maintain()
+init()
 {
 	case "$1" in
 	'bash'|'shell'|'sh') 
@@ -96,11 +95,14 @@ maintain()
 	esac
 }
 
-show_help_exit()
+help()
 {
 	cat << EOL
 
 EOL
 	exit 0
 }
-maintain "$@"; main "$@"; exit $?
+
+#---------------------------------------------------------------------------------#
+main_entry $@
+

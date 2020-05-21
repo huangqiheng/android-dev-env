@@ -11,6 +11,11 @@ docker_entry()
 	gen_entrycode '###DOCKER_BEGIN###' '###DOCKER_END###'; return
 	###DOCKER_BEGIN###
 
+	mkdir -p /etc/xdg/QtProject
+	cat > '/etc/xdg/QtProject/qtlogging.ini' <<-EOF
+	[Rules]
+	qt.qpa.xcb.xcberror=false
+EOF
 
 	if test $SSSERVER; then cat > /etc/sslocal.json <<-EOF
 	{
@@ -30,7 +35,7 @@ EOF
         PIDS2KILL="$PIDS2KILL $!"
 	fi
 
-	/opt/telegram/telegram
+	runuser user -c 'telegram-desktop'
         PIDS2KILL="$PIDS2KILL $!"
 
         waitfor_die "$(cat <<-EOL
@@ -40,50 +45,54 @@ EOL
 	###DOCKER_END###
 }
 
+# RUN add-apt-repository -y ppa:atareao/telegram && apt update -y && apt install -y \
+
 main () 
 {
 	docker_desktop "$1" #return var: SubHome SubName
+	set_title $SubName
 
 	build_image $IMG_APPS <<-EOL
 	FROM $IMG_BASE
 
-	RUN add-apt-repository -y ppa:atareao/telegram \
-	    && apt update -y && apt install -y --no-install-recommends \
-	     xz-utils \
-	     libgtk-3-0 \
-	     libayatana-appindicator3-1 \
-	     libcanberra-gtk-module \
-	     libxcursor1 \
-	     shadowsocks-libev \
-	     falkon \
-	     xdg-utils \
-	     telegram \
-	    && apt autoremove -y xz-utils \
-	    && apt-get clean \
-	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
+	ENV QT_DEBUG_PLUGINS=1 \
+	    QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb \
+	    GTK_IM_MODULE=fcitx \
+	    QT_IM_MODULE=fcitx \
+	    QT4_IM_MODULE=fcitx \
+	    XMODIFIERS=@im=fcitx \
+	    DefaultIMModule=fcitx \
+	    MESA_GLSL_CACHE_DISABLE=true \
+	    DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+	    DEBIAN_FRONTEND=noninteractive
 
 	RUN groupadd -r user && \ 
 	    useradd -m -d /home/user -r -u 1000 -g user -G audio,video user
 
-	USER user 
-
-	ENV QT_DEBUG_PLUGINS=1 \
-	    QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb \
-	    GTK_IM_MODULE=fcitx \
-	    XMODIFIERS=@im=fcitx \
-	    QT_IM_MODULE=fcitx \
-	    QT4_IM_MODULE=fcitx \
-	    MESA_GLSL_CACHE_DISABLE=true \
-	    DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+	RUN  apt update -y && apt install -y \
+	     xz-utils \
+	     libgtk-3-0 \
+	     libcanberra-gtk3-module \
+	     libxcursor1 \
+	     libappindicator3-1 \
+	     fcitx fcitx-config-gtk2 fcitx-sunpinyin fcitx-libs-dev \
+	     shadowsocks-libev \
+	     falkon \
+	     xdg-utils \
+	     telegram-desktop \
+	    && apt autoremove -y xz-utils && apt-get clean \
+	    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /root/.cache/*
 
 	ENTRYPOINT [ "/usr/bin/entrypoint" ]
 EOL
 
 	xhost +SI:localuser:$(id -un) >/dev/null
 
+	# libayatana-appindicator3-1 \
+	# --cpuset-cpus 0 \
+
 	docker run -it --rm --privileged \
 		--net host \
-		--cpuset-cpus 0 \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v $HOME/.Xauthority:/home/user/.Xauthority \
 		-e DISPLAY=unix$DISPLAY \
@@ -91,12 +100,18 @@ EOL
 		-e SSPORT=$SSPORT \
 		-e SSPASSWORD=$SSPASSWORD \
 		-v $(docker_entry):/usr/bin/entrypoint \
-		-v /run/user/1000/bus:/run/user/1000/bus \
 		-v $SubHome:/home/user \
-		-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+		-v $(dirname $SubHome)/Downloads:/home/user/Downloads \
 		-v /run/udev/data:/run/udev/data \
 		--device /dev/snd \
 		--device /dev/dri \
+		-v ${XDG_RUNTIME_DIR}/bus:${XDG_RUNTIME_DIR}/bus \
+		-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+		-e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native \
+		-v ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native \
+		-v ~/.config/pulse/cookie:/home/user/.config/pulse/cookie \
+		-e PULSE_COOKIE=/home/user/.config/pulse/cookie \
+		--group-add $(getent group audio | cut -d: -f3) \
 		-v /etc/localtime:/etc/localtime:ro \
 		--name "telegram-$SubName" $IMG_APPS
 

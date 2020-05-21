@@ -16,7 +16,7 @@ select_subpath()
 			fi
 		fi
 
-		options=$(ls -1p "${BOOT_PATH}" | grep / | sed 's/.$//')
+		options=$(ls -1p "${BOOT_PATH}" | grep / | grep -v 'Downloads' | sed 's/.$//')
 
 		if [ "X$options" = 'X' ]; then
 			while true; do
@@ -37,6 +37,8 @@ select_subpath()
 		FUNC_RESULT=$(echo "$options" | sed -n "${user_select}p")
 		break
 	done
+
+	mkdir -p "${BOOT_PATH}/Downloads"
 	mkdir -p "${BOOT_PATH}/${FUNC_RESULT}"
 }
 
@@ -407,6 +409,16 @@ setup_typescript()
 	setup_nodejs
 	check_npm_g typescript
 }
+
+
+echo_block()
+{
+	local begincode="$1"
+	local endcode="$2"
+	local src="$(sed -n '/^\s*'$begincode'/,/^\s*'$endcode'/p' $EXEC_SCRIPT)"
+	echo $src
+}
+
 
 setup_nodejs()
 {

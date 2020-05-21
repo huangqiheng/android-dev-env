@@ -312,10 +312,14 @@ iface_to_ipaddr()
 	ifconfig | grep -A1 "$1" | grep "inet " | head -1 | awk -F' ' '{print $2}'
 }
 
+wlan_iface()
+{
+	route | grep '^default' | grep -o '[^ ]*$'
+}
+
 wlan_ip()
 {
-	local wan_iface=$(route | grep '^default' | grep -o '[^ ]*$')
-	ifconfig | grep -A1 "$wan_iface" | grep "inet " | head -1 | awk -F' ' '{print $2}'
+	ifconfig | grep -A1 "$(wlan_iface)" | grep "inet " | head -1 | awk -F' ' '{print $2}'
 }
 
 runUser()
@@ -776,6 +780,18 @@ node_exec()
 	echo "$node_code" | node - $@
 }
 
+coffee_exec()
+{
+	if [ -f "$1" ]; then
+		node_code="$(cat $1)"
+	else
+		node_code="$($1)"
+	fi
+
+	shift
+	export NODE_PATH=${NODE_PATH:-$(npm root -g)}
+	echo "$node_code" | coffee -s $@
+}
 
 check_service()
 {
@@ -920,6 +936,14 @@ log_r()
 {
     echo "${Red}$*${Color_Off}"
 }
+
+set_title()
+{
+	ORIG=$PS1
+	TITLE="\e]2;$@\a"
+	PS1=${ORIG}${TITLE}
+}
+
 
 login_root_exec()
 {

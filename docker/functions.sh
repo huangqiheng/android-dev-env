@@ -56,7 +56,11 @@ gen_entrycode()
 		fi
 	fi
 
-	echo '#!/bin/dash' > $out_file
+	cat > $out_file <<-EOL
+	#!/bin/dash
+	waitfor_die() { sleep infinity & CLD=\$!;[ -n "\$1" ] && trap "\${1};kill -9 \$CLD" 1 2 9 15;wait "\$CLD"; }
+EOL
+
 	echo "$src" >> $out_file
 	chmod a+x $out_file 
 	echo $out_file
@@ -108,24 +112,27 @@ docker_desktop()
 	docker_home "$1" #return var: SubHome SubName
 
 	build_image $IMG_BASE <<-EOL
-	FROM phusion/baseimage:0.11
-	CMD ["/sbin/my_init"]
+	FROM ubuntu:18.04
 
-	ENV NO_AT_BRIDGE=1
-	ENV LANG zh_CN.UTF-8
-	ENV LANGUAGE zh_CN:zh
-	ENV LC_ALL zh_CN.UTF-8
-	ENV DEBIAN_FRONTEND noninteractive
+	ENV NO_AT_BRIDGE=1 \
+	    LANG=zh_CN.UTF-8 \
+	    LANGUAGE=zh_CN:zh \
+	    LC_ALL=zh_CN.UTF-8 \
+	    DEBIAN_FRONTEND=noninteractive
 
-	RUN apt update -y && apt install -y --no-install-recommends \
+	RUN apt update -y && apt install -y \
 	    dbus-x11 \
+	    software-properties-common \
 	    language-pack-zh-hans \
-	    libasound2 \
+	    tzdata \
 	    libgl1-mesa-dri \
 	    libgl1-mesa-glx \
-	    libpulse0 \
+	    alsa-utils \
+	    pulseaudio \
+	    libasound2 libpulse0 \
 	    ttf-wqy-zenhei \
 	    ttf-wqy-microhei \
+	    fonts-open-sans \
 	    fonts-wqy-zenhei \
 	    fonts-wqy-microhei \
 	    fontconfig \
