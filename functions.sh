@@ -162,7 +162,7 @@ run_sslocal()
 	inputServer=$(get_ssserver /tmp/sslocal.json)
 	echo "Connect to $inputServer"
 
-        ss-local $opts -c /tmp/sslocal.json
+        ss-local "$opts" -c /tmp/sslocal.json
 }
 
 install_ssredir()

@@ -1,7 +1,6 @@
 #!/bin/dash
-
-. $(dirname $(readlink -f $0))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 main () 
 {
@@ -18,6 +17,10 @@ show_help_exit()
 {
 	echo "${Yellow}"
 	cat << EOL
+zip:
+  zip -r file.zip ./path/to/dir
+  unzip file.zip
+
 rar:
   rar a -r file.rar /path/to/dir   	// zip file
   rar l file.rar		     	// list file
@@ -41,4 +44,5 @@ EOL
 	exit 0
 }
 
-maintain "$@"; main "$@"; exit $?
+#---------------------------------------------------------------------------------#
+main_entry $@
