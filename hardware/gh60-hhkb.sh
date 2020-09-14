@@ -1,7 +1,6 @@
 #!/bin/dash
-
-. $(dirname $(dirname $(readlink -f $0)))/basic_functions.sh
-. $ROOT_DIR/setup_routines.sh
+. $(f='basic_functions.sh'; while [ ! -f $f ]; do f="../$f"; done; readlink -f $f)
+#--------------------------------------------------------------------------------#
 
 TARGET=atmega32u4
 VER=
@@ -14,8 +13,7 @@ main ()
 	get_version
 
 	echo "Erasing..."
-	if [ "$VER" == "0.7" ]
-	then
+	if [ "$VER" = "0.7" ]; then
 		dfu-programmer $TARGET erase --force
 	else
 		dfu-programmer $TARGET erase
@@ -64,4 +62,5 @@ EOL
 	exit 0
 }
 
-maintain "$@"; main "$@"; exit $?
+#---------------------------------------------------------------------------------#
+main_entry $@

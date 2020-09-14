@@ -21,6 +21,12 @@ zip:
   zip -r file.zip ./path/to/dir
   unzip file.zip
 
+tar gz:
+  tar -zxvf xx.tar.gz
+
+tar bz:
+  tar -jxvf xx.tar.bz2
+
 rar:
   rar a -r file.rar /path/to/dir   	// zip file
   rar l file.rar		     	// list file
